@@ -31,7 +31,7 @@ export default function siswaSidebar() {
       className="w-64 bg-white border-r h-screen sticky top-0 flex flex-col"
     >
       <div className="p-6 border-b">
-        <h2 className="text-xl font-bold text-teal-600">
+        <h2 className="text-xl font-bold text-green-600">
           Portal Siswa
         </h2>
       </div>
@@ -49,8 +49,8 @@ export default function siswaSidebar() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
                   isActive
-                    ? "bg-teal-600 text-white shadow-lg"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-green-600 text-white shadow-lg"
+                    : "text-gray-700 hover:bg-green-50"
                 )}
               >
                 <Icon className={cn("h-5 w-5", isActive && "text-white")} />

@@ -2,18 +2,18 @@
 @import "tw-animate-css";
 
 :root {
-  /* Insan Cendekia Nusantara School Colors - Solid Theme */
-  --background: #f8fafc;
+  /* Insan Cendekia Nusantara School Colors - Red & Green Theme */
+  --background: #f0fdf4;
   --foreground: #1e293b;
   --card: #ffffff;
   --card-foreground: #1e293b;
   --popover: #ffffff;
   --popover-foreground: #1e293b;
-  --primary: #00529B;
+  --primary: #dc2626;
   --primary-foreground: #ffffff;
-  --secondary: #059669;
+  --secondary: #16a34a;
   --secondary-foreground: #ffffff;
-  --muted: #f1f5f9;
+  --muted: #dcfce7;
   --muted-foreground: #64748b;
   --accent: #f59e0b;
   --accent-foreground: #1e293b;
@@ -21,7 +21,7 @@
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #00529B;
+  --ring: #dc2626;
   --radius: 0.75rem;
 }
 

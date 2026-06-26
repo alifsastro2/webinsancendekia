@@ -49,7 +49,7 @@ export default function GuruLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
+    <div className="min-h-screen bg-green-50 pb-16 lg:pb-0">
       {/* Header - always visible */}
       <Header role="guru" />
 

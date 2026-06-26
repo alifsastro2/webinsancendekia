@@ -36,10 +36,10 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
   }
 
   return (
-    <div className="min-h-screen bg-slate-800 relative overflow-hidden">
+    <div className="min-h-screen bg-red-700 relative overflow-hidden">
       {/* Simple solid color blocks */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-bl-full" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-green-600 rounded-tr-full" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-green-600 rounded-bl-full" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-800 rounded-tr-full" />
 
       {/* Dot pattern */}
       <div className="absolute inset-0 opacity-10">
@@ -68,7 +68,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
         >
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200">
             {/* Header Section */}
-            <div className="bg-blue-700 p-8 pb-16">
+            <div className="bg-red-600 p-8 pb-16">
               {/* Simple wave */}
               <div className="absolute bottom-0 left-0 right-0">
                 <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -123,7 +123,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Masukkan username"
-                    className="mt-2 h-12 border-gray-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all rounded-xl"
+                    className="mt-2 h-12 border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all rounded-xl"
                     disabled={isLoading}
                   />
                 </motion.div>
@@ -142,7 +142,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Masukkan password"
-                    className="mt-2 h-12 border-gray-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all rounded-xl"
+                    className="mt-2 h-12 border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all rounded-xl"
                     disabled={isLoading}
                   />
                 </motion.div>
@@ -155,7 +155,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-12 bg-blue-700 hover:bg-blue-800 text-white font-semibold shadow-lg transition-all rounded-xl"
+                    className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-semibold shadow-lg transition-all rounded-xl"
                   >
                     {isLoading ? (
                       <>

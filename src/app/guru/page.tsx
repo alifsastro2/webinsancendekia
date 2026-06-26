@@ -153,14 +153,14 @@ export default function GuruDashboard() {
       title: 'Tambah siswa',
       description: 'Tambah siswa baru ke kelas yang diampu',
       icon: Users,
-      color: 'bg-blue-600',
+      color: 'bg-red-600',
       action: () => router.push('/guru/siswa')
     },
     {
       title: 'Buat Kuis',
       description: 'Buat kuis interaktif untuk penilaian',
       icon: ClipboardList,
-      color: 'bg-purple-600',
+      color: 'bg-green-700',
       action: () => router.push('/guru/matapelajaran')
     },
   ]
@@ -181,7 +181,7 @@ export default function GuruDashboard() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <div>

@@ -454,7 +454,7 @@ export default function Kelolasiswa() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center shadow">
+                  <div className="w-14 h-14 bg-red-600 rounded-xl flex items-center justify-center shadow">
                     <span className="text-white font-bold text-lg">
                       {m.nama.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </span>

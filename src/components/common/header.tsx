@@ -67,7 +67,7 @@ export default function Header({ role }: HeaderProps) {
 
           <Logo size="sm" showName={false} />
           <div className="hidden sm:block">
-            <h1 className="text-sm lg:text-base font-semibold text-blue-700">Insan Cendekia Nusantara</h1>
+            <h1 className="text-sm lg:text-base font-semibold text-red-600">Insan Cendekia Nusantara</h1>
             <p className="text-xs text-gray-500 capitalize hidden lg:block">{role === 'guru' ? 'Dashboard Guru' : 'Dashboard Siswa'}</p>
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function Header({ role }: HeaderProps) {
           <DropdownMenuTrigger>
             <div className="relative h-9 w-9 lg:h-10 lg:w-10 rounded-full hover:bg-gray-100 transition-colors cursor-pointer">
               <Avatar>
-                <AvatarFallback className="bg-blue-600 text-white font-semibold text-xs lg:text-sm">
+                <AvatarFallback className="bg-red-600 text-white font-semibold text-xs lg:text-sm">
                   {initials}
                 </AvatarFallback>
               </Avatar>

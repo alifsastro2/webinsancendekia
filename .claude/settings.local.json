@@ -79,7 +79,13 @@
       "Bash(dig @simon.ns.cloudflare.com insancendekia.digitalbnb.my.id A +short)",
       "Bash(dig @vivienne.ns.cloudflare.com insancendekia.digitalbnb.my.id A +short)",
       "Bash(curl -sI --connect-timeout 5 \"https://insancendekia.digitalbnb.my.id\")",
-      "Bash(git commit -m 'Update: Remove gradients, use solid colors theme *)"
+      "Bash(git commit -m 'Update: Remove gradients, use solid colors theme *)",
+      "Bash(sed -i 's/bg-teal-600/bg-green-600/g' src/app/siswa/matapelajaran/*.tsx)",
+      "Bash(sed -i 's/bg-blue-600/bg-red-600/g' src/app/siswa/matapelajaran/*.tsx)",
+      "Bash(sed -i 's/bg-purple-600/bg-green-700/g' src/app/siswa/matapelajaran/*.tsx)",
+      "Bash(sed -i 's/text-teal-600/text-green-600/g' src/app/siswa/matapelajaran/*.tsx)",
+      "Bash(sed -i 's/bg-blue-600/bg-red-600/g' src/app/guru/matapelajaran/*.tsx)",
+      "Bash(git commit -m 'Update: Red and green color theme *)"
     ],
     "additionalDirectories": [
       "/home/alif",
