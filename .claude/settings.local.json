@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(node /home/alif/sekolah-online/scripts/create-guru.js)",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql",
+      "Bash(node /home/alif/sekolah-online/create-azka.js)",
+      "Bash(node /home/alif/sekolah-online/cleanup-and-create.js)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -sSL https://app.mcpmarket.com/install/TOWWsGBWGmezo4DJdRmXSNr35LK16Sb8WVRXMgPVkRA)",
+      "Bash(bash)",
+      "Bash(ls -la /home/alif/.claude/plugins/mcpmarket-me/skills/ 2>/dev/null || echo \"Skills directory not found yet\")",
+      "Read(//home/alif/.claude/plugins/mcpmarket-me/skills/**)",
+      "Bash(fuser 3000)",
+      "Bash(xargs kill -9)",
+      "Bash(fuser -9 5966)",
+      "Bash(awk '{print $2}')",
+      "Bash(kill -9 3108)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(git -C /home/alif/sekolah-online log --oneline -20)",
+      "Bash(node -e ' *)",
+      "Bash(curl -sI \"https://pub-605df3ae3f214dce80557432a73015ee.r2.dev/test/connection-test-1782468056281.txt\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" \"https://pub-605df3ae3f214dce80557432a73015ee.r2.dev/test/connection-test-1782468056281.txt\")",
+      "Bash(curl -sI --connect-timeout 5 \"https://insan-cendekia-files.pub-605df3ae3f214dce80557432a73015ee.r2.dev/test/test.txt\")",
+      "Bash(curl -sI --connect-timeout 5 \"https://pub-605df3ae3f214dce80557432a73015ee.r2.dev/\")",
+      "Bash(curl -sI --connect-timeout 5 \"https://insan-cendekia-files.r2.dev/test/test.txt\")",
+      "WebFetch(domain:files-proxy.cobainai007.workers.dev)",
+      "Bash(npm list *)",
+      "Bash(git config *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Initial commit: Sekolah Online with Cloudflare R2 upload *)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}
