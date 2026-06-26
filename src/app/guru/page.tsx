@@ -107,8 +107,8 @@ export default function GuruDashboard() {
       title: 'Total siswa',
       value: stats.totalSiswa,
       icon: Users,
-      color: 'bg-blue-100 text-blue-600',
-      bgIcon: 'bg-blue-600',
+      color: 'bg-red-100 text-red-600',
+      bgIcon: 'bg-red-500',
       trend: '+5% dari bulan lalu',
       action: () => router.push('/guru/siswa')
     },
@@ -117,7 +117,7 @@ export default function GuruDashboard() {
       value: stats.totalMatapelajaran,
       icon: BookOpen,
       color: 'bg-green-100 text-green-600',
-      bgIcon: 'bg-green-600',
+      bgIcon: 'bg-green-500',
       trend: stats.totalMatapelajaran > 0 ? 'Aktif mengajar' : 'Belum ada',
       action: () => router.push('/guru/matapelajaran')
     },
@@ -125,8 +125,8 @@ export default function GuruDashboard() {
       title: 'Total Materi',
       value: stats.totalMateri,
       icon: FileText,
-      color: 'bg-orange-100 text-orange-600',
-      bgIcon: 'bg-orange-500',
+      color: 'bg-amber-100 text-amber-600',
+      bgIcon: 'bg-amber-500',
       trend: stats.totalMateri > 0 ? 'Tersedia' : 'Belum ada',
       action: () => router.push('/guru/matapelajaran')
     },
@@ -135,7 +135,7 @@ export default function GuruDashboard() {
       value: stats.totalKuis,
       icon: ClipboardList,
       color: 'bg-purple-100 text-purple-600',
-      bgIcon: 'bg-purple-600',
+      bgIcon: 'bg-purple-500',
       trend: stats.totalKuis > 0 ? 'Siap digunakan' : 'Belum ada',
       action: () => router.push('/guru/matapelajaran')
     },
@@ -146,21 +146,21 @@ export default function GuruDashboard() {
       title: 'Tambah Mata Pelajaran',
       description: 'Buat mata pelajaran baru untuk kelas Anda',
       icon: BookOpen,
-      color: 'bg-green-600',
+      color: 'bg-green-500',
       action: () => router.push('/guru/matapelajaran')
     },
     {
       title: 'Tambah siswa',
       description: 'Tambah siswa baru ke kelas yang diampu',
       icon: Users,
-      color: 'bg-red-600',
+      color: 'bg-red-500',
       action: () => router.push('/guru/siswa')
     },
     {
       title: 'Buat Kuis',
       description: 'Buat kuis interaktif untuk penilaian',
       icon: ClipboardList,
-      color: 'bg-green-700',
+      color: 'bg-amber-500',
       action: () => router.push('/guru/matapelajaran')
     },
   ]
@@ -181,7 +181,7 @@ export default function GuruDashboard() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20">
+            <div className="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -193,7 +193,7 @@ export default function GuruDashboard() {
           </div>
           <button
             onClick={() => router.push('/guru/matapelajaran')}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 lg:px-6 lg:py-3 bg-blue-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg shadow-blue-500/25"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 lg:px-6 lg:py-3 bg-blue-500 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg shadow-blue-500/25"
           >
             <Plus className="h-4 w-4" />
             Mapel Baru
@@ -305,7 +305,7 @@ export default function GuruDashboard() {
         {/* Recent Activity */}
         <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm lg:shadow-lg border border-gray-100">
           <div className="flex items-center gap-3 mb-4 lg:mb-6">
-            <div className="p-2 lg:p-3 bg-blue-600 rounded-xl">
+            <div className="p-2 lg:p-3 bg-blue-500 rounded-xl">
               <Award className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
             <div>
@@ -327,7 +327,7 @@ export default function GuruDashboard() {
               <p className="text-sm text-gray-500 mb-4">Mulai dengan membuat mata pelajaran baru</p>
               <button
                 onClick={() => router.push('/guru/matapelajaran')}
-                className="inline-flex items-center gap-2 px-4 lg:px-6 py-2 lg:py-3 bg-blue-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg text-sm lg:text-base"
+                className="inline-flex items-center gap-2 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg text-sm lg:text-base"
               >
                 <Plus className="h-4 w-4" />
                 Buat Mata Pelajaran
@@ -363,7 +363,7 @@ export default function GuruDashboard() {
         {/* Status Cards */}
         <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm lg:shadow-lg border border-gray-100">
           <div className="flex items-center gap-3 mb-4 lg:mb-6">
-            <div className="p-2 lg:p-3 bg-blue-600 rounded-xl">
+            <div className="p-2 lg:p-3 bg-blue-500 rounded-xl">
               <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
             <div>

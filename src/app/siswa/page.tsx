@@ -94,10 +94,10 @@ export default function siswaDashboard() {
   }
 
   const statCards = [
-    { title: 'Mata Pelajaran', value: mataPelajaran.length, bgColor: 'bg-green-600' },
-    { title: 'Total Materi', value: stats.totalMateri, bgColor: 'bg-red-600' },
-    { title: 'Kuis Aktif', value: stats.totalKuis, bgColor: 'bg-green-700' },
-    { title: 'Kuis Selesai', value: stats.completedKuis, bgColor: 'bg-red-700' },
+    { title: 'Mata Pelajaran', value: mataPelajaran.length, bgColor: 'bg-green-500' },
+    { title: 'Total Materi', value: stats.totalMateri, bgColor: 'bg-amber-500' },
+    { title: 'Kuis Aktif', value: stats.totalKuis, bgColor: 'bg-red-500' },
+    { title: 'Kuis Selesai', value: stats.completedKuis, bgColor: 'bg-purple-500' },
   ]
 
   return (

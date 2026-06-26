@@ -2,8 +2,8 @@
 @import "tw-animate-css";
 
 :root {
-  /* Insan Cendekia Nusantara School Colors - Red & Green Theme */
-  --background: #f0fdf4;
+  /* Insan Cendekia Nusantara School Colors - Vibrant Theme */
+  --background: #f8fafc;
   --foreground: #1e293b;
   --card: #ffffff;
   --card-foreground: #1e293b;
@@ -13,7 +13,7 @@
   --primary-foreground: #ffffff;
   --secondary: #16a34a;
   --secondary-foreground: #ffffff;
-  --muted: #dcfce7;
+  --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #f59e0b;
   --accent-foreground: #1e293b;
@@ -49,33 +49,69 @@
 
   /* Button styles */
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700 rounded-xl px-4 py-2 font-medium transition-colors;
+    @apply bg-red-600 text-white hover:bg-red-700 rounded-xl px-4 py-2 font-medium transition-all duration-200;
   }
 
   .btn-outline {
-    @apply border border-gray-200 bg-white hover:bg-gray-50 rounded-xl px-4 py-2 font-medium transition-colors;
+    @apply border-2 border-gray-200 bg-white hover:bg-gray-50 hover:border-red-400 rounded-xl px-4 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-green-600 text-white hover:bg-green-700 rounded-xl px-4 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-purple {
+    @apply bg-purple-600 text-white hover:bg-purple-700 rounded-xl px-4 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-amber {
+    @apply bg-amber-500 text-white hover:bg-amber-600 rounded-xl px-4 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-cyan {
+    @apply bg-cyan-600 text-white hover:bg-cyan-700 rounded-xl px-4 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-pink {
+    @apply bg-pink-600 text-white hover:bg-pink-700 rounded-xl px-4 py-2 font-medium transition-all duration-200;
   }
 
   /* Input styles */
   .input {
-    @apply w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all;
+    @apply w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all duration-200;
   }
 
   /* Badge styles */
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
   }
 
-  .badge-blue {
-    @apply bg-blue-100 text-blue-700;
+  .badge-red {
+    @apply bg-red-100 text-red-700;
   }
 
   .badge-green {
     @apply bg-green-100 text-green-700;
   }
 
-  .badge-red {
-    @apply bg-red-100 text-red-700;
+  .badge-blue {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .badge-purple {
+    @apply bg-purple-100 text-purple-700;
+  }
+
+  .badge-amber {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .badge-cyan {
+    @apply bg-cyan-100 text-cyan-700;
+  }
+
+  .badge-pink {
+    @apply bg-pink-100 text-pink-700;
   }
 
   .badge-gray {
@@ -93,22 +129,97 @@
 
   /* Select popup */
   .select-trigger {
-    @apply flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm transition-colors hover:border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
+    @apply flex items-center justify-between gap-2 rounded-xl border-2 border-gray-200 bg-white px-3 py-2 text-sm transition-all duration-200 hover:border-red-400 focus:outline-none focus:border-red-400 focus:ring-4 focus:ring-red-400/10;
   }
 
   .select-content {
-    @apply absolute z-50 w-full max-h-60 rounded-xl bg-white shadow-lg border border-gray-100 py-1 overflow-auto;
+    @apply absolute z-50 w-full max-h-60 rounded-xl bg-white shadow-xl border border-gray-100 py-1 overflow-auto;
   }
 
   .select-item {
-    @apply relative flex items-center gap-2 px-3 py-2 text-sm cursor-pointer select-none rounded-lg outline-none hover:bg-gray-50 focus:bg-blue-50 focus:text-blue-700;
+    @apply relative flex items-center gap-2 px-3 py-2 text-sm cursor-pointer select-none rounded-lg outline-none hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700 transition-colors;
   }
+}
+
+/* Custom Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+  50% { box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+
+/* Hover effects */
+.hover-lift {
+  @apply transition-all duration-300;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -116,10 +227,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #94a3b8;
 }
