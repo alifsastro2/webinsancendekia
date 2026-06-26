@@ -146,21 +146,21 @@ export default function GuruDashboard() {
       title: 'Tambah Mata Pelajaran',
       description: 'Buat mata pelajaran baru untuk kelas Anda',
       icon: BookOpen,
-      color: 'from-green-500 to-green-600',
+      color: 'bg-green-600',
       action: () => router.push('/guru/matapelajaran')
     },
     {
       title: 'Tambah siswa',
       description: 'Tambah siswa baru ke kelas yang diampu',
       icon: Users,
-      color: 'from-blue-500 to-blue-600',
+      color: 'bg-blue-600',
       action: () => router.push('/guru/siswa')
     },
     {
       title: 'Buat Kuis',
       description: 'Buat kuis interaktif untuk penilaian',
       icon: ClipboardList,
-      color: 'from-purple-500 to-purple-600',
+      color: 'bg-purple-600',
       action: () => router.push('/guru/matapelajaran')
     },
   ]
@@ -181,7 +181,7 @@ export default function GuruDashboard() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -193,7 +193,7 @@ export default function GuruDashboard() {
           </div>
           <button
             onClick={() => router.push('/guru/matapelajaran')}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 lg:px-6 lg:py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg shadow-blue-500/25"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 lg:px-6 lg:py-3 bg-blue-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg shadow-blue-500/25"
           >
             <Plus className="h-4 w-4" />
             Mapel Baru
@@ -280,7 +280,7 @@ export default function GuruDashboard() {
               >
                 <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm lg:shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group">
                   <div className="flex items-center gap-4">
-                    <div className={`p-3 lg:p-4 rounded-xl bg-gradient-to-br ${action.color} shadow-lg group-hover:scale-110 transition-transform`}>
+                    <div className={`p-3 lg:p-4 rounded-xl ${action.color} shadow-lg group-hover:scale-110 transition-transform`}>
                       <Icon className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -305,7 +305,7 @@ export default function GuruDashboard() {
         {/* Recent Activity */}
         <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm lg:shadow-lg border border-gray-100">
           <div className="flex items-center gap-3 mb-4 lg:mb-6">
-            <div className="p-2 lg:p-3 bg-gradient-to-br from-blue-600 to-green-600 rounded-xl">
+            <div className="p-2 lg:p-3 bg-blue-600 rounded-xl">
               <Award className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
             <div>
@@ -319,7 +319,7 @@ export default function GuruDashboard() {
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4"
               >
                 <Award className="h-8 w-8 text-gray-400" />
               </motion.div>
@@ -327,7 +327,7 @@ export default function GuruDashboard() {
               <p className="text-sm text-gray-500 mb-4">Mulai dengan membuat mata pelajaran baru</p>
               <button
                 onClick={() => router.push('/guru/matapelajaran')}
-                className="inline-flex items-center gap-2 px-4 lg:px-6 py-2 lg:py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg text-sm lg:text-base"
+                className="inline-flex items-center gap-2 px-4 lg:px-6 py-2 lg:py-3 bg-blue-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-green-700 transition-all shadow-lg text-sm lg:text-base"
               >
                 <Plus className="h-4 w-4" />
                 Buat Mata Pelajaran
@@ -335,7 +335,7 @@ export default function GuruDashboard() {
             </div>
           ) : (
             <div className="space-y-3 lg:space-y-4">
-              <div className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100">
+              <div className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <div className="p-2 lg:p-3 bg-white rounded-xl shadow-sm">
                   <BookOpen className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
                 </div>
@@ -346,7 +346,7 @@ export default function GuruDashboard() {
                 <CheckCircle2 className="h-4 w-4 lg:h-5 lg:w-5 text-green-500 flex-shrink-0" />
               </div>
 
-              <div className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-100">
+              <div className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-orange-50 rounded-xl border border-orange-100">
                 <div className="p-2 lg:p-3 bg-white rounded-xl shadow-sm">
                   <Users className="h-4 w-4 lg:h-5 lg:w-5 text-orange-600" />
                 </div>
@@ -363,7 +363,7 @@ export default function GuruDashboard() {
         {/* Status Cards */}
         <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm lg:shadow-lg border border-gray-100">
           <div className="flex items-center gap-3 mb-4 lg:mb-6">
-            <div className="p-2 lg:p-3 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl">
+            <div className="p-2 lg:p-3 bg-blue-600 rounded-xl">
               <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
             <div>

@@ -315,7 +315,7 @@ export default function Kelolasiswa() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center shadow-lg">
             <Users className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -340,7 +340,7 @@ export default function Kelolasiswa() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger>
-            <button className="h-11 px-5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-medium shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+            <button className="h-11 px-5 bg-green-600 text-white rounded-xl font-medium shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Tambah siswa
             </button>
@@ -418,7 +418,7 @@ export default function Kelolasiswa() {
               </button>
               <button
                 onClick={handleCreate}
-                className="h-10 px-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:opacity-90 transition-opacity"
+                className="h-10 px-4 bg-green-600 text-white rounded-xl hover:opacity-90 transition-opacity"
               >
                 Simpan
               </button>
@@ -454,7 +454,7 @@ export default function Kelolasiswa() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow">
+                  <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center shadow">
                     <span className="text-white font-bold text-lg">
                       {m.nama.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </span>
@@ -569,7 +569,7 @@ export default function Kelolasiswa() {
             </button>
             <button
               onClick={handleEdit}
-              className="h-10 px-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:opacity-90 transition-opacity"
+              className="h-10 px-4 bg-green-600 text-white rounded-xl hover:opacity-90 transition-opacity"
             >
               Simpan
             </button>

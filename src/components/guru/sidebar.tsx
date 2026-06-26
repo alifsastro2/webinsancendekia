@@ -77,7 +77,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string, onClose: () =
       <div className="p-4 lg:p-6 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
               <School className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
             </div>
             <div>
@@ -145,7 +145,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string, onClose: () =
 
       {/* Bottom decoration */}
       <div className="p-3 lg:p-4 border-t border-gray-100 hidden lg:block">
-        <div className="bg-gradient-to-r from-blue-50 via-green-50 to-orange-50 rounded-xl p-4">
+        <div className="bg-blue-50 rounded-xl p-4">
           <p className="text-xs text-gray-600 font-medium mb-1">Tips hari ini</p>
           <p className="text-xs text-gray-500">Buat kuis interaktif untuk meningkatkan partisipasi siswa.</p>
         </div>

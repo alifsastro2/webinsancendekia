@@ -94,10 +94,10 @@ export default function siswaDashboard() {
   }
 
   const statCards = [
-    { title: 'Mata Pelajaran', value: mataPelajaran.length, color: 'from-teal-500 to-blue-500' },
-    { title: 'Total Materi', value: stats.totalMateri, color: 'from-blue-500 to-purple-500' },
-    { title: 'Kuis Aktif', value: stats.totalKuis, color: 'from-purple-500 to-pink-500' },
-    { title: 'Kuis Selesai', value: stats.completedKuis, color: 'from-green-500 to-emerald-500' },
+    { title: 'Mata Pelajaran', value: mataPelajaran.length, bgColor: 'bg-teal-600' },
+    { title: 'Total Materi', value: stats.totalMateri, bgColor: 'bg-blue-600' },
+    { title: 'Kuis Aktif', value: stats.totalKuis, bgColor: 'bg-purple-600' },
+    { title: 'Kuis Selesai', value: stats.completedKuis, bgColor: 'bg-green-600' },
   ]
 
   return (
@@ -114,7 +114,7 @@ export default function siswaDashboard() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium text-gray-600">{stat.title}</CardTitle>
-                  <div className="p-2 rounded-lg text-white" style={{ background: `linear-gradient(135deg, ${stat.color})` }}>
+                  <div className={`p-2 rounded-lg text-white ${stat.bgColor}`}>
                     {index === 0 && <BookOpen className="h-5 w-5" />}
                     {index === 1 && <FileText className="h-5 w-5" />}
                     {index === 2 && <ClipboardList className="h-5 w-5" />}

@@ -76,7 +76,7 @@ export default function Header({ role }: HeaderProps) {
           <DropdownMenuTrigger>
             <div className="relative h-9 w-9 lg:h-10 lg:w-10 rounded-full hover:bg-gray-100 transition-colors cursor-pointer">
               <Avatar>
-                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white font-semibold text-xs lg:text-sm">
+                <AvatarFallback className="bg-blue-600 text-white font-semibold text-xs lg:text-sm">
                   {initials}
                 </AvatarFallback>
               </Avatar>

@@ -171,7 +171,7 @@ export default function siswaProfil() {
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
                 <Avatar className="h-20 w-20">
-                  <AvatarFallback className="bg-gradient-to-br from-teal-500 to-blue-500 text-white text-2xl font-semibold">
+                  <AvatarFallback className="bg-teal-600 text-white text-2xl font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>

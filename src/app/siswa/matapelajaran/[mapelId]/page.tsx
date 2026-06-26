@@ -147,7 +147,7 @@ export default function siswaMapelDetail() {
           Kembali
         </Button>
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-blue-500 rounded-xl flex items-center justify-center text-white">
+          <div className="w-14 h-14 bg-teal-600 rounded-xl flex items-center justify-center text-white">
             <BookOpen className="h-7 w-7" />
           </div>
           <div>
@@ -205,10 +205,10 @@ export default function siswaMapelDetail() {
                         initial="hidden"
                         animate="visible"
                         transition={{ delay: i * 0.05 }}
-                        className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-100 hover:border-blue-200 transition-all"
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-200 transition-all"
                       >
                         <div className="flex items-center gap-4 flex-1">
-                          <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-blue-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                          <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center text-white shadow-md">
                             <FileText className="h-6 w-6" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -227,7 +227,7 @@ export default function siswaMapelDetail() {
                             href={m.file_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg hover:from-teal-600 hover:to-blue-600 transition-all shadow-md hover:shadow-lg"
+                            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:from-teal-600 hover:to-blue-600 transition-all shadow-md hover:shadow-lg"
                           >
                             <Download className="h-4 w-4" />
                             <span className="font-medium">Download</span>
@@ -268,10 +268,10 @@ export default function siswaMapelDetail() {
                         initial="hidden"
                         animate="visible"
                         transition={{ delay: i * 0.05 }}
-                        className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100 hover:border-purple-200 transition-all"
+                        className="flex items-center justify-between p-4 bg-purple-50 rounded-xl border border-purple-100 hover:border-purple-200 transition-all"
                       >
                         <div className="flex items-center gap-4 flex-1">
-                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                          <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center text-white shadow-md">
                             <ClipboardList className="h-6 w-6" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -287,7 +287,7 @@ export default function siswaMapelDetail() {
                         </div>
 
                         <Link href={`/siswa/matapelajaran/${mapelId}/kuis/${k.id}`}>
-                          <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                          <Button className="bg-purple-600 hover:from-purple-600 hover:to-pink-600">
                             <ClipboardList className="mr-2 h-4 w-4" />
                             Mulai Kuis
                           </Button>

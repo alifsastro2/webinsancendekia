@@ -306,7 +306,7 @@ export default function siswaKerjakanKuis() {
           onClick={() => handleSubmit()}
           disabled={submitting || (!allAnswered && !timeExpired)}
           size="lg"
-          className="bg-gradient-to-r from-blue-600 to-purple-600"
+          className="bg-blue-600"
         >
           {submitting ? 'Mengirim...' : 'Kirim Jawaban'}
           {!submitting && <CheckCircle2 className="ml-2 h-5 w-5" />}

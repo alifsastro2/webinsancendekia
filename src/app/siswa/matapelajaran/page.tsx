@@ -144,7 +144,7 @@ export default function siswaMataPelajaran() {
                             <p className="text-sm text-gray-600 line-clamp-2">{m.deskripsi}</p>
                           )}
                         </div>
-                        <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-blue-500 rounded-lg flex items-center justify-center text-white">
+                        <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center text-white">
                           <BookOpen className="h-6 w-6" />
                         </div>
                       </div>

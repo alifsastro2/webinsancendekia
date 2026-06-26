@@ -39,7 +39,7 @@ export default function siswaLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-teal-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
         <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
       </div>
     )

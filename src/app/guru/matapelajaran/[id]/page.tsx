@@ -294,7 +294,7 @@ export default function MataPelajaranDetail() {
               <div className="flex items-center justify-between">
                 <CardTitle>Materi Pembelajaran</CardTitle>
                 <Dialog open={materiDialogOpen} onOpenChange={setMateriDialogOpen}>
-                  <button onClick={() => setMateriDialogOpen(true)} className="h-11 px-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:opacity-90 flex items-center gap-2">
+                  <button onClick={() => setMateriDialogOpen(true)} className="h-11 px-5 bg-blue-600 text-white rounded-xl font-medium hover:opacity-90 flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Tambah Materi
                   </button>
@@ -426,7 +426,7 @@ export default function MataPelajaranDetail() {
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all"
                       >
                         <div className="flex items-center gap-4 flex-1">
-                          <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-blue-500 rounded-lg flex items-center justify-center text-white">
+                          <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center text-white">
                             <FileText className="h-6 w-6" />
                           </div>
                           <div className="flex-1">

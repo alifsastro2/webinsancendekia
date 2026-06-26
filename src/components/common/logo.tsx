@@ -59,7 +59,7 @@ export default function Logo({ size = 'md', showName = true, className = '' }: L
           transition={{ delay: 0.3, duration: 0.5 }}
           className="mt-3 text-center"
         >
-          <h1 className={`font-bold bg-gradient-to-r from-blue-700 via-green-600 to-orange-500 bg-clip-text text-transparent ${
+          <h1 className={`font-bold text-blue-700 ${
             size === 'sm' ? 'text-lg' : size === 'md' ? 'text-xl' : 'text-3xl'
           }`}>
             Insan Cendekia Nusantara

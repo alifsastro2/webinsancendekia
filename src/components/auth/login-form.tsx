@@ -36,36 +36,20 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-800 via-blue-700 to-green-600 relative overflow-hidden">
-      {/* Animated gradient orbs */}
-      <motion.div
-        className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-orange-400/20 to-yellow-400/20 rounded-full blur-3xl"
-        animate={{
-          scale: [1, 1.2, 1],
-          x: [0, 30, 0],
-          y: [0, -30, 0],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-green-400/30 to-emerald-400/30 rounded-full blur-3xl"
-        animate={{
-          scale: [1.2, 1, 1.2],
-          x: [0, -30, 0],
-          y: [0, 30, 0],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-      />
+    <div className="min-h-screen bg-slate-800 relative overflow-hidden">
+      {/* Simple solid color blocks */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-bl-full" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-green-600 rounded-tr-full" />
 
-      {/* Grid pattern overlay */}
+      {/* Dot pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <circle cx="20" cy="20" r="1" fill="white" />
+            <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1" fill="white" />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
+          <rect width="100%" height="100%" fill="url(#dots)" />
         </svg>
       </div>
 
@@ -82,13 +66,13 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
           transition={{ delay: 0.1, duration: 0.4 }}
           className="w-full max-w-md"
         >
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200">
             {/* Header Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 via-green-600 to-orange-500 p-8 pb-16">
-              {/* Wave decoration */}
+            <div className="bg-blue-700 p-8 pb-16">
+              {/* Simple wave */}
               <div className="absolute bottom-0 left-0 right-0">
-                <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
+                <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 60L60 50C120 40 240 20 360 15C480 10 600 15 720 20C840 25 960 30 1080 35C1200 40 1320 45 1380 48L1440 50V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0Z" fill="white"/>
                 </svg>
               </div>
 
@@ -99,7 +83,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                 transition={{ delay: 0.3, duration: 0.5, type: "spring" }}
                 className="relative z-10 flex flex-col items-center"
               >
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 border border-white/30 shadow-lg">
+                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                   <Logo size="lg" showName={false} />
                 </div>
                 <h1 className="text-2xl font-bold text-white text-center">
@@ -171,9 +155,8 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-12 bg-gradient-to-r from-blue-700 via-green-600 to-orange-500 hover:from-blue-800 hover:via-green-700 hover:to-orange-600 text-white font-semibold shadow-lg shadow-blue-500/25 transition-all rounded-xl relative overflow-hidden group"
+                    className="w-full h-12 bg-blue-700 hover:bg-blue-800 text-white font-semibold shadow-lg transition-all rounded-xl"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -195,12 +178,12 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                © 2024 Insan Cendekia Nusantara
+                © 2026 Insan Cendekia Nusantara
               </motion.p>
             </div>
           </div>
 
-          {/* Bottom decoration */}
+          {/* Simple dots indicator */}
           <motion.div
             className="mt-8 flex justify-center gap-2"
             initial={{ opacity: 0 }}
@@ -210,9 +193,9 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
             {[1, 2, 3].map((i) => (
               <motion.div
                 key={i}
-                className="w-8 h-1 bg-white/30 rounded-full"
+                className="w-2 h-2 bg-white/50 rounded-full"
                 animate={{
-                  scaleX: [0.5, 1, 0.5],
+                  scale: [0.5, 1, 0.5],
                 }}
                 transition={{
                   duration: 1.5,

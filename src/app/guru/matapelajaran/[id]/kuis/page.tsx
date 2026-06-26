@@ -237,7 +237,7 @@ export default function GuruKuis() {
             <CardTitle>Daftar Kuis</CardTitle>
             <Dialog open={kuisDialogOpen} onOpenChange={setKuisDialogOpen}>
               <DialogTrigger>
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
+                <Button className="bg-blue-600">
                   <Plus className="mr-2 h-4 w-4" />
                   Buat Kuis Baru
                 </Button>
@@ -324,7 +324,7 @@ export default function GuruKuis() {
                   >
                     <div className="p-4 bg-gray-50 flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white">
+                        <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white">
                           <ClipboardList className="h-6 w-6" />
                         </div>
                         <div>

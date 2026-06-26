@@ -148,7 +148,7 @@ export default function SettingsPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 lg:p-6 xl:p-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+        <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
           <Shield className="h-6 w-6 text-white" />
         </div>
         <div>
