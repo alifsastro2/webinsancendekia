@@ -31,7 +31,16 @@
       "Bash(npm list *)",
       "Bash(git config *)",
       "Bash(git add *)",
-      "Bash(git commit -m 'Initial commit: Sekolah Online with Cloudflare R2 upload *)"
+      "Bash(git commit -m 'Initial commit: Sekolah Online with Cloudflare R2 upload *)",
+      "Bash(gh --version)",
+      "Bash(sudo apt update)",
+      "Bash(sudo apt install -y gh)",
+      "Bash(gh auth *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(npx vercel *)",
+      "Bash(pkill -f \"vercel whoami\")",
+      "Bash(git commit -m 'Fix: ensure clean build *)"
     ]
   },
   "enableAllProjectMcpServers": true,
