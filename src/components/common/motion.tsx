@@ -10,9 +10,9 @@ export const pageVariants = {
 }
 
 export const pageTransition = {
-  type: 'tween',
+  type: 'tween' as const,
   duration: 0.4,
-  ease: 'easeInOut'
+  ease: 'easeInOut' as const
 }
 
 // Staggered list animation
@@ -38,7 +38,7 @@ export const cardVariants = {
     scale: 1.02,
     boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 300,
       damping: 20
     }
@@ -58,7 +58,7 @@ export const slideUpVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 100,
       damping: 20
     }
@@ -72,7 +72,7 @@ export const scaleInVariants = {
     opacity: 1,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 200,
       damping: 25
     }
@@ -99,7 +99,7 @@ export const shimmerVariants = {
     transition: {
       repeat: Infinity,
       duration: 1.5,
-      ease: 'linear'
+      ease: 'linear' as const
     }
   }
 }

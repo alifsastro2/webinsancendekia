@@ -90,7 +90,7 @@ export default function GuruDashboard() {
       }
 
       setStats({
-        totalsiswa: siswaCount,
+        totalSiswa: siswaCount,
         totalMatapelajaran: mapelIds.length,
         totalMateri: materiCount,
         totalKuis: kuisCount
@@ -105,7 +105,7 @@ export default function GuruDashboard() {
   const statCards = [
     {
       title: 'Total siswa',
-      value: stats.totalsiswa,
+      value: stats.totalSiswa,
       icon: Users,
       color: 'bg-blue-100 text-blue-600',
       bgIcon: 'bg-blue-600',
@@ -314,7 +314,7 @@ export default function GuruDashboard() {
             </div>
           </div>
 
-          {stats.totalMatapelajaran === 0 && stats.totalsiswa === 0 ? (
+          {stats.totalMatapelajaran === 0 && stats.totalSiswa === 0 ? (
             <div className="text-center py-8 lg:py-12">
               <motion.div
                 animate={{ y: [0, -10, 0] }}
@@ -351,7 +351,7 @@ export default function GuruDashboard() {
                   <Users className="h-4 w-4 lg:h-5 lg:w-5 text-orange-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 text-sm lg:text-base">{stats.totalsiswa} siswa Aktif</p>
+                  <p className="font-medium text-gray-900 text-sm lg:text-base">{stats.totalSiswa} siswa Aktif</p>
                   <p className="text-xs lg:text-sm text-gray-500">Di semua kelas yang diampu</p>
                 </div>
                 <CheckCircle2 className="h-4 w-4 lg:h-5 lg:w-5 text-green-500 flex-shrink-0" />

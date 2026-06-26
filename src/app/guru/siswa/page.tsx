@@ -386,7 +386,7 @@ export default function Kelolasiswa() {
               </div>
               <div>
                 <Label htmlFor="kelas">Kelas</Label>
-                <Select value={formData.kelas_id} onValueChange={(v) => setFormData({ ...formData, kelas_id: v })}>
+                <Select value={formData.kelas_id} onValueChange={(v) => v && setFormData({ ...formData, kelas_id: v })}>
                   <SelectTrigger id="kelas" className="h-11 rounded-xl mt-2">
                     <SelectValue placeholder="Pilih kelas" />
                   </SelectTrigger>
@@ -546,7 +546,7 @@ export default function Kelolasiswa() {
             </div>
             <div>
               <Label htmlFor="edit-kelas">Kelas</Label>
-              <Select value={formData.kelas_id} onValueChange={(v) => setFormData({ ...formData, kelas_id: v })}>
+              <Select value={formData.kelas_id} onValueChange={(v) => v && setFormData({ ...formData, kelas_id: v })}>
                 <SelectTrigger id="edit-kelas" className="h-11 rounded-xl mt-2">
                   <SelectValue placeholder="Pilih kelas" />
                 </SelectTrigger>

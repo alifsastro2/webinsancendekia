@@ -236,7 +236,7 @@ export default function GuruKuis() {
           <div className="flex items-center justify-between">
             <CardTitle>Daftar Kuis</CardTitle>
             <Dialog open={kuisDialogOpen} onOpenChange={setKuisDialogOpen}>
-              <DialogTrigger asChild>
+              <DialogTrigger>
                 <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
                   <Plus className="mr-2 h-4 w-4" />
                   Buat Kuis Baru
@@ -353,7 +353,7 @@ export default function GuruKuis() {
                           Tambah Pertanyaan
                         </Button>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger>
                             <Button variant="ghost" size="icon">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -468,7 +468,7 @@ export default function GuruKuis() {
               {selectedKuis?.tipe === 'pilihan_ganda' ? (
                 <Select
                   value={pertanyaanForm.jawaban_benar}
-                  onValueChange={(v) => setPertanyaanForm({ ...pertanyaanForm, jawaban_benar: v })}
+                  onValueChange={(v) => v && setPertanyaanForm({ ...pertanyaanForm, jawaban_benar: v })}
                 >
                   <SelectTrigger id="jawaban">
                     <SelectValue placeholder="Pilih jawaban benar" />

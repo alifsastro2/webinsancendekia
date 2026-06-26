@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/common/header'
-import siswaSidebar from '@/components/siswa/sidebar'
+import SiswaSidebar from '@/components/siswa/sidebar'
 import { supabase } from '@/lib/supabase'
 import { Loader2 } from 'lucide-react'
 
@@ -49,7 +49,7 @@ export default function siswaLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-gray-50">
       <Header role="siswa" />
       <div className="flex">
-        <siswaSidebar />
+        <SiswaSidebar />
         <main className="flex-1 p-8">
           {children}
         </main>

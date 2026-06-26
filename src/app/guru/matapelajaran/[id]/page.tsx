@@ -448,14 +448,14 @@ export default function MataPelajaranDetail() {
                           </div>
                         </div>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger>
                             <Button variant="ghost" size="icon">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {m.file_url && (
-                              <DropdownMenuItem asChild>
+                              <DropdownMenuItem>
                                 <a href={m.file_url} target="_blank" rel="noopener noreferrer">
                                   <Download className="mr-2 h-4 w-4" />
                                   Download

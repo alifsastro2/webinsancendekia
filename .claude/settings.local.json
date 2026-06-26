@@ -40,7 +40,23 @@
       "Bash(git push *)",
       "Bash(npx vercel *)",
       "Bash(pkill -f \"vercel whoami\")",
-      "Bash(git commit -m 'Fix: ensure clean build *)"
+      "Bash(git commit -m 'Fix: ensure clean build *)",
+      "Bash(xxd)",
+      "Bash(find /home/alif -name \"page.tsx\" -path \"*/siswa/*\" 2>/dev/null)",
+      "Read(//home/alif/**)",
+      "Bash(# Remove the confusing parent package.json *)",
+      "Bash(NEXT_DISABLE_TURBOPACK=1 npm run build)",
+      "Bash(sed -n '200,230p' src/app/guru/matapelajaran/[id]/kuis/page.tsx)",
+      "Bash(sed -n '235,250p' src/app/guru/matapelajaran/[id]/kuis/page.tsx)",
+      "Bash(# Fix kuis page - remove asChild *)",
+      "Bash(sed -n '465,480p' src/app/guru/matapelajaran/[id]/kuis/page.tsx)",
+      "Bash(sed -i 's/onValueChange={\\(v\\) => setPertanyaanForm/onValueChange={\\(v\\) => v \\\\&\\\\& setPertanyaanForm/g' src/app/guru/matapelajaran/[id]/kuis/page.tsx)",
+      "Bash(sed -i 's/onValueChange={\\(v\\) => setKuisForm/onValueChange={\\(v\\) => v \\\\&\\\\& setKuisForm/g' src/app/guru/matapelajaran/[id]/kuis/page.tsx)",
+      "Bash(git commit -m 'Fix: TypeScript errors and build issues *)"
+    ],
+    "additionalDirectories": [
+      "/home/alif",
+      "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]/kuis"
     ]
   },
   "enableAllProjectMcpServers": true,
