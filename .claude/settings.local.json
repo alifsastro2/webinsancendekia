@@ -91,7 +91,8 @@
       "Bash(sed -i 's/bg-purple-600/bg-purple-500/g' src/app/siswa/matapelajaran/*.tsx)",
       "Bash(sed -i 's/bg-amber-600/bg-amber-500/g' src/app/siswa/matapelajaran/*.tsx)",
       "Bash(sed -i 's/bg-cyan-600/bg-cyan-500/g' src/app/siswa/matapelajaran/*.tsx)",
-      "Bash(git commit -m 'Update: Vibrant colors and animations *)"
+      "Bash(git commit -m 'Update: Vibrant colors and animations *)",
+      "Bash(git commit -m 'Fix: Professional UI/UX improvements *)"
     ],
     "additionalDirectories": [
       "/home/alif",
