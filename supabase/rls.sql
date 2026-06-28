@@ -100,16 +100,11 @@ WITH CHECK (
 -- MATA_PELAJARAN Policies
 -- ============================================
 
--- Guru can read all mata_pelajaran
-CREATE POLICY "Guru can read all mata_pelajaran"
+-- Guru can only read own mata_pelajaran
+CREATE POLICY "Guru can read own mata_pelajaran"
 ON mata_pelajaran FOR SELECT
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-);
+USING (guru_id = auth.uid());
 
 -- Siswa can only read mata_pelajaran for their class
 CREATE POLICY "Siswa can read class mata_pelajaran"
@@ -140,6 +135,29 @@ ON mata_pelajaran FOR UPDATE
 TO authenticated
 USING (guru_id = auth.uid())
 WITH CHECK (guru_id = auth.uid());
+
+-- Guru can delete own mata_pelajaran
+CREATE POLICY "Guru can delete own mata_pelajaran"
+ON mata_pelajaran FOR DELETE
+TO authenticated
+USING (guru_id = auth.uid());
+
+-- ============================================
+-- Helper: Count kelas references (bypass RLS)
+-- ============================================
+CREATE OR REPLACE FUNCTION count_kelas_references(p_kelas_id UUID)
+RETURNS TABLE(table_name TEXT, count BIGINT)
+LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+    SELECT 'mata_pelajaran'::TEXT, COUNT(*)::BIGINT
+    FROM mata_pelajaran WHERE mata_pelajaran.kelas_id = p_kelas_id
+  UNION ALL
+    SELECT 'users'::TEXT, COUNT(*)::BIGINT
+    FROM public.users WHERE users.kelas_id = p_kelas_id AND users.role = 'siswa';
+END;
+$$;
 
 -- ============================================
 -- MATERI Policies

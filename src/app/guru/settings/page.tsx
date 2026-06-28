@@ -141,23 +141,17 @@ export default function SettingsPage() {
       return toast.error('Anda tidak memiliki izin untuk menghapus kelas ini')
     }
 
-    // Cek apakah kelas masih dipakai oleh mata_pelajaran
-    const { count: mapelCount } = await supabase
-      .from('mata_pelajaran')
-      .select('*', { count: 'exact', head: true })
-      .eq('kelas_id', id)
-    if (mapelCount && mapelCount > 0) {
-      return toast.error(`Kelas tidak bisa dihapus — masih digunakan oleh ${mapelCount} mata pelajaran`)
-    }
-
-    // Cek apakah kelas masih dipakai oleh siswa
-    const { count: siswaCount } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .eq('kelas_id', id)
-      .eq('role', 'siswa')
-    if (siswaCount && siswaCount > 0) {
-      return toast.error(`Kelas tidak bisa dihapus — masih memiliki ${siswaCount} siswa`)
+    // Cek apakah kelas masih dipakai oleh mata_pelajaran atau siswa
+    const { data: refs } = await supabase.rpc('count_kelas_references', { p_kelas_id: id })
+    if (refs) {
+      const mapelRef = refs.find((r: { table_name: string, count: number }) => r.table_name === 'mata_pelajaran')
+      const siswaRef = refs.find((r: { table_name: string, count: number }) => r.table_name === 'users')
+      if (mapelRef && mapelRef.count > 0) {
+        return toast.error(`Kelas tidak bisa dihapus — masih digunakan oleh ${mapelRef.count} mata pelajaran`)
+      }
+      if (siswaRef && siswaRef.count > 0) {
+        return toast.error(`Kelas tidak bisa dihapus — masih memiliki ${siswaRef.count} siswa`)
+      }
     }
 
     if (!confirm('Yakin hapus kelas ini?')) return
