@@ -510,8 +510,8 @@ export default function Kelolasiswa() {
               transition={{ delay: i * 0.05 }}
               className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-4">
+              <div className="flex justify-between gap-3">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
                   <div className="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center shadow shrink-0">
                     <span className="text-white font-bold text-lg">
                       {m.nama.split(' ').map(n => n[0]).join('').slice(0, 2)}
@@ -523,7 +523,7 @@ export default function Kelolasiswa() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-start gap-1 pt-1">
                   <Badge className={m.is_active ? 'bg-green-100 text-green-700 border-0' : 'bg-gray-100 text-gray-600 border-0'}>
                     {m.is_active ? 'Aktif' : 'Nonaktif'}
                   </Badge>
