@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   username VARCHAR(50) UNIQUE NOT NULL,
   nama VARCHAR(100) NOT NULL,
   email VARCHAR(100),
-  role VARCHAR(10) NOT NULL CHECK (role IN ('guru', 'murid')),
+  role VARCHAR(10) NOT NULL CHECK (role IN ('guru', 'siswa')),
   kelas_id UUID REFERENCES kelas(id),
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS kuis (
   judul VARCHAR(200) NOT NULL,
   tipe VARCHAR(20) NOT NULL CHECK (tipe IN ('pilihan_ganda', 'essay')),
   waktu_menit INTEGER,
+  due_date TIMESTAMP WITH TIME ZONE,
+  published BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -91,11 +93,11 @@ CREATE TABLE IF NOT EXISTS pertanyaan_kuis (
 CREATE TABLE IF NOT EXISTS hasil_kuis (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   kuis_id UUID REFERENCES kuis(id) ON DELETE CASCADE,
-  murid_id UUID REFERENCES public.users(id),
+  siswa_id UUID REFERENCES public.users(id),
   jawaban JSONB NOT NULL,
   skor INTEGER,
   submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(kuis_id, murid_id)
+  UNIQUE(kuis_id, siswa_id)
 );
 
 -- ============================================
@@ -109,7 +111,7 @@ CREATE INDEX IF NOT EXISTS idx_matapelajaran_kelas ON mata_pelajaran(kelas_id);
 CREATE INDEX IF NOT EXISTS idx_materi_matapelajaran ON materi(mata_pelajaran_id);
 CREATE INDEX IF NOT EXISTS idx_kuis_matapelajaran ON kuis(mata_pelajaran_id);
 CREATE INDEX IF NOT EXISTS idx_pertanyaan_kuis ON pertanyaan_kuis(kuis_id);
-CREATE INDEX IF NOT EXISTS idx_hasil_kuis_murid ON hasil_kuis(murid_id);
+CREATE INDEX IF NOT EXISTS idx_hasil_kuis_siswa ON hasil_kuis(siswa_id);
 
 -- ============================================
 -- TRIGGER: Updated_at
@@ -138,13 +140,14 @@ CREATE TRIGGER update_matapelajaran_updated_at
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.users (id, username, nama, email, role)
+  INSERT INTO public.users (id, username, nama, email, role, kelas_id)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'username',
     COALESCE(NEW.raw_user_meta_data->>'nama', NEW.email),
     NEW.email,
-    NEW.raw_user_meta_data->>'role'
+    NEW.raw_user_meta_data->>'role',
+    (NEW.raw_user_meta_data->>'kelas_id')::UUID
   );
   RETURN NEW;
 END;

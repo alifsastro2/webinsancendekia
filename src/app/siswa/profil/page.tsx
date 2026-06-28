@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { User, Mail, Calendar, Save, GraduationCap } from 'lucide-react'
+import { User, Mail, Calendar, Save, GraduationCap, Key, Shield, Edit3 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { slideUpVariants } from '@/components/common/motion'
@@ -155,6 +155,7 @@ export default function siswaProfil() {
       initial="hidden"
       animate="visible"
       variants={slideUpVariants}
+      className="p-4 lg:p-6 xl:p-8"
     >
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Profil</h1>
@@ -164,9 +165,17 @@ export default function siswaProfil() {
       <div className="grid gap-6 max-w-3xl">
         {/* Profile Card */}
         <motion.div variants={slideUpVariants} transition={{ delay: 0.1 }}>
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle>Informasi Profil</CardTitle>
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-teal-50 to-white border-l-4 border-teal-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-teal-100 rounded-lg">
+                  <Edit3 className="h-5 w-5 text-teal-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Informasi Profil</CardTitle>
+                  <p className="text-sm text-gray-500 mt-0.5">Kelola data diri Anda</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
@@ -232,9 +241,17 @@ export default function siswaProfil() {
 
         {/* Account Info */}
         <motion.div variants={slideUpVariants} transition={{ delay: 0.2 }}>
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle>Informasi Akun</CardTitle>
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Shield className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Informasi Akun</CardTitle>
+                  <p className="text-sm text-gray-500 mt-0.5">Detail dan status akun Anda</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3 text-sm">
@@ -259,9 +276,17 @@ export default function siswaProfil() {
 
         {/* Change Password */}
         <motion.div variants={slideUpVariants} transition={{ delay: 0.3 }}>
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle>Ubah Password</CardTitle>
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Key className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Ubah Password</CardTitle>
+                  <p className="text-sm text-gray-500 mt-0.5">Ganti password akun Anda</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>

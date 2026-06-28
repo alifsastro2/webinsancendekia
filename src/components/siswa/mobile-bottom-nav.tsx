@@ -5,20 +5,20 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Home,
-  Users,
   BookOpen,
-  Settings
+  ClipboardList,
+  User
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const bottomNavItems = [
-  { icon: Home, label: 'Dashboard', href: '/guru', color: 'red' },
-  { icon: BookOpen, label: 'Mapel', href: '/guru/matapelajaran', color: 'amber' },
-  { icon: Users, label: 'Siswa', href: '/guru/siswa', color: 'green' },
-  { icon: Settings, label: 'Settings', href: '/guru/settings', color: 'blue' },
+  { icon: Home, label: 'Dashboard', href: '/siswa', color: 'green' },
+  { icon: BookOpen, label: 'Mapel', href: '/siswa/matapelajaran', color: 'amber' },
+  { icon: ClipboardList, label: 'Kuis', href: '/siswa/kuis', color: 'purple' },
+  { icon: User, label: 'Profil', href: '/siswa/profil', color: 'cyan' },
 ]
 
-export default function MobileBottomNav() {
+export default function SiswaMobileBottomNav() {
   const pathname = usePathname()
 
   return (
@@ -33,12 +33,12 @@ export default function MobileBottomNav() {
           const isActive = pathname === item.href
           const Icon = item.icon
           const colorMap: Record<string, { bg: string, text: string }> = {
-            red: { bg: 'bg-red-100 text-red-600', text: 'text-red-600' },
             green: { bg: 'bg-green-100 text-green-600', text: 'text-green-600' },
             amber: { bg: 'bg-amber-100 text-amber-600', text: 'text-amber-600' },
-            blue: { bg: 'bg-blue-100 text-blue-600', text: 'text-blue-600' },
+            purple: { bg: 'bg-purple-100 text-purple-600', text: 'text-purple-600' },
+            cyan: { bg: 'bg-cyan-100 text-cyan-600', text: 'text-cyan-600' },
           }
-          const colors = colorMap[item.color] || colorMap.red
+          const colors = colorMap[item.color] || colorMap.green
 
           return (
             <Link key={item.href} href={item.href}>

@@ -128,6 +128,8 @@ export type Database = {
           judul: string
           tipe: 'pilihan_ganda' | 'essay'
           waktu_menit: number | null
+          due_date: string | null
+          published: boolean
           created_at: string
         }
         Insert: {
@@ -136,6 +138,8 @@ export type Database = {
           judul: string
           tipe: 'pilihan_ganda' | 'essay'
           waktu_menit?: number | null
+          due_date?: string | null
+          published?: boolean
           created_at?: string
         }
         Update: {
@@ -144,6 +148,8 @@ export type Database = {
           judul?: string
           tipe?: 'pilihan_ganda' | 'essay'
           waktu_menit?: number | null
+          due_date?: string | null
+          published?: boolean
           created_at?: string
         }
       }

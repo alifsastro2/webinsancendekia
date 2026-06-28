@@ -36,7 +36,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-orange-500 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-rose-600 relative overflow-hidden">
       {/* Animated floating shapes */}
       <motion.div
         className="absolute top-20 left-10 w-20 h-20 bg-green-400 rounded-full opacity-20"
@@ -106,7 +106,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
         >
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-white/20">
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-red-600 to-orange-500 p-8 pb-16 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-red-600 to-rose-600 p-8 pb-16 relative overflow-hidden">
               {/* Decorative circles */}
               <motion.div
                 className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full"
@@ -211,7 +211,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                     disabled={isLoading}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full h-12 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold shadow-lg transition-all duration-300 rounded-xl relative overflow-hidden group"
+                    className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold shadow-lg transition-all duration-300 rounded-xl relative overflow-hidden group"
                   >
                     <motion.span
                       className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"

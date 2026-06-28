@@ -1,25 +1,22 @@
 # 🏫 Sekolah Online - Student Information Management System
 
-Sistem informasi belajar siswa dengan fitur lengkap untuk guru dan murid.
+Sistem informasi belajar siswa dengan fitur lengkap untuk guru dan siswa.
 
 ## ✨ Fitur Utama
 
 ### 👨‍🏫 Untuk Guru
-- **Kelola Murid** - Buat, edit, hapus akun murid
-- **Reset Password** - Reset password murid
-- **Status Akun** - Aktif/nonaktifkan akun murid
-- **Pindah Kelas** - Ganti kelas murid
-- **Mata Pelajaran** - Buat dan kelola mata pelajaran per kelas
-- **Upload Materi** - Upload materi pembelajaran
-- **Buat Kuis** - Kuis pilihan ganda dan essay
-- **Lihat Hasil** - Lihat hasil kuis murid
+- **Kelola Siswa** - Buat, edit, hapus, reset password, aktif/nonaktifkan akun
+- **Mata Pelajaran** - Buat dan kelola mapel per kelas
+- **Materi** - Upload materi pembelajaran (file/URL)
+- **Kuis** - Buat kuis pilihan ganda & essay dengan timer
+- **Penilaian** - Review jawaban & nilai essay siswa
 
-### 👨‍🎓 Untuk Murid
-- **Lihat Mata Pelajaran** - Sesuai kelas yang dituju
+### 👨‍🎓 Untuk Siswa
+- **Lihat Mata Pelajaran** - Sesuai kelas
 - **Akses Materi** - Lihat dan download materi
-- **Kerjakan Kuis** - Pilihan ganda & essay
-- **Lihat Skor** - Skor kuis otomatis untuk pilihan ganda
-- **Edit Profil** - Ubah nama, username, password
+- **Kerjakan Kuis** - Pilihan ganda & essay, satu-satu dengan navigasi
+- **Timer** - Auto-submit saat waktu habis
+- **Lihat Skor** - Skor otomatis untuk pilihan ganda
 
 ## 🛠️ Tech Stack
 
@@ -62,7 +59,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 # Run file: supabase/rls.sql
 ```
 
-### 5. Buat Akun Guru Test
+### 5. Buat Akun Guru & Siswa Test
 
 ```bash
 node scripts/create-guru.js
@@ -90,12 +87,12 @@ Email: azka@sekolah.test
 src/
 ├── app/                 # Next.js App Router
 │   ├── guru/           # Guru pages
-│   ├── murid/          # Murid pages
+│   ├── siswa/          # Siswa pages
 │   └── login/          # Auth pages
 ├── components/         # React components
 │   ├── common/         # Shared components
 │   ├── guru/           # Guru-specific
-│   ├── murid/          # Murid-specific
+│   ├── siswa/          # Siswa-specific
 │   └── ui/             # shadcn/ui
 ├── lib/                # Utilities & types
 └── styles/             # Global styles
@@ -103,9 +100,9 @@ src/
 
 ## 🎨 Theme Colors
 
-- **Primary**: Blue (#3b82f6)
-- **Secondary**: Purple (#a855f7)
-- **Accent**: Teal (#14b8a6)
+- **Primary**: Red (#ef4444)
+- **Secondary**: Purple (#8b5cf6)
+- **Accent**: Green (#22c55e)
 
 ## 📝 Database Schema
 
@@ -117,7 +114,7 @@ Full schema: [supabase/schema.sql](supabase/schema.sql)
 
 - Row Level Security (RLS) enabled
 - Role-based access control
-- Murid hanya akses kelas mereka
+- Siswa hanya akses mapel, materi, kuis di kelasnya
 - Guru hanya edit mapel miliknya
 
 ## 📄 License

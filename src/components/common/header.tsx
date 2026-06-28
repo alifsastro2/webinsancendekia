@@ -6,13 +6,14 @@ import { motion } from 'framer-motion'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, Settings, Menu, Bell } from 'lucide-react'
+import { LogOut, Settings, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { User as UserType } from '@/lib/types'
 
@@ -68,7 +69,7 @@ export default function Header({ role }: HeaderProps) {
           {/* Title */}
           <div className="hidden sm:block">
             <h1 className="font-bold text-gray-900">Insan Cendekia</h1>
-            <p className="text-xs text-gray-500 capitalize">{role === 'guru' ? 'Portal Guru' : 'Portal Siswa'}</p>
+            <p className="text-xs text-gray-500">{user?.nama || (role === 'guru' ? 'Guru' : 'Siswa')}</p>
           </div>
         </div>
 
@@ -87,28 +88,32 @@ export default function Header({ role }: HeaderProps) {
 
           {/* User menu */}
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-3 p-1.5 hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
-                  <AvatarFallback className="bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-sm">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-gray-900">{user?.nama || 'Loading...'}</p>
-                  <p className="text-xs text-gray-500">@{user?.username || '...'}</p>
-                </div>
-              </motion.button>
+            <DropdownMenuTrigger
+              render={
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                />
+              }
+              className="flex items-center gap-3 p-1.5 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
+                <AvatarFallback className="bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-sm">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="hidden md:block text-left">
+                <p className="text-sm font-medium text-gray-900">{user?.nama || 'Loading...'}</p>
+                <p className="text-xs text-gray-500">@{user?.username || '...'}</p>
+              </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 mt-2 p-2">
-              <DropdownMenuLabel className="p-2">
-                <p className="font-medium">{user?.nama}</p>
-                <p className="text-xs text-gray-500 font-normal">@{user?.username}</p>
-              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="p-2">
+                  <p className="font-medium">{user?.nama}</p>
+                  <p className="text-xs text-gray-500 font-normal">@{user?.username}</p>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator className="my-2" />
               <DropdownMenuItem
                 onClick={() => router.push(`/${role}/settings`)}

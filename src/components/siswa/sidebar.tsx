@@ -1,42 +1,77 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   BookOpen,
   FileText,
   ClipboardList,
-  User,
+  User as UserIcon,
   LogOut,
   GraduationCap
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { User } from '@/lib/types'
 
 const menuItems = [
   { icon: GraduationCap, label: 'Dashboard', href: '/siswa', color: 'green' },
   { icon: BookOpen, label: 'Mata Pelajaran', href: '/siswa/matapelajaran', color: 'amber' },
   { icon: ClipboardList, label: 'Kuis Saya', href: '/siswa/kuis', color: 'purple' },
-  { icon: User, label: 'Profil', href: '/siswa/profil', color: 'cyan' },
+  { icon: UserIcon, label: 'Profil', href: '/siswa/profil', color: 'cyan' },
 ]
 
 export default function SiswaSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [kelas, setKelas] = useState<string | null>(null)
+
+  useEffect(() => {
+    const getUserInfo = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        const { data } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        setUser(data)
+
+        if (data?.kelas_id) {
+          const { data: kelasData } = await supabase
+            .from('kelas')
+            .select('nama')
+            .eq('id', data.kelas_id)
+            .single()
+          setKelas(kelasData?.nama || null)
+        }
+      }
+    }
+    getUserInfo()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   return (
     <motion.aside
       initial={{ x: -300 }}
       animate={{ x: 0 }}
       transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-      className="w-64 bg-white border-r h-screen sticky top-0 flex flex-col"
+      className="hidden lg:flex w-64 bg-white border-r h-screen sticky top-0 flex-col"
     >
       <div className="p-6 border-b">
-        <motion.h2
-          whileHover={{ scale: 1.02 }}
-          className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent"
-        >
-          Portal Siswa
-        </motion.h2>
+        <div>
+          <h2 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+            {user?.nama || 'Siswa'}
+          </h2>
+            <p className="text-xs text-gray-500">{kelas || '...'}</p>
+        </div>
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
@@ -75,7 +110,7 @@ export default function SiswaSidebar() {
       </nav>
 
       <div className="p-4 border-t">
-        <Link href="/login">
+        <button onClick={handleLogout} className="w-full">
           <motion.div
             whileHover={{ x: 4 }}
             whileTap={{ scale: 0.98 }}
@@ -84,7 +119,7 @@ export default function SiswaSidebar() {
             <LogOut className="h-5 w-5" />
             <span className="font-medium">Keluar</span>
           </motion.div>
-        </Link>
+        </button>
       </div>
     </motion.aside>
   )

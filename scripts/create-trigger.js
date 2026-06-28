@@ -19,12 +19,13 @@ async function main() {
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'nama', NEW.email),
         COALESCE(NEW.raw_user_meta_data->>'username', SPLIT_PART(NEW.email, '@', 1)),
-        COALESCE(NEW.raw_user_meta_data->>'role', 'murid'),
-        NULL,
+        COALESCE(NEW.raw_user_meta_data->>'role', 'siswa'),
+        (NEW.raw_user_meta_data->>'kelas_id')::UUID,
         true
       )
       ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
+        kelas_id = EXCLUDED.kelas_id,
         updated_at = NOW();
       RETURN NEW;
     END;

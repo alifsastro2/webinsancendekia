@@ -22,12 +22,12 @@
 - [x] Buat halaman login dengan animasi
 - [x] Implementasi autentikasi Supabase
 - [x] Buat dashboard Guru
-- [x] Buat dashboard Murid
-- [x] Implementasi fitur kelola murid (CRUD)
+- [x] Buat dashboard siswa
+- [x] Implementasi fitur kelola siswa (CRUD)
 - [x] Implementasi fitur mata pelajaran
 - [x] Implementasi fitur materi
 - [x] Implementasi fitur kuis (pilihan ganda & essay)
-- [x] Buat profil page untuk guru & murid
+- [x] Buat profil page untuk guru & siswa
 - [x] Script pembuatan akun guru test (Azka Muhamad Naufal)
 - [x] Buat setup instructions & quickstart guide
 
@@ -43,34 +43,38 @@ src/
 │   ├── guru/
 │   │   ├── page.tsx                # Dashboard Guru
 │   │   ├── layout.tsx              # Layout Guru
-│   │   ├── murid/page.tsx          # Kelola murid (CRUD)
+│   │   ├── siswa/page.tsx          # Kelola siswa (CRUD)
+│   │   ├── settings/page.tsx       # Settings guru
 │   │   ├── matapelajaran/
-│   │   │   ├── page.tsx            # Daftar mata pelajaran
-│   │   │   ├── [id]/page.tsx       # Detail mapel + materi
-│   │   │   └── [id]/kuis/page.tsx  # Kelola kuis + pertanyaan
+│   │   │   ├── page.tsx            # Daftar mapel
+│   │   │   ├── [id]/page.tsx       # Detail mapel (materi + daftar kuis)
+│   │   │   └── [id]/kuis/
+│   │   │       ├── page.tsx        # Kelola semua kuis
+│   │   │       └── [kuisId]/page.tsx # Kelola 1 kuis + review hasil + nilai essay
 │   │   └── profil/page.tsx         # Profil guru
-│   ├── murid/
-│   │   ├── page.tsx                # Dashboard Murid
-│   │   ├── layout.tsx              # Layout Murid
+│   ├── siswa/
+│   │   ├── page.tsx                # Dashboard siswa
+│   │   ├── layout.tsx              # Layout siswa
+│   │   ├── kuis/page.tsx           # Daftar kuis + riwayat
 │   │   ├── matapelajaran/
-│   │   │   ├── page.tsx            # Daftar mapel kelas murid
+│   │   │   ├── page.tsx            # Daftar mapel
 │   │   │   └── [mapelId]/
 │   │   │       ├── page.tsx        # Detail mapel + materi/kuis
-│   │   │       └── kuis/[kuisId]/page.tsx # Kerjakan kuis
-│   │   └── profil/page.tsx         # Profil murid
+│   │   │       └── kuis/[kuisId]/page.tsx # Kerjakan kuis (satu-satu)
+│   │   └── profil/page.tsx         # Profil siswa
 │   ├── layout.tsx                  # Root layout
 │   └── page.tsx                    # Home page (redirect)
 ├── components/
 │   ├── auth/
-│   │   └── login-form.tsx          # Form login component
 │   ├── common/
-│   │   ├── logo.tsx                # Logo component dengan fallback
-│   │   ├── motion.tsx              # Framer Motion variants & components
-│   │   └── header.tsx              # Header dengan user menu
+│   │   ├── logo.tsx                # Logo component
+│   │   ├── motion.tsx              # Framer Motion variants
+│   │   ├── header.tsx              # Header dengan user menu
+│   │   └── timer.tsx               # Timer component
 │   ├── guru/
 │   │   └── sidebar.tsx             # Sidebar guru
-│   ├── murid/
-│   │   └── sidebar.tsx             # Sidebar murid
+│   ├── siswa/
+│   │   └── sidebar.tsx             # Sidebar siswa
 │   └── ui/                         # shadcn/ui components
 ├── lib/
 │   ├── supabase.ts                 # Supabase client + types
@@ -80,7 +84,8 @@ src/
     └── globals.css                 # Global styles
 
 scripts/
-└── create-guru.js                  # Script buat akun guru test
+├── create-guru.js                  # Script buat akun guru
+└── create-siswa-test.js            # Script buat akun siswa test
 
 supabase/
 ├── schema.sql                      # Database schema
@@ -129,16 +134,16 @@ Danger:      #ef4444 (Red 500)
 
 ### Autentikasi & Authorization
 - ✅ Login dengan username & password
-- ✅ Role-based routing (guru/murid)
+- ✅ Role-based routing (guru/siswa)
 - ✅ Session management dengan Supabase Auth
 - ✅ Logout functionality
 
 ### Dashboard Guru
-- ✅ Overview statistik (murid, mapel, materi, kuis)
-- ✅ Kelola murid (Create, Read, Update, Delete)
-- ✅ Reset password murid
-- ✅ Aktif/Nonaktifkan akun murid
-- ✅ Ganti kelas murid
+- ✅ Overview statistik (siswa, mapel, materi, kuis)
+- ✅ Kelola siswa (Create, Read, Update, Delete)
+- ✅ Reset password siswa
+- ✅ Aktif/Nonaktifkan akun siswa
+- ✅ Ganti kelas siswa
 - ✅ Edit profil sendiri
 
 ### Mata Pelajaran (Guru)
@@ -149,27 +154,28 @@ Danger:      #ef4444 (Red 500)
 - ✅ Kelola materi
 
 ### Kuis (Guru)
-- ✅ Buat kuis pilihan ganda
-- ✅ Buat kuis essay
+- ✅ Buat kuis pilihan ganda & essay
 - ✅ Set waktu kuis (opsional)
-- ✅ Tambah pertanyaan
-- ✅ Hapus pertanyaan
+- ✅ Tambah/hapus pertanyaan
 - ✅ Hapus kuis
+- ✅ Lihat semua hasil siswa per kuis
+- ✅ Review jawaban (pilihan ganda otomatis, essay manual)
+- ✅ Input & simpan nilai essay (0-100)
+- ✅ Statistik rata-rata nilai
 
-### Dashboard Murid
+### Dashboard Siswa
 - ✅ Overview statistik (mapel, materi, kuis)
-- ✅ Daftar mata pelajaran (hanya kelas murid)
-- ✅ Lihat materi
-- ✅ Lihat kuis yang tersedia
-- ✅ Status kuis (selesai/belum)
+- ✅ Daftar mata pelajaran (hanya kelas siswa)
+- ✅ Lihat materi & download file
+- ✅ Daftar kuis tersedia & riwayat pengerjaan
 
-### Kuis (Murid)
-- ✅ Kerjakan kuis pilihan ganda
-- ✅ Kerjakan kuis essay
-- ✅ Timer kuis (jika ada batas waktu)
-- ✅ Validasi semua jawaban terisi
-- ✅ Submit jawaban
-- ✅ Lihat skor (untuk pilihan ganda)
+### Kuis (Siswa)
+- ✅ Kerjakan kuis pilihan ganda & essay
+- ✅ Timer + auto-submit saat waktu habis
+- ✅ Soal tampil satu-satu dengan navigasi Sebelumnya/Berikutnya
+- ✅ Progress pills & sidebar map soal
+- ✅ Validasi & konfirmasi jika ada soal belum dijawab
+- ✅ Submit jawaban & lihat skor (pilihan ganda)
 
 ### Profil
 - ✅ Edit nama, username, email
@@ -273,6 +279,8 @@ npm run dev
 | `supabase/schema.sql` | Database schema (tables, indexes, triggers) |
 | `supabase/rls.sql` | Row Level Security policies |
 | `scripts/create-guru.js` | Create test teacher account |
+| `scripts/create-siswa-test.js` | Create test student accounts |
+| `scripts/supabase-exec.js` | Execute SQL via Management API |
 | `scripts/setup-database-v2.js` | Display setup instructions |
 | `SETUP_DATABASE.md` | Detailed setup guide |
 | `SETUP_QUICKSTART.md` | Quick reference guide |
@@ -346,8 +354,9 @@ Buka http://localhost:3000
 
 ### RLS Policies
 - Semua tabel sudah dilindungi dengan Row Level Security
-- Murid hanya bisa akses mapel kelasnya
+- Siswa hanya bisa akses mapel, materi, kuis di kelasnya
 - Guru hanya bisa edit mapel miliknya
+- Semua policies menggunakan role `siswa` (bukan `murid`)
 
 ---
 
@@ -371,9 +380,9 @@ Buka http://localhost:3000
 
 ## 📌 Todo Belum Dikerjakan (Optional)
 
-- [ ] Halaman register (opsional, guru buat akun murid)
-- [ ] Laporan statistik murid (guru bisa lihat performa murid)
-- [ ] Laporan statistik kuis (guru bisa lihat hasil kuis murid)
+- [ ] Halaman register (opsional, guru buat akun siswa)
+- [ ] Laporan statistik siswa (guru bisa lihat performa siswa)
+- [ ] Laporan statistik kuis (guru bisa lihat hasil kuis siswa)
 - [ ] File upload dengan Supabase Storage
 - [ ] Email verification
 - [ ] Notifikasi saat kuis baru ditambahkan

@@ -39,9 +39,9 @@ export default function GuruLayout({ children }: { children: React.ReactNode }) 
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-green-50">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-red-600 mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Memuat...</p>
         </div>
       </div>
@@ -49,19 +49,14 @@ export default function GuruLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="min-h-screen bg-green-50 pb-16 lg:pb-0">
+    <div className="h-dvh flex flex-col bg-green-50">
       {/* Header - always visible */}
       <Header role="guru" />
 
       {/* Sidebar + Content */}
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:block fixed left-0 top-16 bottom-0 w-72 bg-white border-r border-gray-200 z-40 overflow-y-auto">
-          <GuruSidebar />
-        </div>
-
-        {/* Main content */}
-        <main className="flex-1 lg:ml-72 min-h-screen">
+      <div className="flex flex-1 min-h-0">
+        <GuruSidebar />
+        <main className="flex-1 lg:ml-72 overflow-y-auto">
           {children}
         </main>
       </div>

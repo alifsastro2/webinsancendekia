@@ -4,7 +4,7 @@ const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmF
 async function main() {
   console.log('🧹 Cleaning up...')
 
-  // Delete all murid from auth
+  // Delete all siswa from auth
   const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
     method: 'GET',
     headers: {
@@ -14,14 +14,14 @@ async function main() {
   })
 
   const users = await listRes.json()
-  const murids = users.users?.filter(u =>
-    u.user_metadata?.role === 'murid' ||
-    u.email?.includes('murid.test')
+  const siswas = users.users?.filter(u =>
+    u.user_metadata?.role === 'siswa' ||
+    u.email?.includes('siswa.test')
   ) || []
 
-  console.log(`Found ${murids.length} murid users to delete`)
+  console.log(`Found ${siswas.length} siswa users to delete`)
 
-  for (const user of murids) {
+  for (const user of siswas) {
     await fetch(`${supabaseUrl}/auth/v1/admin/users/${user.id}`, {
       method: 'DELETE',
       headers: {
@@ -32,8 +32,8 @@ async function main() {
     console.log(`✅ Deleted: ${user.email}`)
   }
 
-  // Delete murid profiles
-  await fetch(`${supabaseUrl}/rest/v1/users?role=eq.murid`, {
+  // Delete siswa profiles
+  await fetch(`${supabaseUrl}/rest/v1/users?role=eq.siswa`, {
     method: 'DELETE',
     headers: {
       'apikey': serviceRoleKey,

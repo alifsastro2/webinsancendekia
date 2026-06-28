@@ -163,7 +163,8 @@ export default function Kelolasiswa() {
           data: {
             username: formData.username,
             nama: formData.nama,
-            role: 'siswa'
+            role: 'siswa',
+            kelas_id: kelasData.id
           }
         }
       })
@@ -171,8 +172,8 @@ export default function Kelolasiswa() {
       if (authError) throw authError
       if (!authData.user) throw new Error('Gagal membuat user')
 
-      // Insert to users table (in case trigger doesn't exist)
-      const { error: insertError } = await supabase.from('users').insert({
+      // Upsert to users table (trigger may have already inserted)
+      const { error: upsertError } = await supabase.from('users').upsert({
         id: authData.user.id,
         username: formData.username,
         nama: formData.nama,
@@ -182,9 +183,21 @@ export default function Kelolasiswa() {
         is_active: true
       })
 
-      if (insertError) {
-        console.error('Insert error:', insertError)
-        // Continue anyway if user was created in auth
+      if (upsertError) {
+        console.error('Upsert error:', upsertError)
+        throw upsertError
+      }
+
+      // Confirm email so user can login
+      const confirmRes = await fetch('/api/auth/confirm-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: authData.user.id }),
+      })
+
+      if (!confirmRes.ok) {
+        const errData = await confirmRes.json().catch(() => ({}))
+        console.error('Confirm email error:', errData)
       }
 
       toast.success('siswa berhasil ditambahkan')
@@ -270,10 +283,20 @@ export default function Kelolasiswa() {
     if (!newPassword) return
 
     try {
-      await supabase.auth.updateUser({ password: newPassword })
+      const res = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: id, password: newPassword })
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Gagal mereset password')
+      }
+
       toast.success('Password berhasil direset')
-    } catch (error) {
-      toast.error('Gagal mereset password')
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal mereset password')
     }
   }
 
@@ -339,11 +362,13 @@ export default function Kelolasiswa() {
           />
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger>
-            <button className="h-11 px-5 bg-green-600 text-white rounded-xl font-medium shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Tambah siswa
-            </button>
+          <DialogTrigger
+            render={
+              <button className="h-11 px-5 bg-green-600 text-white rounded-xl font-medium shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2" />
+            }
+          >
+            <Plus className="h-4 w-4" />
+            Tambah siswa
           </DialogTrigger>
           <DialogContent className="sm:max-w-md rounded-2xl">
             <DialogHeader>
@@ -454,7 +479,7 @@ export default function Kelolasiswa() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-red-600 rounded-xl flex items-center justify-center shadow">
+                  <div className="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center shadow">
                     <span className="text-white font-bold text-lg">
                       {m.nama.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </span>

@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-import { Save, Shield, ShieldCheck, Layers, Users, Edit, Trash2, Plus, X } from 'lucide-react'
+import { Save, Settings as SettingsIcon, Layers, Users, Edit, Trash2, Plus, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
@@ -149,7 +149,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-          <Shield className="h-6 w-6 text-white" />
+          <SettingsIcon className="h-6 w-6 text-white" />
         </div>
         <div>
           <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Pengaturan</h1>
@@ -170,9 +170,17 @@ export default function SettingsPage() {
 
         {/* Tab Profil */}
         <TabsContent value="profil" className="space-y-6">
-          <Card>
-            <CardHeader className="pb-0">
-              <h2 className="text-lg font-semibold">Informasi Profil</h2>
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Informasi Profil</CardTitle>
+                  <p className="text-sm text-gray-500">Kelola data diri Anda</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
@@ -206,27 +214,21 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-
-          <Card className="bg-blue-50 border-blue-100">
-            <CardContent className="pt-6">
-              <div className="flex gap-3">
-                <ShieldCheck className="h-5 w-5 text-blue-600 mt-1" />
-                <div>
-                  <h4 className="font-medium text-gray-900">Tips Keamanan</h4>
-                  <p className="text-sm text-gray-600">Pastikan password sulit ditebak dan jangan bagikan ke siapapun.</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Tab Referensi */}
         <TabsContent value="referensi">
-          <Card>
-            <CardHeader className="pb-0">
-              <h2 className="flex items-center gap-2 text-lg font-semibold">
-                <Layers className="h-5 w-5" /> Daftar Kelas
-              </h2>
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Layers className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Daftar Kelas</CardTitle>
+                  <p className="text-sm text-gray-500">Kelola kelas yang tersedia</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">

@@ -27,9 +27,12 @@ import {
   Trash2,
   ClipboardList,
   Clock,
+  CalendarClock,
   ArrowLeft,
   PlusCircle,
-  Trash
+  Trash,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Kuis, PertanyaanKuis } from '@/lib/types'
@@ -63,7 +66,8 @@ export default function GuruKuis() {
   const [kuisForm, setKuisForm] = useState({
     judul: '',
     tipe: 'pilihan_ganda' as 'pilihan_ganda' | 'essay',
-    waktu_menit: ''
+    waktu_menit: '',
+    due_date: ''
   })
 
   const [pertanyaanForm, setPertanyaanForm] = useState({
@@ -113,6 +117,7 @@ export default function GuruKuis() {
           judul: kuisForm.judul,
           tipe: kuisForm.tipe,
           waktu_menit: kuisForm.waktu_menit ? parseInt(kuisForm.waktu_menit) : null,
+          due_date: kuisForm.due_date ? new Date(kuisForm.due_date).toISOString() : null,
           mata_pelajaran_id: mapelId
         })
 
@@ -199,7 +204,8 @@ export default function GuruKuis() {
     setKuisForm({
       judul: '',
       tipe: 'pilihan_ganda',
-      waktu_menit: ''
+      waktu_menit: '',
+      due_date: ''
     })
   }
 
@@ -219,6 +225,7 @@ export default function GuruKuis() {
       initial="hidden"
       animate="visible"
       variants={slideUpVariants}
+      className="p-4 lg:p-6 xl:p-8"
     >
       <div className="mb-6">
         <Button variant="ghost" onClick={() => router.back()} className="mb-4">
@@ -231,16 +238,26 @@ export default function GuruKuis() {
         </div>
       </div>
 
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Daftar Kuis</CardTitle>
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <ClipboardList className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-bold text-gray-900">Daftar Kuis</CardTitle>
+                <p className="text-sm text-gray-500">Kuis pilihan ganda dan essay</p>
+              </div>
+            </div>
             <Dialog open={kuisDialogOpen} onOpenChange={setKuisDialogOpen}>
-              <DialogTrigger>
-                <Button className="bg-blue-600">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Buat Kuis Baru
-                </Button>
+              <DialogTrigger
+                render={
+                  <button className="inline-flex items-center justify-center gap-2 font-medium h-10 px-4 py-2 text-sm rounded-xl bg-amber-600 text-white hover:bg-amber-700" />
+                }
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Buat Kuis Baru
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
@@ -280,6 +297,16 @@ export default function GuruKuis() {
                       onChange={(e) => setKuisForm({ ...kuisForm, waktu_menit: e.target.value })}
                       placeholder="Biarkan kosong untuk tanpa batas waktu"
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="due_date">Batas Akhir Pengerjaan - Opsional</Label>
+                    <Input
+                      id="due_date"
+                      type="datetime-local"
+                      value={kuisForm.due_date}
+                      onChange={(e) => setKuisForm({ ...kuisForm, due_date: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Setelah waktu ini, kuis tidak bisa dikerjakan</p>
                   </div>
                 </div>
                 <DialogFooter>
@@ -323,13 +350,13 @@ export default function GuruKuis() {
                     className="border rounded-lg overflow-hidden"
                   >
                     <div className="p-4 bg-gray-50 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white">
-                          <ClipboardList className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900">{kuis.judul}</h3>
+                        <Link href={`/guru/matapelajaran/${mapelId}/kuis/${kuis.id}`} className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white">
+                            <ClipboardList className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-gray-900">{kuis.judul}</h3>
                             <Badge variant={kuis.tipe === 'pilihan_ganda' ? 'default' : 'secondary'}>
                               {kuis.tipe === 'pilihan_ganda' ? 'Pilihan Ganda' : 'Essay'}
                             </Badge>
@@ -339,10 +366,27 @@ export default function GuruKuis() {
                                 {kuis.waktu_menit} menit
                               </Badge>
                             )}
+                            {kuis.due_date && (
+                              <Badge variant="outline" className="gap-1 text-red-600 border-red-200">
+                                <CalendarClock className="h-3 w-3" />
+                                {new Date(kuis.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </Badge>
+                            )}
+                            {kuis.published ? (
+                              <Badge className="bg-green-100 text-green-700 border-0 gap-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                Diterbitkan
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-gray-100 text-gray-500 border-0 gap-1">
+                                <XCircle className="h-3 w-3" />
+                                Draft
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm text-gray-500 mt-1">{kuis.pertanyaan.length} pertanyaan</p>
                         </div>
-                      </div>
+                      </Link>
                       <div className="flex items-center gap-3">
                         <Button
                           variant="outline"
@@ -353,10 +397,12 @@ export default function GuruKuis() {
                           Tambah Pertanyaan
                         </Button>
                         <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
+                          <DropdownMenuTrigger
+                            render={
+                              <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-10 w-10 rounded-xl hover:bg-gray-100" />
+                            }
+                          >
+                            <MoreVertical className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleDeleteKuis(kuis.id)} className="text-red-600">
@@ -391,9 +437,9 @@ export default function GuruKuis() {
                                           }`}
                                         >
                                           <span className="font-medium">{opt}.</span>{' '}
-                                          {p[`opsi_${opt.toLowerCase()}` as keyof typeof p] || '-'}
+                                           {p[`opsi_${opt.toLowerCase()}` as keyof typeof p] || '-'}
                                         </div>
-                                      ))}
+                                          ))}
                                     </div>
                                   )}
                                 </div>

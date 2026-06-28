@@ -103,6 +103,7 @@ export interface KuisForm {
   judul: string
   tipe: 'pilihan_ganda' | 'essay'
   waktu_menit?: number
+  due_date?: string
 }
 
 export interface PertanyaanForm {

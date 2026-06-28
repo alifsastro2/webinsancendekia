@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Plus,
@@ -24,11 +25,14 @@ import {
   ClipboardList,
   ArrowLeft,
   Upload,
-  Download,
+  Eye,
   Trash2,
   X,
   File,
-  Settings
+  Clock,
+  CalendarClock,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { MataPelajaran, Materi } from '@/lib/types'
@@ -51,9 +55,17 @@ export default function MataPelajaranDetail() {
 
   const [mapel, setMapel] = useState<MataPelajaran | null>(null)
   const [materi, setMateri] = useState<Materi[]>([])
+  const [kuisList, setKuisList] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [materiDialogOpen, setMateriDialogOpen] = useState(false)
+  const [kuisDialogOpen, setKuisDialogOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [kuisForm, setKuisForm] = useState({
+    judul: '',
+    tipe: 'pilihan_ganda' as 'pilihan_ganda' | 'essay',
+    waktu_menit: '',
+    due_date: ''
+  })
 
   const [materiForm, setMateriForm] = useState({
     judul: '',
@@ -92,6 +104,19 @@ export default function MataPelajaranDetail() {
 
         if (materiData) {
           setMateri(materiData)
+        }
+
+        const { data: kuisData } = await supabase
+          .from('kuis')
+          .select(`
+            *,
+            pertanyaan:pertanyaan_kuis(count)
+          `)
+          .eq('mata_pelajaran_id', mapelId)
+          .order('created_at', { ascending: false })
+
+        if (kuisData) {
+          setKuisList(kuisData)
         }
       }
     } catch (error) {
@@ -199,6 +224,32 @@ export default function MataPelajaranDetail() {
     }
   }
 
+  const handleCreateKuis = async () => {
+    try {
+      if (!kuisForm.judul) {
+        toast.error('Judul kuis wajib diisi')
+        return
+      }
+
+      const { error } = await supabase.from('kuis').insert({
+        judul: kuisForm.judul,
+        tipe: kuisForm.tipe,
+        waktu_menit: kuisForm.waktu_menit ? parseInt(kuisForm.waktu_menit) : null,
+        due_date: kuisForm.due_date ? new Date(kuisForm.due_date).toISOString() : null,
+        mata_pelajaran_id: mapelId
+      })
+
+      if (error) throw error
+
+      toast.success('Kuis berhasil ditambahkan')
+      setKuisDialogOpen(false)
+      setKuisForm({ judul: '', tipe: 'pilihan_ganda', waktu_menit: '', due_date: '' })
+      fetchData()
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal menambahkan kuis')
+    }
+  }
+
   const resetMateriForm = () => {
     setMateriForm({ judul: '', deskripsi: '', file_url: '' })
     setSelectedFile(null)
@@ -214,7 +265,7 @@ export default function MataPelajaranDetail() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-red-200 border-t-red-500 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-12 h-12 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500">Memuat...</p>
         </div>
       </div>
@@ -235,7 +286,7 @@ export default function MataPelajaranDetail() {
       initial="hidden"
       animate="visible"
       variants={slideUpVariants}
-      className="space-y-6"
+      className="p-4 lg:p-6 xl:p-8 space-y-6"
     >
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -250,23 +301,13 @@ export default function MataPelajaranDetail() {
           </motion.button>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl font-bold text-gray-900">{mapel.nama}</h1>
-            <Badge className="bg-amber-100 text-amber-700 border-0">{mapel as any}</Badge>
+            <Badge className="bg-amber-100 text-amber-700 border-0">{(mapel as any).kelas?.nama || '-'}</Badge>
           </div>
           <p className="text-gray-500 text-sm">
             {(mapel as any).guru?.nama || '-'}
             {mapel.deskripsi && ` • ${mapel.deskripsi}`}
           </p>
         </div>
-        <Link href={`/guru/matapelajaran/${mapelId}/kuis`}>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 transition-colors"
-          >
-            <Settings className="h-4 w-4" />
-            Pengaturan
-          </motion.button>
-        </Link>
       </div>
 
       {/* Tabs */}
@@ -274,14 +315,14 @@ export default function MataPelajaranDetail() {
         <TabsList className="bg-gray-100 p-1 rounded-xl">
           <TabsTrigger
             value="materi"
-            className="data-[state=active]:bg-white data-[state=active]:text-red-600 data-[state=active]:shadow-sm rounded-lg px-4 py-2"
+            className="data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-sm rounded-lg px-4 py-2"
           >
             <FileText className="mr-2 h-4 w-4" />
             Materi ({materi.length})
           </TabsTrigger>
           <TabsTrigger
             value="kuis"
-            className="data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm rounded-lg px-4 py-2"
+            className="data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-sm rounded-lg px-4 py-2"
           >
             <ClipboardList className="mr-2 h-4 w-4" />
             Kuis
@@ -290,15 +331,23 @@ export default function MataPelajaranDetail() {
 
         {/* Tab Materi */}
         <TabsContent value="materi" className="mt-6">
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg font-semibold">Daftar Materi</CardTitle>
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <FileText className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Daftar Materi</CardTitle>
+                  <p className="text-sm text-gray-500">Materi pembelajaran untuk siswa</p>
+                </div>
+              </div>
               <Dialog open={materiDialogOpen} onOpenChange={setMateriDialogOpen}>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setMateriDialogOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Tambah
@@ -354,7 +403,7 @@ export default function MataPelajaranDetail() {
                         ) : (
                           <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full p-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-red-400 hover:bg-red-50/50 transition-all text-center"
+                            className="w-full p-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-amber-400 hover:bg-amber-50/50 transition-all text-center"
                           >
                             <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                             <p className="text-sm text-gray-600 font-medium">Klik untuk upload</p>
@@ -394,7 +443,7 @@ export default function MataPelajaranDetail() {
                     <Button variant="outline" onClick={() => { setMateriDialogOpen(false); resetMateriForm() }}>
                       Batal
                     </Button>
-                    <Button onClick={handleCreateMateri} disabled={uploading} className="bg-red-500 hover:bg-red-600">
+                    <Button onClick={handleCreateMateri} disabled={uploading} className="bg-amber-500 hover:bg-amber-600">
                       {uploading ? (
                         <>
                           <Upload className="mr-2 h-4 w-4 animate-spin" />
@@ -416,7 +465,7 @@ export default function MataPelajaranDetail() {
                   <p className="text-gray-400 text-sm mt-1">Tambahkan materi pertama untuk kelas ini</p>
                   <Button
                     onClick={() => setMateriDialogOpen(true)}
-                    className="mt-4 bg-red-500 hover:bg-red-600"
+                    className="mt-4 bg-amber-500 hover:bg-amber-600"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Tambah Materi
@@ -448,26 +497,28 @@ export default function MataPelajaranDetail() {
                               rel="noopener noreferrer"
                               className="text-sm text-green-600 hover:underline flex items-center gap-1 mt-1"
                             >
-                              <Download className="h-3 w-3" />
-                              Download File
+                              <Eye className="h-3 w-3" />
+                              Lihat Materi
                             </a>
                           )}
                         </div>
                       </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 12a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                            </svg>
-                          </Button>
+                        <DropdownMenuTrigger
+                          render={
+                            <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-10 w-10 rounded-xl hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          }
+                        >
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 12a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                          </svg>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {m.file_url && (
                             <DropdownMenuItem>
                               <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                <Download className="h-4 w-4" />
-                                Download
+                                <Eye className="h-4 w-4" />
+                                Lihat Materi
                               </a>
                             </DropdownMenuItem>
                           )}
@@ -488,23 +539,150 @@ export default function MataPelajaranDetail() {
 
         {/* Tab Kuis */}
         <TabsContent value="kuis" className="mt-6">
-          <Card className="border-0 shadow-lg">
-            <CardContent className="py-16">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ClipboardList className="h-8 w-8 text-purple-500" />
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <ClipboardList className="h-5 w-5 text-amber-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Kelola Kuis</h3>
-                <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
-                  Buat dan kelola kuis pilihan ganda atau essay untuk mata pelajaran ini
-                </p>
-                <Link href={`/guru/matapelajaran/${mapelId}/kuis`}>
-                  <Button size="lg" className="bg-purple-500 hover:bg-purple-600">
-                    <ClipboardList className="mr-2 h-5 w-5" />
-                    Buka Pengaturan Kuis
-                  </Button>
-                </Link>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Daftar Kuis</CardTitle>
+                  <p className="text-sm text-gray-500">Kuis pilihan ganda dan essay</p>
+                </div>
               </div>
+              <Dialog open={kuisDialogOpen} onOpenChange={setKuisDialogOpen}>
+                <button
+                  onClick={() => setKuisDialogOpen(true)}
+                  className="inline-flex items-center justify-center gap-2 font-medium h-10 px-4 py-2 text-sm rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  Tambah Kuis
+                </button>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Buat Kuis Baru</DialogTitle>
+                    <DialogDescription>
+                      Buat kuis pilihan ganda atau essay
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label htmlFor="kuis-judul">Judul Kuis</Label>
+                      <Input
+                        id="kuis-judul"
+                        value={kuisForm.judul}
+                        onChange={(e) => setKuisForm({ ...kuisForm, judul: e.target.value })}
+                        placeholder="Judul kuis"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="kuis-tipe">Tipe Kuis</Label>
+                      <Select value={kuisForm.tipe} onValueChange={(v: any) => setKuisForm({ ...kuisForm, tipe: v })}>
+                        <SelectTrigger id="kuis-tipe">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pilihan_ganda">Pilihan Ganda</SelectItem>
+                          <SelectItem value="essay">Essay</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="kuis-waktu">Waktu (Menit) - Opsional</Label>
+                      <Input
+                        id="kuis-waktu"
+                        type="number"
+                        value={kuisForm.waktu_menit}
+                        onChange={(e) => setKuisForm({ ...kuisForm, waktu_menit: e.target.value })}
+                        placeholder="Biarkan kosong untuk tanpa batas waktu"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="kuis-due-date">Batas Akhir Pengerjaan - Opsional</Label>
+                      <Input
+                        id="kuis-due-date"
+                        type="datetime-local"
+                        value={kuisForm.due_date}
+                        onChange={(e) => setKuisForm({ ...kuisForm, due_date: e.target.value })}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Setelah waktu ini, kuis tidak bisa dikerjakan</p>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => { setKuisDialogOpen(false); setKuisForm({ judul: '', tipe: 'pilihan_ganda', waktu_menit: '', due_date: '' }) }}>
+                      Batal
+                    </Button>
+                    <Button onClick={handleCreateKuis}>Buat</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {kuisList.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <ClipboardList className="h-8 w-8 text-purple-500" />
+                  </div>
+                  <p className="text-gray-500 font-medium">Belum ada kuis</p>
+                  <p className="text-gray-400 text-sm mt-1">Buat kuis pertama untuk mata pelajaran ini</p>
+                  <Button
+                    onClick={() => setKuisDialogOpen(true)}
+                    className="mt-4 bg-purple-500 hover:bg-purple-600"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Buat Kuis
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {kuisList.map((kuis: any, i) => (
+                    <Link key={kuis.id} href={`/guru/matapelajaran/${mapelId}/kuis/${kuis.id}`}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className={`p-5 rounded-xl border transition-all cursor-pointer ${
+                          kuis.published
+                            ? 'bg-purple-50 border-purple-100 hover:shadow-lg hover:border-purple-200'
+                            : 'bg-gray-50 border-gray-200 hover:shadow-md hover:border-gray-300 opacity-75'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-4">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${
+                            kuis.published ? 'bg-purple-500' : 'bg-gray-400'
+                          }`}>
+                            <ClipboardList className="h-6 w-6" />
+                          </div>
+                          {kuis.published ? (
+                            <Badge className="bg-green-100 text-green-700 border-0 gap-1 text-xs">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Diterbitkan
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-gray-200 text-gray-600 border-0 gap-1 text-xs">
+                              <XCircle className="h-3 w-3" />
+                              Draft
+                            </Badge>
+                          )}
+                        </div>
+                        <h3 className="font-semibold text-gray-900 mb-1">{kuis.judul}</h3>
+                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                          <Badge variant={kuis.tipe === 'pilihan_ganda' ? 'default' : 'secondary'} className="text-xs">
+                            {kuis.tipe === 'pilihan_ganda' ? 'Pilihan Ganda' : 'Essay'}
+                          </Badge>
+                          <span>{(kuis.pertanyaan as any)?.[0]?.count || 0} pertanyaan</span>
+                          {kuis.waktu_menit && (
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{kuis.waktu_menit} menit</span>
+                          )}
+                          {kuis.due_date && (
+                            <span className="flex items-center gap-1 text-red-500"><CalendarClock className="h-3 w-3" />{new Date(kuis.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                          )}
+                        </div>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

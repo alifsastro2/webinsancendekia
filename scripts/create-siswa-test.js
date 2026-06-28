@@ -22,9 +22,9 @@ async function getKelas() {
   return data || []
 }
 
-// Create murid
+// Create siswa
 async function createMurid(nama, username, password, kelasNama) {
-  console.log(`\n📝 Creating murid: ${nama}`)
+  console.log(`\n📝 Creating siswa: ${nama}`)
 
   const { data: kelas } = await supabase.from('kelas').select('id').eq('nama', kelasNama).single()
 
@@ -33,7 +33,7 @@ async function createMurid(nama, username, password, kelasNama) {
     return null
   }
 
-  const email = `${username}@murid.test`
+  const email = `${username}@siswa.test`
 
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
@@ -42,7 +42,7 @@ async function createMurid(nama, username, password, kelasNama) {
     user_metadata: {
       username,
       nama,
-      role: 'murid'
+      role: 'siswa'
     }
   })
 
@@ -50,7 +50,7 @@ async function createMurid(nama, username, password, kelasNama) {
 
   await pool.query(`
     INSERT INTO public.users (id, username, nama, email, role, kelas_id, is_active)
-    VALUES ($1, $2, $3, $4, 'murid', $5, true)
+    VALUES ($1, $2, $3, $4, 'siswa', $5, true)
     ON CONFLICT (id) DO UPDATE SET
       username = EXCLUDED.username,
       nama = EXCLUDED.nama,
@@ -70,22 +70,22 @@ async function createMurid(nama, username, password, kelasNama) {
 }
 
 async function main() {
-  console.log('🚀 Creating murid test accounts...')
+  console.log('🚀 Creating siswa test accounts...')
 
   try {
     const kelasList = await getKelas()
     console.log('\n📚 Available classes:', kelasList.map(k => k.nama).join(', '))
 
-    // Create test murid for each class
-    const murids = [
+    // Create test siswa for each class
+    const siswas = [
       { nama: 'Budi Santoso', username: 'budi', kelas: 'X' },
       { nama: 'Siti Aminah', username: 'siti', kelas: 'XI' },
       { nama: 'Ahmad Rizky', username: 'ahmad', kelas: 'XII' }
     ]
 
     const results = []
-    for (const murid of murids) {
-      const result = await createMurid(murid.nama, murid.username, 'Murid123456', murid.kelas)
+    for (const siswa of siswas) {
+      const result = await createMurid(siswa.nama, siswa.username, 'Murid123456', siswa.kelas)
       if (result) results.push(result)
     }
 

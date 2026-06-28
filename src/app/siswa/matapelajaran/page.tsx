@@ -87,6 +87,7 @@ export default function siswaMataPelajaran() {
       initial="hidden"
       animate="visible"
       variants={slideUpVariants}
+      className="p-4 lg:p-6 xl:p-8"
     >
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Mata Pelajaran</h1>
@@ -144,7 +145,7 @@ export default function siswaMataPelajaran() {
                             <p className="text-sm text-gray-600 line-clamp-2">{m.deskripsi}</p>
                           )}
                         </div>
-                        <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white">
+                        <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center text-white">
                           <BookOpen className="h-6 w-6" />
                         </div>
                       </div>

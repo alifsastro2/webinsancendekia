@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/common/header'
 import SiswaSidebar from '@/components/siswa/sidebar'
+import SiswaMobileBottomNav from '@/components/siswa/mobile-bottom-nav'
 import { supabase } from '@/lib/supabase'
 import { Loader2 } from 'lucide-react'
 
@@ -40,20 +41,21 @@ export default function siswaLayout({ children }: { children: React.ReactNode })
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-green-50">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-red-600" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-dvh flex flex-col bg-green-50">
       <Header role="siswa" />
-      <div className="flex">
+      <div className="flex flex-1 min-h-0">
         <SiswaSidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
           {children}
         </main>
       </div>
+      <SiswaMobileBottomNav />
     </div>
   )
 }

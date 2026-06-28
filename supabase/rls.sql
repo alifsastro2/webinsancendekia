@@ -42,8 +42,8 @@ USING (
   )
 );
 
--- Murid can only read themselves
-CREATE POLICY "Murid can read own profile"
+-- Siswa can only read themselves
+CREATE POLICY "Siswa can read own profile"
 ON public.users FOR SELECT
 TO authenticated
 USING (id = auth.uid());
@@ -54,9 +54,9 @@ ON public.users FOR UPDATE
 TO authenticated
 USING (id = auth.uid())
 WITH CHECK (id = auth.uid());
+-- Guru can update siswa profiles
 
--- Guru can update murid profiles
-CREATE POLICY "Guru can update murid"
+CREATE POLICY "Guru can update siswa"
 ON public.users FOR UPDATE
 TO authenticated
 USING (
@@ -64,14 +64,14 @@ USING (
     SELECT 1 FROM public.users
     WHERE id = auth.uid() AND role = 'guru'
   )
-  AND role = 'murid'
+  AND role = 'siswa'
 )
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM public.users
     WHERE id = auth.uid() AND role = 'guru'
   )
-  AND role = 'murid'
+  AND role = 'siswa'
 );
 
 -- ============================================
@@ -89,14 +89,14 @@ USING (
   )
 );
 
--- Murid can only read mata_pelajaran for their class
-CREATE POLICY "Murid can read class mata_pelajaran"
+-- Siswa can only read mata_pelajaran for their class
+CREATE POLICY "Siswa can read class mata_pelajaran"
 ON mata_pelajaran FOR SELECT
 TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'murid' AND kelas_id = mata_pelajaran.kelas_id
+    WHERE id = auth.uid() AND role = 'siswa' AND kelas_id = mata_pelajaran.kelas_id
   )
 );
 
@@ -134,15 +134,15 @@ USING (
   )
 );
 
--- Murid can read materi for their class
-CREATE POLICY "Murid can read class materi"
+-- Siswa can read materi for their class
+CREATE POLICY "Siswa can read class materi"
 ON materi FOR SELECT
 TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM public.users u
     INNER JOIN mata_pelajaran mp ON mp.kelas_id = u.kelas_id
-    WHERE u.id = auth.uid() AND u.role = 'murid' AND mp.id = materi.mata_pelajaran_id
+    WHERE u.id = auth.uid() AND u.role = 'siswa' AND mp.id = materi.mata_pelajaran_id
   )
 );
 
@@ -183,15 +183,15 @@ USING (
   )
 );
 
--- Murid can read kuis for their class
-CREATE POLICY "Murid can read class kuis"
+-- Siswa can read kuis for their class
+CREATE POLICY "Siswa can read class kuis"
 ON kuis FOR SELECT
 TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM public.users u
     INNER JOIN mata_pelajaran mp ON mp.kelas_id = u.kelas_id
-    WHERE u.id = auth.uid() AND u.role = 'murid' AND mp.id = kuis.mata_pelajaran_id
+    WHERE u.id = auth.uid() AND u.role = 'siswa' AND mp.id = kuis.mata_pelajaran_id
   )
 );
 
@@ -238,8 +238,8 @@ USING (
   )
 );
 
--- Murid can read pertanyaan_kuis for their class
-CREATE POLICY "Murid can read class pertanyaan_kuis"
+-- Siswa can read pertanyaan_kuis for their class
+CREATE POLICY "Siswa can read class pertanyaan_kuis"
 ON pertanyaan_kuis FOR SELECT
 TO authenticated
 USING (
@@ -249,7 +249,7 @@ USING (
       SELECT mp.id FROM mata_pelajaran mp
       WHERE mp.kelas_id = u.kelas_id
     )
-    WHERE u.id = auth.uid() AND u.role = 'murid' AND k.id = pertanyaan_kuis.kuis_id
+    WHERE u.id = auth.uid() AND u.role = 'siswa' AND k.id = pertanyaan_kuis.kuis_id
   )
 );
 
@@ -282,17 +282,34 @@ USING (
   )
 );
 
--- Murid can read own hasil_kuis
-CREATE POLICY "Murid can read own hasil_kuis"
+-- Siswa can read own hasil_kuis
+CREATE POLICY "Siswa can read own hasil_kuis"
 ON hasil_kuis FOR SELECT
 TO authenticated
-USING (murid_id = auth.uid());
+USING (siswa_id = auth.uid());
 
--- Murid can create hasil_kuis
-CREATE POLICY "Murid can create hasil_kuis"
+-- Siswa can create hasil_kuis
+CREATE POLICY "Siswa can create hasil_kuis"
 ON hasil_kuis FOR INSERT
 TO authenticated
-WITH CHECK (murid_id = auth.uid());
+WITH CHECK (siswa_id = auth.uid());
+
+-- Guru can update hasil_kuis (skor)
+CREATE POLICY "Guru can update hasil_kuis"
+ON hasil_kuis FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role = 'guru'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role = 'guru'
+  )
+);
 
 -- ============================================
 -- Helper Functions

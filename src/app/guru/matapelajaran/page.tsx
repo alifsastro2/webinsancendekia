@@ -270,7 +270,7 @@ export default function GuruMataPelajaran() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 bg-amber-600 rounded-xl flex items-center justify-center shadow-lg">
             <BookOpen className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -294,11 +294,13 @@ export default function GuruMataPelajaran() {
           />
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger>
-            <button className="h-11 px-5 bg-red-600 text-white rounded-xl font-medium shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Buat Mata Pelajaran
-            </button>
+          <DialogTrigger
+            render={
+              <button className="h-11 px-5 bg-amber-600 text-white rounded-xl font-medium shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2" />
+            }
+          >
+            <Plus className="h-4 w-4" />
+            Buat Mata Pelajaran
           </DialogTrigger>
           <DialogContent className="sm:max-w-md rounded-2xl">
             <DialogHeader>
@@ -352,7 +354,7 @@ export default function GuruMataPelajaran() {
               </button>
               <button
                 onClick={handleCreate}
-                className="h-10 px-4 bg-red-600 text-white rounded-xl hover:opacity-90 transition-opacity"
+                className="h-10 px-4 bg-amber-600 text-white rounded-xl hover:opacity-90 transition-opacity"
               >
                 Simpan
               </button>
@@ -389,7 +391,7 @@ export default function GuruMataPelajaran() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-red-600 rounded-xl flex items-center justify-center shadow">
+                  <div className="w-14 h-14 bg-amber-600 rounded-xl flex items-center justify-center shadow">
                     <BookOpen className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -492,7 +494,7 @@ export default function GuruMataPelajaran() {
             </button>
             <button
               onClick={handleEdit}
-              className="h-10 px-4 bg-red-600 text-white rounded-xl hover:opacity-90 transition-opacity"
+              className="h-10 px-4 bg-amber-600 text-white rounded-xl hover:opacity-90 transition-opacity"
             >
               Simpan
             </button>

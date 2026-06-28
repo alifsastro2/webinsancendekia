@@ -39,7 +39,7 @@ export default function LoginPage() {
       })
 
       if (signInError) {
-        throw new Error('Password salah')
+        throw new Error(signInError.message || 'Password salah')
       }
 
       toast.success(`Selamat datang, ${userData.nama}!`)

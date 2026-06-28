@@ -8,16 +8,16 @@ const supabase = createClient(supabaseUrl, serviceRoleKey)
 async function main() {
   console.log('=== Checking Murid Data ===\n')
 
-  // Check users with role murid
+  // Check users with role siswa
   const { data: users, error } = await supabase
     .from('users')
     .select('*')
-    .eq('role', 'murid')
+    .eq('role', 'siswa')
 
   if (error) {
     console.error('Error:', error)
   } else {
-    console.log(`Found ${users?.length || 0} users with role 'murid':`)
+    console.log(`Found ${users?.length || 0} users with role 'siswa':`)
     console.table(users)
   }
 
