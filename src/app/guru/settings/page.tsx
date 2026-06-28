@@ -28,7 +28,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  const [kelas, setKelas] = useState<Kelas[]>([])
+  const [kelas, setKelas] = useState<(Kelas & { created_by?: string })[]>([])
   const [loadingKelas, setLoadingKelas] = useState(true)
   const [formData, setFormData] = useState({ nama: '', username: '', email: '' })
   const [newKelas, setNewKelas] = useState('')
@@ -92,7 +92,9 @@ export default function SettingsPage() {
     }
 
     try {
-      const { error } = await supabase.from('kelas').insert({ nama: kelasName })
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return toast.error('Sesi tidak valid')
+      const { error } = await supabase.from('kelas').insert({ nama: kelasName, created_by: session.user.id })
       if (error) throw error
       toast.success('Kelas ditambahkan')
       setNewKelas('')
@@ -100,8 +102,14 @@ export default function SettingsPage() {
     } catch (e: any) { toast.error(e.message || 'Gagal') }
   }
 
-  const handleUpdateKelas = async (id: string) => {
+  const handleUpdateKelas = async (id: string, createdBy?: string | null) => {
     if (!editKelasName.trim()) return toast.error('Nama kelas wajib diisi')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return toast.error('Sesi tidak valid')
+    if (createdBy && createdBy !== session.user.id) {
+      return toast.error('Anda tidak memiliki izin untuk mengedit kelas ini')
+    }
 
     const kelasName = editKelasName.trim().toUpperCase()
 
@@ -126,7 +134,32 @@ export default function SettingsPage() {
     } catch (e: any) { toast.error(e.message || 'Gagal') }
   }
 
-  const handleDeleteKelas = async (id: string) => {
+  const handleDeleteKelas = async (id: string, createdBy?: string | null) => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return toast.error('Sesi tidak valid')
+    if (createdBy && createdBy !== session.user.id) {
+      return toast.error('Anda tidak memiliki izin untuk menghapus kelas ini')
+    }
+
+    // Cek apakah kelas masih dipakai oleh mata_pelajaran
+    const { count: mapelCount } = await supabase
+      .from('mata_pelajaran')
+      .select('*', { count: 'exact', head: true })
+      .eq('kelas_id', id)
+    if (mapelCount && mapelCount > 0) {
+      return toast.error(`Kelas tidak bisa dihapus — masih digunakan oleh ${mapelCount} mata pelajaran`)
+    }
+
+    // Cek apakah kelas masih dipakai oleh siswa
+    const { count: siswaCount } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .eq('kelas_id', id)
+      .eq('role', 'siswa')
+    if (siswaCount && siswaCount > 0) {
+      return toast.error(`Kelas tidak bisa dihapus — masih memiliki ${siswaCount} siswa`)
+    }
+
     if (!confirm('Yakin hapus kelas ini?')) return
     try {
       await supabase.from('kelas').delete().eq('id', id)
@@ -263,11 +296,11 @@ export default function SettingsPage() {
                           <Input
                             value={editKelasName}
                             onChange={(e) => setEditKelasName(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleUpdateKelas(k.id)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleUpdateKelas(k.id, k.created_by)}
                             autoFocus
                             className="h-8 text-sm"
                           />
-                          <button onClick={() => handleUpdateKelas(k.id)} className="p-1.5 hover:bg-green-100 rounded-lg">
+                          <button onClick={() => handleUpdateKelas(k.id, k.created_by)} className="p-1.5 hover:bg-green-100 rounded-lg">
                             <Save className="h-4 w-4 text-green-600" />
                           </button>
                           <button onClick={() => setEditingKelas(null)} className="p-1.5 hover:bg-gray-200 rounded-lg">
@@ -280,14 +313,16 @@ export default function SettingsPage() {
                             <Layers className="h-4 w-4 text-gray-400" />
                             <span className="font-medium">{k.nama}</span>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 flex gap-1">
-                            <button onClick={() => { setEditingKelas(k.id); setEditKelasName(k.nama) }} className="p-1.5 hover:bg-blue-100 rounded-lg">
-                              <Edit className="h-4 w-4 text-gray-500" />
-                            </button>
-                            <button onClick={() => handleDeleteKelas(k.id)} className="p-1.5 hover:bg-red-100 rounded-lg">
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </button>
-                          </div>
+                          {user && k.created_by === user.id && (
+                            <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                              <button onClick={() => { setEditingKelas(k.id); setEditKelasName(k.nama) }} className="p-1.5 hover:bg-blue-100 rounded-lg">
+                                <Edit className="h-4 w-4 text-gray-500" />
+                              </button>
+                              <button onClick={() => handleDeleteKelas(k.id, k.created_by)} className="p-1.5 hover:bg-red-100 rounded-lg">
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </button>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>

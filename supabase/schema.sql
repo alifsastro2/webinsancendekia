@@ -7,6 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS kelas (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nama VARCHAR(20) NOT NULL UNIQUE,
+  created_by UUID REFERENCES public.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
