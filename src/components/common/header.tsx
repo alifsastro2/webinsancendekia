@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { LogOut, Settings, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { User as UserType } from '@/lib/types'
+import Logo from '@/components/common/logo'
 
 interface HeaderProps {
   role: 'guru' | 'siswa'
@@ -61,9 +62,9 @@ export default function Header({ role }: HeaderProps) {
           {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-sm"
+            className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm"
           >
-            <span className="text-white font-bold text-lg">IC</span>
+            <Logo size="sm" showName={false} />
           </motion.div>
 
           {/* Title */}

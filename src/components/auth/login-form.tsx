@@ -134,7 +134,6 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                 className="relative z-10 flex flex-col items-center"
               >
                 <motion.div
-                  className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-xl"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >

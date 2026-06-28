@@ -7,6 +7,7 @@ import { Loader2, UserPlus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import Logo from '@/components/common/logo'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -56,8 +57,8 @@ export default function RegisterPage() {
       >
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-white/20">
           <div className="bg-gradient-to-r from-red-600 to-rose-600 p-8 text-center relative overflow-hidden">
-            <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl font-bold text-white">IC</span>
+            <div className="mx-auto mb-4">
+              <Logo size="md" showName={false} />
             </div>
             <h1 className="text-2xl font-bold text-white">Daftar Guru</h1>
             <p className="text-white/80 text-sm mt-1">Buat akun guru baru</p>

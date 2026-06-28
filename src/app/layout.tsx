@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Insan Cendekia Nusantara - Sistem Informasi Belajar",
   description: "Platform pembelajaran digital Insan Cendekia Nusantara",
+  icons: '/images/logo-insan-cendekia.png',
 };
 
 export default function RootLayout({
