@@ -314,7 +314,7 @@ export default function SettingsPage() {
                             <span className="font-medium">{k.nama}</span>
                           </div>
                           {user && k.created_by === user.id && (
-                            <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                            <div className="flex gap-1">
                               <button onClick={() => { setEditingKelas(k.id); setEditKelasName(k.nama) }} className="p-1.5 hover:bg-blue-100 rounded-lg">
                                 <Edit className="h-4 w-4 text-gray-500" />
                               </button>
