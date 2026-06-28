@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg'
   showName?: boolean
@@ -15,12 +13,13 @@ export default function Logo({ size = 'md', showName = true, className = '' }: L
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <Image
+      <img
         src="/images/logo-insan-cendekia.png"
         alt="Logo Insan Cendekia Nusantara"
         width={sizeMap[size].width}
         height={sizeMap[size].height}
         className="rounded-lg object-contain"
+        style={{ background: 'transparent' }}
       />
       {showName && (
         <div className="mt-3 text-center">
