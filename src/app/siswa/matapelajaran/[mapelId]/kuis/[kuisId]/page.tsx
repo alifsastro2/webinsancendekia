@@ -172,7 +172,7 @@ export default function siswaKerjakanKuis() {
       if (expired) {
         toast.error('Waktu habis! Jawaban Anda sudah dikirim otomatis.')
       } else {
-        toast.success(kuis?.tipe === 'pilihan_ganda' ? `Jawaban dikirim! Skor Anda: ${skor}` : 'Jawaban dikirim!')
+        toast.success(kuis?.tipe === 'pilihan_ganda' ? `Jawaban dikirim! Nilai Anda: ${skor}` : 'Jawaban dikirim!')
       }
 
       setTimeout(() => router.back(), 1500)

@@ -109,7 +109,7 @@ export default function SiswaKuisPage() {
   const statCards = [
     { title: 'Total Kuis', value: stats.total, icon: ClipboardList, color: 'bg-purple-500' },
     { title: 'Selesai Dikerjakan', value: stats.completed, icon: CheckCircle2, color: 'bg-purple-500' },
-    { title: 'Rata-rata Skor', value: stats.avgSkor > 0 ? `${stats.avgSkor}` : '-', icon: TrendingUp, color: 'bg-purple-500' },
+    { title: 'Rata-rata Nilai', value: stats.avgSkor > 0 ? `${stats.avgSkor}` : '-', icon: TrendingUp, color: 'bg-purple-500' },
     { title: 'Tersedia', value: available.length, icon: AlertCircle, color: 'bg-purple-500' },
   ]
 

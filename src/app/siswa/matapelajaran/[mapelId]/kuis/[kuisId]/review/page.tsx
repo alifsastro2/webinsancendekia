@@ -135,7 +135,7 @@ export default function ReviewKuis() {
                 <CheckCircle2 className="h-8 w-8 text-green-600" />
               </div>
               <h2 className="text-2xl font-bold text-green-700">{hasil.skor}</h2>
-              <p className="text-green-600 font-medium">Skor Anda</p>
+              <p className="text-green-600 font-medium">Nilai Anda</p>
             </CardContent>
           </Card>
         ) : (

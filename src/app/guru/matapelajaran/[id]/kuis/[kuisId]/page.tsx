@@ -197,7 +197,7 @@ export default function GuruKuisDetail() {
   const handleSaveNilai = async (hasilId: string) => {
     const skor = parseInt(nilaiMap[hasilId])
     if (isNaN(skor) || skor < 0 || skor > 100) {
-      toast.error('Skor harus antara 0-100')
+      toast.error('Nilai harus antara 0-100')
       return
     }
     setSavingNilai(prev => ({ ...prev, [hasilId]: true }))
@@ -214,7 +214,7 @@ export default function GuruKuisDetail() {
         .eq('id', hasilId)
         .single()
       if (verifyError) throw verifyError
-      if (verify?.skor === null) throw new Error('Skor tidak tersimpan — kemungkinan RLS blocking update')
+      if (verify?.skor === null) throw new Error('Nilai tidak tersimpan — kemungkinan RLS blocking update')
 
       toast.success('Nilai berhasil disimpan')
       setEditingNilai(prev => ({ ...prev, [hasilId]: false }))
@@ -502,7 +502,7 @@ export default function GuruKuisDetail() {
                                             type="number"
                                             min={0}
                                             max={100}
-                                            placeholder="Skor (0-100)"
+                                            placeholder="Nilai (0-100)"
                                             value={nilaiMap[hasil.id] ?? ''}
                                             onChange={(e) => setNilaiMap({ ...nilaiMap, [hasil.id]: e.target.value })}
                                             className="w-36 text-sm"
@@ -525,7 +525,7 @@ export default function GuruKuisDetail() {
                                             type="number"
                                             min={0}
                                             max={100}
-                                            placeholder="Skor (0-100)"
+                                            placeholder="Nilai (0-100)"
                                             value={nilaiMap[hasil.id] ?? hasil.skor ?? ''}
                                             onChange={(e) => setNilaiMap({ ...nilaiMap, [hasil.id]: e.target.value })}
                                             className="w-36 text-sm"

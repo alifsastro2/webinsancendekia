@@ -276,7 +276,7 @@ export default function GuruDashboard() {
               </div>
               <div>
                 <CardTitle className="text-lg font-bold text-gray-900">Kuis Perlu Dinilai</CardTitle>
-                <p className="text-sm text-gray-500">Jawaban essay yang belum diskor</p>
+                <p className="text-sm text-gray-500">Jawaban essay yang belum dinilai</p>
               </div>
             </div>
           </CardHeader>

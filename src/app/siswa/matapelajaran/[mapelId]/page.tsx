@@ -300,7 +300,7 @@ export default function siswaMapelDetail() {
                               {hasilKuis[k.id]?.skor !== null && hasilKuis[k.id] ? (
                                 <Badge className="bg-green-100 text-green-700 border-0 text-xs">
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Skor: {hasilKuis[k.id].skor}
+                                  Nilai: {hasilKuis[k.id].skor}
                                 </Badge>
                               ) : hasilKuis[k.id]?.skor === null ? (
                                 <Badge className="bg-gray-100 text-gray-500 border-0 text-xs">
