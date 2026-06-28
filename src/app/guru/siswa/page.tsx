@@ -28,8 +28,17 @@ import {
   RefreshCw,
   UserPlus,
   ShieldCheck,
-  Users
+  Users,
+  MoreVertical,
+  Eye,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
@@ -514,42 +523,43 @@ export default function Kelolasiswa() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 flex-wrap">
+                <div className="flex items-center gap-1">
                   <Badge className={m.is_active ? 'bg-green-100 text-green-700 border-0' : 'bg-gray-100 text-gray-600 border-0'}>
                     {m.is_active ? 'Aktif' : 'Nonaktif'}
                   </Badge>
 
-                  <button
-                    onClick={() => openEditDialog(m)}
-                    className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                  >
-                    <Edit className="h-4 w-4 text-gray-500" />
-                  </button>
-
-                  <button
-                    onClick={() => handleToggleActive(m.id, m.is_active)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    {m.is_active ? (
-                      <Lock className="h-4 w-4 text-gray-500" />
-                    ) : (
-                      <Unlock className="h-4 w-4 text-gray-500" />
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => handleResetPassword(m.id, m.nama)}
-                    className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
-                  >
-                    <RefreshCw className="h-4 w-4 text-gray-500" />
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(m.id)}
-                    className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-10 w-10 rounded-xl hover:bg-gray-100 transition-opacity" />
+                      }
+                    >
+                      <MoreVertical className="h-5 w-5 text-gray-500" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => openEditDialog(m)} className="cursor-pointer">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleActive(m.id, m.is_active)} className="cursor-pointer">
+                        {m.is_active ? (
+                          <Lock className="h-4 w-4 mr-2" />
+                        ) : (
+                          <Unlock className="h-4 w-4 mr-2" />
+                        )}
+                        {m.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleResetPassword(m.id, m.nama)} className="cursor-pointer">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Reset Password
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleDelete(m.id)} className="cursor-pointer text-red-600">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </motion.div>
