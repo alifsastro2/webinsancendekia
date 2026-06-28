@@ -22,15 +22,15 @@ WITH CHECK (
   EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'guru')
 );
 
--- Only creator can update kelas
+-- Only creator can update kelas (or legacy records without creator)
 CREATE POLICY "Creator can update kelas"
 ON kelas FOR UPDATE
 TO authenticated
-USING (created_by = auth.uid())
-WITH CHECK (created_by = auth.uid());
+USING (created_by IS NULL OR created_by = auth.uid())
+WITH CHECK (created_by IS NULL OR created_by = auth.uid());
 
--- Only creator can delete kelas
+-- Only creator can delete kelas (or legacy records without creator)
 CREATE POLICY "Creator can delete kelas"
 ON kelas FOR DELETE
 TO authenticated
-USING (created_by = auth.uid());
+USING (created_by IS NULL OR created_by = auth.uid());
