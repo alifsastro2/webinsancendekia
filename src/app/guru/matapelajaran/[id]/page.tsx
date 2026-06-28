@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { MataPelajaran, Materi } from '@/lib/types'
+import { getFileUrl } from '@/lib/files'
 import { toast } from 'sonner'
 import { slideUpVariants } from '@/components/common/motion'
 import {
@@ -492,7 +493,7 @@ export default function MataPelajaranDetail() {
                           )}
                           {m.file_url && (
                             <a
-                              href={m.file_url}
+                              href={getFileUrl(m.file_url)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm text-green-600 hover:underline flex items-center gap-1 mt-1"
@@ -516,7 +517,7 @@ export default function MataPelajaranDetail() {
                         <DropdownMenuContent align="end">
                           {m.file_url && (
                             <DropdownMenuItem>
-                              <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                              <a href={getFileUrl(m.file_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                 <Eye className="h-4 w-4" />
                                 Lihat Materi
                               </a>

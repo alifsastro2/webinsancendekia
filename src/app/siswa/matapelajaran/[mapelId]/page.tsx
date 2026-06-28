@@ -20,6 +20,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { getFileUrl } from '@/lib/files'
 import { slideUpVariants } from '@/components/common/motion'
 import Link from 'next/link'
 
@@ -238,7 +239,7 @@ export default function siswaMapelDetail() {
 
                       {m.file_url && (
                         <a
-                          href={m.file_url}
+                          href={getFileUrl(m.file_url)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors shadow-sm"
