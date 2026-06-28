@@ -16,7 +16,7 @@ import {
 import { supabase } from '@/lib/supabase'
 import { MotionCard, MotionList } from '@/components/common/motion'
 import { slideUpVariants } from '@/components/common/motion'
-import { MataPelajaran } from '@/lib/types'
+
 import Link from 'next/link'
 
 export default function siswaDashboard() {

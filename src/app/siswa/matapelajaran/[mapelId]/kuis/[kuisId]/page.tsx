@@ -234,9 +234,6 @@ export default function siswaKerjakanKuis() {
     )
   }
   const isAnswered = (id: string) => !!jawaban[id]
-  const unansweredNums = kuis.pertanyaan
-    .map((p, i) => i + 1)
-    .filter(i => !jawaban[kuis.pertanyaan[i - 1]?.id])
   const unansweredIndices = kuis.pertanyaan
     .map((p, i) => ({ id: p.id, num: i + 1 }))
     .filter(p => !jawaban[p.id])

@@ -75,15 +75,15 @@ function LoadingSkeleton() {
   )
 }
 
-export default function Kelolasiswa() {
-  const [siswa, setsiswa] = useState<User[]>([])
+export default function KelolaSiswa() {
+  const [siswa, setSiswa] = useState<User[]>([])
   const [kelas, setKelas] = useState<Kelas[]>([])
-  const [filteredsiswa, setFilteredsiswa] = useState<User[]>([])
+  const [filteredSiswa, setFilteredSiswa] = useState<User[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [selectedsiswa, setSelectedsiswa] = useState<User | null>(null)
+  const [selectedSiswa, setSelectedSiswa] = useState<User | null>(null)
 
   const [formData, setFormData] = useState({
     nama: '',
@@ -95,7 +95,7 @@ export default function Kelolasiswa() {
 
   useEffect(() => {
     fetchKelas()
-    fetchsiswa()
+    fetchSiswa()
   }, [])
 
   useEffect(() => {
@@ -104,9 +104,9 @@ export default function Kelolasiswa() {
         m.nama.toLowerCase().includes(search.toLowerCase()) ||
         m.username.toLowerCase().includes(search.toLowerCase())
       )
-      setFilteredsiswa(filtered)
+      setFilteredSiswa(filtered)
     } else {
-      setFilteredsiswa(siswa)
+      setFilteredSiswa(siswa)
     }
   }, [search, siswa])
 
@@ -115,7 +115,7 @@ export default function Kelolasiswa() {
     if (data) setKelas(data)
   }
 
-  const fetchsiswa = async () => {
+  const fetchSiswa = async () => {
     try {
       const { data, error } = await supabase
         .from('users')
@@ -148,8 +148,8 @@ export default function Kelolasiswa() {
           kelas: s.kelas_id ? { nama: kelasMap[s.kelas_id] || '' } : undefined
         }))
 
-        setsiswa(enriched as User[])
-        setFilteredsiswa(enriched as User[])
+        setSiswa(enriched as User[])
+        setFilteredSiswa(enriched as User[])
       }
     } catch (error) {
       console.error('Error fetching siswa:', error)
@@ -165,18 +165,6 @@ export default function Kelolasiswa() {
     }
 
     try {
-      // Lookup kelas by nama to get the ID
-      const { data: kelasData } = await supabase
-        .from('kelas')
-        .select('id')
-        .eq('nama', formData.kelas_id)
-        .single()
-
-      if (!kelasData) {
-        toast.error('Kelas tidak ditemukan')
-        return
-      }
-
       const { data: existingUser } = await supabase
         .from('users')
         .select('id')
@@ -190,14 +178,14 @@ export default function Kelolasiswa() {
 
       // Create user in Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email || `${formData.username}@sekolah.local`,
+        email: formData.email || `${formData.username}@sekolah.app`,
         password: formData.password,
         options: {
           data: {
             username: formData.username,
             nama: formData.nama,
             role: 'siswa',
-            kelas_id: kelasData.id
+            kelas_id: formData.kelas_id
           }
         }
       })
@@ -210,9 +198,9 @@ export default function Kelolasiswa() {
         id: authData.user.id,
         username: formData.username,
         nama: formData.nama,
-        email: formData.email || `${formData.username}@sekolah.local`,
+        email: formData.email || `${formData.username}@sekolah.app`,
         role: 'siswa',
-        kelas_id: kelasData.id,
+        kelas_id: formData.kelas_id,
         is_active: true
       })
 
@@ -236,33 +224,20 @@ export default function Kelolasiswa() {
       toast.success('siswa berhasil ditambahkan')
       setDialogOpen(false)
       resetForm()
-      fetchsiswa()
+      fetchSiswa()
     } catch (error: any) {
       toast.error(error.message || 'Gagal menambahkan siswa')
     }
   }
 
   const handleEdit = async () => {
-    if (!selectedsiswa) return
+    if (!selectedSiswa) return
 
     try {
-      // Lookup kelas by nama to get the ID
-      let kelasId = formData.kelas_id
-      if (formData.kelas_id) {
-        const { data: kelasData } = await supabase
-          .from('kelas')
-          .select('id')
-          .eq('nama', formData.kelas_id)
-          .single()
-        if (kelasData) {
-          kelasId = kelasData.id
-        }
-      }
-
       const updates: any = {
         nama: formData.nama,
         username: formData.username,
-        kelas_id: kelasId
+        kelas_id: formData.kelas_id
       }
 
       if (formData.email !== undefined) {
@@ -272,14 +247,14 @@ export default function Kelolasiswa() {
       const { error } = await supabase
         .from('users')
         .update(updates)
-        .eq('id', selectedsiswa.id)
+        .eq('id', selectedSiswa.id)
 
       if (error) throw error
 
       toast.success('Data siswa berhasil diupdate')
       setEditDialogOpen(false)
       resetForm()
-      fetchsiswa()
+      fetchSiswa()
     } catch (error: any) {
       toast.error(error.message || 'Gagal mengupdate siswa')
     }
@@ -291,7 +266,7 @@ export default function Kelolasiswa() {
     try {
       await supabase.from('users').delete().eq('id', id)
       toast.success('siswa berhasil dihapus')
-      fetchsiswa()
+      fetchSiswa()
     } catch (error) {
       toast.error('Gagal menghapus siswa')
     }
@@ -305,7 +280,7 @@ export default function Kelolasiswa() {
         .eq('id', id)
 
       toast.success(`Akun berhasil ${currentStatus ? 'dinonaktifkan' : 'diaktifkan'}`)
-      fetchsiswa()
+      fetchSiswa()
     } catch (error) {
       toast.error('Gagal mengubah status akun')
     }
@@ -334,12 +309,12 @@ export default function Kelolasiswa() {
   }
 
   const openEditDialog = (siswa: User) => {
-    setSelectedsiswa(siswa)
+    setSelectedSiswa(siswa)
     setFormData({
       nama: siswa.nama,
       username: siswa.username,
       email: siswa.email || '',
-      kelas_id: (siswa as any).kelas?.nama || '',
+      kelas_id: siswa.kelas_id || '',
       password: ''
     })
     setEditDialogOpen(true)
@@ -353,7 +328,7 @@ export default function Kelolasiswa() {
       kelas_id: '',
       password: ''
     })
-    setSelectedsiswa(null)
+    setSelectedSiswa(null)
   }
 
   return (
@@ -450,7 +425,7 @@ export default function Kelolasiswa() {
                   </SelectTrigger>
                   <SelectContent>
                     {kelas.map((k) => (
-                      <SelectItem key={k.id} value={k.nama}>{k.nama}</SelectItem>
+                      <SelectItem key={k.id} value={k.id}>{k.nama}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -488,7 +463,7 @@ export default function Kelolasiswa() {
       {/* Content */}
       {loading ? (
         <LoadingSkeleton />
-      ) : filteredsiswa.length === 0 ? (
+      ) : filteredSiswa.length === 0 ? (
         <Card className="border border-gray-100 rounded-2xl shadow-lg">
           <CardContent className="py-12 text-center">
             <ShieldCheck className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -502,7 +477,7 @@ export default function Kelolasiswa() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredsiswa.map((m, i) => (
+          {filteredSiswa.map((m, i) => (
             <motion.div
               key={m.id}
               initial={{ opacity: 0, y: 20 }}
@@ -611,7 +586,7 @@ export default function Kelolasiswa() {
                 </SelectTrigger>
                 <SelectContent>
                   {kelas.map((k) => (
-                    <SelectItem key={k.id} value={k.nama}>
+                    <SelectItem key={k.id} value={k.id}>
                       {k.nama}
                     </SelectItem>
                   ))}

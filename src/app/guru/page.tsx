@@ -109,7 +109,7 @@ export default function GuruDashboard() {
             siswa:siswa_id(nama, username)
           `)
           .is('skor', null)
-          .in('kuis.kuis.mata_pelajaran_id', mapelIds)
+          .in('kuis.mata_pelajaran_id', mapelIds)
           .order('submitted_at', { ascending: false })
           .limit(10)
 

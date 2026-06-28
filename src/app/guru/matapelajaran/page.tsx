@@ -158,24 +158,12 @@ export default function GuruMataPelajaran() {
         return
       }
 
-      // Lookup kelas by nama to get the ID
-      const { data: kelasData } = await supabase
-        .from('kelas')
-        .select('id')
-        .eq('nama', formData.kelas_id)
-        .single()
-
-      if (!kelasData) {
-        toast.error('Kelas tidak ditemukan')
-        return
-      }
-
       const { error } = await supabase
         .from('mata_pelajaran')
         .insert({
           nama: formData.nama,
           deskripsi: formData.deskripsi,
-          kelas_id: kelasData.id,
+          kelas_id: formData.kelas_id,
           guru_id: session.user.id
         })
 
@@ -194,25 +182,12 @@ export default function GuruMataPelajaran() {
     if (!selectedMapel) return
 
     try {
-      // Lookup kelas by nama to get the ID
-      let kelasId = formData.kelas_id
-      if (formData.kelas_id) {
-        const { data: kelasData } = await supabase
-          .from('kelas')
-          .select('id')
-          .eq('nama', formData.kelas_id)
-          .single()
-        if (kelasData) {
-          kelasId = kelasData.id
-        }
-      }
-
       const { error } = await supabase
         .from('mata_pelajaran')
         .update({
           nama: formData.nama,
           deskripsi: formData.deskripsi,
-          kelas_id: kelasId
+          kelas_id: formData.kelas_id
         })
         .eq('id', selectedMapel.id)
 
@@ -244,7 +219,7 @@ export default function GuruMataPelajaran() {
     setFormData({
       nama: m.nama,
       deskripsi: m.deskripsi || '',
-      kelas_id: (m as any).kelas?.nama || m.kelas_id
+      kelas_id: m.kelas_id
     })
     setEditDialogOpen(true)
   }
@@ -335,7 +310,7 @@ export default function GuruMataPelajaran() {
                   </SelectTrigger>
                   <SelectContent>
                     {kelas.map((k) => (
-                      <SelectItem key={k.id} value={k.nama}>{k.nama}</SelectItem>
+                      <SelectItem key={k.id} value={k.id}>{k.nama}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -475,7 +450,7 @@ export default function GuruMataPelajaran() {
                 </SelectTrigger>
                 <SelectContent>
                   {kelas.map((k) => (
-                    <SelectItem key={k.id} value={k.nama}>{k.nama}</SelectItem>
+                    <SelectItem key={k.id} value={k.id}>{k.nama}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
