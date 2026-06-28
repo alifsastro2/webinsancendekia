@@ -7,7 +7,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-import { Save, Settings as SettingsIcon, Layers, Users, Edit, Trash2, Plus, X } from 'lucide-react'
+import { Save, Settings as SettingsIcon, Layers, Users, Edit, Trash2, Plus, X, MoreVertical } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
@@ -308,14 +314,25 @@ export default function SettingsPage() {
                             <span className="font-medium">{k.nama}</span>
                           </div>
                           {user && k.created_by === user.id && (
-                            <div className="flex gap-1">
-                              <button onClick={() => { setEditingKelas(k.id); setEditKelasName(k.nama) }} className="p-1.5 hover:bg-blue-100 rounded-lg">
-                                <Edit className="h-4 w-4 text-gray-500" />
-                              </button>
-                              <button onClick={() => handleDeleteKelas(k.id, k.created_by)} className="p-1.5 hover:bg-red-100 rounded-lg">
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </button>
-                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger
+                                render={
+                                  <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-8 w-8 rounded-lg hover:bg-gray-200 transition-opacity" />
+                                }
+                              >
+                                <MoreVertical className="h-4 w-4 text-gray-500" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-36">
+                                <DropdownMenuItem onClick={() => { setEditingKelas(k.id); setEditKelasName(k.nama) }} className="cursor-pointer">
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteKelas(k.id, k.created_by)} className="cursor-pointer text-red-600">
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Hapus
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </>
                       )}

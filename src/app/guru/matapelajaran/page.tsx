@@ -29,8 +29,15 @@ import {
   Trash2,
   ArrowRight,
   Users,
-  ShieldCheck
+  ShieldCheck,
+  MoreVertical,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -415,27 +422,27 @@ export default function GuruMataPelajaran() {
                     </span>
                   </div>
 
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <button onClick={(e) => e.stopPropagation()} className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-9 w-9 rounded-xl hover:bg-gray-100 transition-opacity" />
+                      }
+                    >
+                      <MoreVertical className="h-5 w-5 text-gray-500" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-36">
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditDialog(m) }} className="cursor-pointer">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(m.id) }} className="cursor-pointer text-red-600">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
                   <ArrowRight className="h-5 w-5 text-gray-400" />
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      openEditDialog(m)
-                    }}
-                    className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                  >
-                    <Edit className="h-4 w-4 text-gray-500" />
-                  </button>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDelete(m.id)
-                    }}
-                    className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </button>
                 </div>
               </div>
             </motion.div>
