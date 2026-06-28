@@ -282,7 +282,7 @@ export default function SettingsPage() {
                   <p className="text-gray-500">Belum ada kelas</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {kelas.map((k) => (
                     <div key={k.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group">
                       {editingKelas === k.id ? (
