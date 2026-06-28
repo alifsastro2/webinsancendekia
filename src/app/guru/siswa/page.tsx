@@ -108,15 +108,39 @@ export default function Kelolasiswa() {
 
   const fetchsiswa = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('users')
-        .select('*, kelas:kelas(nama)')
+        .select('*')
         .eq('role', 'siswa')
         .order('nama')
 
+      if (error) {
+        console.error('Supabase error:', error)
+        toast.error('Gagal memuat data siswa: ' + error.message)
+        return
+      }
+
       if (data) {
-        setsiswa(data as User[])
-        setFilteredsiswa(data as User[])
+        // Fetch kelas data for each siswa
+        const kelasIds = [...new Set(data.map(s => s.kelas_id).filter(Boolean))]
+        let kelasMap: Record<string, string> = {}
+        if (kelasIds.length > 0) {
+          const { data: kelasData } = await supabase
+            .from('kelas')
+            .select('id, nama')
+            .in('id', kelasIds)
+          if (kelasData) {
+            kelasMap = Object.fromEntries(kelasData.map(k => [k.id, k.nama]))
+          }
+        }
+
+        const enriched = data.map(s => ({
+          ...s,
+          kelas: s.kelas_id ? { nama: kelasMap[s.kelas_id] || '' } : undefined
+        }))
+
+        setsiswa(enriched as User[])
+        setFilteredsiswa(enriched as User[])
       }
     } catch (error) {
       console.error('Error fetching siswa:', error)
