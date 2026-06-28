@@ -349,63 +349,60 @@ export default function GuruKuis() {
                     transition={{ delay: i * 0.05 }}
                     className="border rounded-lg overflow-hidden"
                   >
-                    <div className="p-4 bg-gray-50 flex items-center justify-between">
-                        <Link href={`/guru/matapelajaran/${mapelId}/kuis/${kuis.id}`} className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white">
+                    <div className="p-4 bg-gray-50">
+                      <div className="flex items-start justify-between gap-3">
+                        <Link href={`/guru/matapelajaran/${mapelId}/kuis/${kuis.id}`} className="flex items-start gap-3 min-w-0 flex-1">
+                          <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white shrink-0">
                             <ClipboardList className="h-6 w-6" />
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-gray-900">{kuis.judul}</h3>
-                            <Badge variant={kuis.tipe === 'pilihan_ganda' ? 'default' : 'secondary'}>
-                              {kuis.tipe === 'pilihan_ganda' ? 'Pilihan Ganda' : 'Essay'}
-                            </Badge>
-                            {kuis.waktu_menit && (
-                              <Badge variant="outline" className="gap-1">
-                                <Clock className="h-3 w-3" />
-                                {kuis.waktu_menit} menit
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <h3 className="font-semibold text-gray-900 truncate">{kuis.judul}</h3>
+                              <Badge variant={kuis.tipe === 'pilihan_ganda' ? 'default' : 'secondary'}>
+                                {kuis.tipe === 'pilihan_ganda' ? 'PG' : 'Essay'}
                               </Badge>
-                            )}
-                            {kuis.due_date && (
-                              <Badge variant="outline" className="gap-1 text-red-600 border-red-200">
-                                <CalendarClock className="h-3 w-3" />
-                                {new Date(kuis.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                              </Badge>
-                            )}
-                            {kuis.published ? (
-                              <Badge className="bg-green-100 text-green-700 border-0 gap-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Diterbitkan
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-gray-100 text-gray-500 border-0 gap-1">
-                                <XCircle className="h-3 w-3" />
-                                Draft
-                              </Badge>
-                            )}
+                              {kuis.waktu_menit && (
+                                <Badge variant="outline" className="gap-1 text-xs">
+                                  <Clock className="h-3 w-3" />
+                                  {kuis.waktu_menit}m
+                                </Badge>
+                              )}
+                              {kuis.due_date && (
+                                <Badge variant="outline" className="gap-1 text-xs text-red-600 border-red-200">
+                                  <CalendarClock className="h-3 w-3" />
+                                  {new Date(kuis.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                </Badge>
+                              )}
+                              {kuis.published ? (
+                                <Badge className="bg-green-100 text-green-700 border-0 gap-1 text-xs">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Terbit
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-gray-100 text-gray-500 border-0 gap-1 text-xs">
+                                  <XCircle className="h-3 w-3" />
+                                  Draft
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">{kuis.pertanyaan.length} pertanyaan</p>
                           </div>
-                          <p className="text-sm text-gray-500 mt-1">{kuis.pertanyaan.length} pertanyaan</p>
-                        </div>
-                      </Link>
-                      <div className="flex items-center gap-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openPertanyaanDialog(kuis)}
-                        >
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          Tambah Pertanyaan
-                        </Button>
+                        </Link>
                         <DropdownMenu>
                           <DropdownMenuTrigger
                             render={
-                              <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-10 w-10 rounded-xl hover:bg-gray-100" />
+                              <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-9 w-9 rounded-lg hover:bg-gray-200" />
                             }
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <MoreVertical className="h-5 w-5 text-gray-500" />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleDeleteKuis(kuis.id)} className="text-red-600">
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => openPertanyaanDialog(kuis)} className="cursor-pointer">
+                              <PlusCircle className="h-4 w-4 mr-2" />
+                              Tambah Pertanyaan
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleDeleteKuis(kuis.id)} className="cursor-pointer text-red-600">
                               <Trash2 className="mr-2 h-4 w-4" />
                               Hapus Kuis
                             </DropdownMenuItem>
@@ -426,7 +423,7 @@ export default function GuruKuis() {
                                 <div className="flex-1">
                                   <p className="text-gray-900">{p.pertanyaan}</p>
                                   {kuis.tipe === 'pilihan_ganda' && (
-                                    <div className="mt-2 grid grid-cols-2 gap-2">
+                                    <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                       {['A', 'B', 'C', 'D'].map((opt) => (
                                         <div
                                           key={opt}

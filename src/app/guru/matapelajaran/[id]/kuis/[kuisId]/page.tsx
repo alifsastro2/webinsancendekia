@@ -34,8 +34,16 @@ import {
   ChevronUp,
   Save,
   Star,
-  CalendarClock
+  CalendarClock,
+  MoreVertical,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { supabase } from '@/lib/supabase'
 import { Kuis, PertanyaanKuis } from '@/lib/types'
 import { toast } from 'sonner'
@@ -279,51 +287,63 @@ export default function GuruKuisDetail() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali
         </Button>
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-3xl font-bold text-gray-900">{kuis.judul}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">{kuis.judul}</h1>
               <Badge variant={kuis.tipe === 'pilihan_ganda' ? 'default' : 'secondary'}>
-                {kuis.tipe === 'pilihan_ganda' ? 'Pilihan Ganda' : 'Essay'}
+                {kuis.tipe === 'pilihan_ganda' ? 'PG' : 'Essay'}
               </Badge>
               {kuis.waktu_menit && (
                 <Badge variant="outline" className="gap-1">
                   <Clock className="h-3 w-3" />
-                  {kuis.waktu_menit} menit
+                  {kuis.waktu_menit}m
                 </Badge>
               )}
               {kuis.due_date && (
-                <Badge variant="outline" className="gap-1 text-red-600 border-red-200">
+                <Badge variant="outline" className="gap-1 text-xs text-red-600 border-red-200">
                   <CalendarClock className="h-3 w-3" />
                   {new Date(kuis.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </Badge>
               )}
             </div>
-            <p className="text-gray-500 mt-1">
-              {kuis.pertanyaan.length} pertanyaan &bull; {totalSiswa} siswa mengerjakan
+            <p className="text-sm text-gray-500">
+              {kuis.pertanyaan.length} pertanyaan &bull; {totalSiswa} siswa
               {rataRataCount > 0 && ` &bull; Rata-rata: ${Math.round(rataRata / rataRataCount)}`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {!kuis.published ? (
-              <Button onClick={handlePublishKuis} className="bg-green-600 hover:bg-green-700">
-                <CheckCircle2 className="mr-2 h-4 w-4" />
+              <Button onClick={handlePublishKuis} size="sm" className="bg-green-600 hover:bg-green-700">
+                <CheckCircle2 className="mr-1.5 h-4 w-4" />
                 Terbitkan
               </Button>
             ) : (
               <Badge className="bg-green-100 text-green-700 border-0 gap-1">
                 <CheckCircle2 className="h-3 w-3" />
-                Diterbitkan
+                Terbit
               </Badge>
             )}
-            <Button onClick={() => setPertanyaanDialogOpen(true)} className="bg-amber-500 hover:bg-amber-600">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Tambah Pertanyaan
-            </Button>
-            <Button variant="outline" onClick={handleDeleteKuis} className="text-red-600 border-red-200 hover:bg-red-50">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Hapus Kuis
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-9 w-9 rounded-lg hover:bg-gray-100 border border-gray-200" />
+                }
+              >
+                <MoreVertical className="h-5 w-5 text-gray-500" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setPertanyaanDialogOpen(true)} className="cursor-pointer">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Tambah Pertanyaan
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDeleteKuis} className="cursor-pointer text-red-600">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus Kuis
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -378,7 +398,7 @@ export default function GuruKuisDetail() {
                             <div className="flex-1">
                               <p className="font-medium text-gray-900">{p.pertanyaan}</p>
                               {kuis.tipe === 'pilihan_ganda' && (
-                                <div className="mt-3 grid grid-cols-2 gap-2">
+                                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   {['A', 'B', 'C', 'D'].map((opt) => {
                                     const opsiVal = p[`opsi_${opt.toLowerCase()}` as keyof typeof p]
                                     if (!opsiVal) return null
