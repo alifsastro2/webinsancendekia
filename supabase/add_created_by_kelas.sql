@@ -1,6 +1,9 @@
 -- Add created_by column to kelas table
 ALTER TABLE kelas ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES public.users(id);
 
+-- Set all existing records to Azka's user ID
+UPDATE kelas SET created_by = '550374c3-6517-4423-b4e2-659bbefdd8e4' WHERE created_by IS NULL;
+
 -- Drop existing RLS policies for kelas
 DROP POLICY IF EXISTS "Anyone can read kelas" ON kelas;
 DROP POLICY IF EXISTS "Guru can insert kelas" ON kelas;
@@ -22,15 +25,15 @@ WITH CHECK (
   EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'guru')
 );
 
--- Only creator can update kelas (or legacy records without creator)
+-- Only creator can update kelas
 CREATE POLICY "Creator can update kelas"
 ON kelas FOR UPDATE
 TO authenticated
-USING (created_by IS NULL OR created_by = auth.uid())
-WITH CHECK (created_by IS NULL OR created_by = auth.uid());
+USING (created_by = auth.uid())
+WITH CHECK (created_by = auth.uid());
 
--- Only creator can delete kelas (or legacy records without creator)
+-- Only creator can delete kelas
 CREATE POLICY "Creator can delete kelas"
 ON kelas FOR DELETE
 TO authenticated
-USING (created_by IS NULL OR created_by = auth.uid());
+USING (created_by = auth.uid());
