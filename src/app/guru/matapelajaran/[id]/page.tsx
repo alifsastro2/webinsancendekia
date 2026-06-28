@@ -507,7 +507,7 @@ export default function MataPelajaranDetail() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           render={
-                            <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-10 w-10 rounded-xl hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-10 w-10 rounded-xl hover:bg-gray-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
                           }
                         >
                           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
