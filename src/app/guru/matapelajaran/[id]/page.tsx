@@ -32,7 +32,8 @@ import {
   Clock,
   CalendarClock,
   CheckCircle2,
-  XCircle
+  XCircle,
+  MoreVertical
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { MataPelajaran, Materi } from '@/lib/types'
@@ -510,9 +511,7 @@ export default function MataPelajaranDetail() {
                             <button className="inline-flex items-center justify-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:pointer-events-none h-10 w-10 rounded-xl hover:bg-gray-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
                           }
                         >
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 12a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                          </svg>
+                          <MoreVertical className="h-5 w-5 text-gray-500" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {m.file_url && (
