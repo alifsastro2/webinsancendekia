@@ -45,7 +45,7 @@ export default function siswaProfil() {
           kelas:kelas(nama)
         `)
         .eq('id', session.user.id)
-        .single()
+        .maybeSingle()
 
       if (data) {
         setUser(data)
@@ -74,11 +74,23 @@ export default function siswaProfil() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Sesi tidak valid')
 
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', formData.username)
+        .neq('id', session.user.id)
+        .maybeSingle()
+
+      if (existing) {
+        toast.error('Username sudah digunakan')
+        setSaving(false)
+        return
+      }
+
       const { error } = await supabase
         .from('users')
         .update({
           nama: formData.nama,
-          email: formData.email,
           username: formData.username
         })
         .eq('id', session.user.id)
