@@ -26,11 +26,9 @@ import {
   Lock,
   Unlock,
   RefreshCw,
-  UserPlus,
   ShieldCheck,
   Users,
   MoreVertical,
-  Eye,
 } from 'lucide-react'
 import {
   DropdownMenu,

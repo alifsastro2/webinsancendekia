@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   BookOpen,
-  FileText,
   ClipboardList,
   User as UserIcon,
   LogOut,

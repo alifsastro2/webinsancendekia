@@ -31,6 +31,7 @@ Platform pembelajaran digital — manajemen kelas, materi, kuis (pilihan ganda &
 | `/siswa/matapelajaran/[mapelId]` | Siswa | Detail mapel: materi + kuis |
 | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]` | Siswa | Mengerjakan kuis |
 | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/review` | Siswa | Review hasil kuis yang sudah dinilai |
+| `/siswa/profil` | Siswa | Profil siswa (nama, username, ganti password) |
 
 ## Supabase Tables
 | Table | Key Columns | Notes |
@@ -38,7 +39,7 @@ Platform pembelajaran digital — manajemen kelas, materi, kuis (pilihan ganda &
 | **`kelas`** | id, nama, `created_by` (UUID), created_at | Default: X, XI, XII; creator-only DML |
 | **`users`** | id, username, nama, email, role (guru/siswa), kelas_id, is_active | Auto-created via trigger on auth.users signup |
 | **`mata_pelajaran`** | id, nama, deskripsi, guru_id, kelas_id | Strict RLS: guru only sees own mapel |
-| **`materi`** | id, mata_pelajaran_id, judul, deskripsi, file_url (R2) | File URL proxied through /api/files |
+| **`materi** | id, mata_pelajaran_id, judul, deskripsi, file_url (R2) | File URL proxied through /api/files |
 | **`kuis`** | id, mata_pelajaran_id, judul, tipe (pilihan_ganda/essay), waktu_menit, `due_date`, `published`, created_at | Draft by default |
 | **`pertanyaan_kuis`** | id, kuis_id, pertanyaan, opsi_a..d, jawaban_benar, urutan | |
 | **`hasil_kuis`** | id, kuis_id, siswa_id, jawaban (JSONB), skor (null until graded), submitted_at | Unique per kuis+siswa; essay needs manual grading |
@@ -57,7 +58,12 @@ Platform pembelajaran digital — manajemen kelas, materi, kuis (pilihan ganda &
 - **R2 files:** Proxied through `/api/files/[...path]` to fix SSL `ERR_CERT_AUTHORITY_INVALID`
 - **Kelas:** Creator only can edit/delete; RPC helper `count_kelas_references()` prevents delete if referenced
 - **Mata pelajaran:** Strict RLS — guru only sees their own subjects
-- **Register:** Hidden `/register` page uses `supabaseAdmin.auth.admin.createUser` (service_role key) with email=`${username}@sekolah.app`
+- **Register:** Hidden `/register` page uses `supabaseAdmin.auth.admin.createUser` (service_role key) with email=`${username}@insancendekia.com`
+- **Email auto-generated:** Login uses `username@insancendekia.com` for auth; email is NEVER shown to users in UI/UX
+- **Login:** Only username + password; auth email generated from username (`${username}@insancendekia.com`)
+- **Card layout mobile:** All cards use `flex-col sm:flex-row` for responsive layout; action buttons stack below content on mobile
+- **`.maybeSingle()`:** Prefer over `.single()` for existence checks to avoid PGRST116/406 bug
+- **Ambiguous FK joins:** When 2 FK exist between tables (e.g. `users` ↔ `kelas` via `kelas_id` AND `created_by`), specify explicit FK: `kelas!users_kelas_id_fkey(nama)`
 
 ## Migration SQL (run in Supabase SQL Editor)
 - `supabase/add_due_date.sql` — adds `due_date TIMESTAMPTZ` to `kuis`
@@ -68,7 +74,7 @@ Platform pembelajaran digital — manajemen kelas, materi, kuis (pilihan ganda &
 ### Done
 - Sidebar header (guru + siswa): no icon, just name; siswa shows kelas
 - All "Download" buttons → "Lihat Materi" with Eye icon
-- Review page at `/review/` for graded kuis results
+- Review page at `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/review/` for graded kuis results
 - Due date: column, form input, badges, expired check, disabled "Ditutup" button
 - Published: column, Terbitkan button (guard: ≥1 soal), draft/published badges, siswa filter `.eq('published', true)`
 - Dashboard: removed Aksi Cepat & Activity; added "Kuis Perlu Dinilai" (guru) + "Deadline Mendekat" (guru & siswa, side-by-side)
@@ -77,13 +83,19 @@ Platform pembelajaran digital — manajemen kelas, materi, kuis (pilihan ganda &
 - Kelas `created_by` + RLS (creator-only DML) + reference check before delete
 - Strict RLS for `mata_pelajaran` (SELECT/UPDATE/DELETE own only)
 - Secret `/register` page + `/api/register` endpoint
-
-### In Progress
-- (none)
+- Login uses username-based auto-generated email (`username@insancendekia.com`) instead of fetching from DB
+- CSS mobile fixes: Card layout `flex-col sm:flex-row` for kuis & materi cards, search card padding fix
+- Email domain changed from `@sekolah.app` to `@insancendekia.com` in all API/auth code
+- Email removed from all UI/UX (profil siswa, settings guru, edit siswa) — auto-generated, hidden from users
+- Fixed ambiguous FK join (`kelas!users_kelas_id_fkey`) in profil page
+- Fixed kuis count stat to count all published kuis (not just non-expired)
+- Added duplicate username check before saving profile
+- Removed unused imports (AlertCircle, FileText, Button, UserPlus, Eye)
 
 ### Known Issues / Next Steps
-- Test `/register` page end-to-end (create teacher account, verify login)
-- Verify R2 proxy works (click "Lihat Materi" on R2 file)
-- Ensure `SUPABASE_SERVICE_ROLE_KEY` set in production `.env`
-- No "unpublish" button yet (published kuis cannot revert to draft)
+- **Notifikasi:** Belum ada fitur notifikasi (to-do next)
+- **`.single()` calls:** ~20 `.single()` calls remain that could be `.maybeSingle()` for consistency (non-breaking, low priority)
+- **Hardcoded email domain:** `@insancendekia.com` hardcoded in 4 places, not an env var (low priority, stable domain)
+- **No "unpublish" button:** Published kuis cannot revert to draft
+- **Guru siswa page** fetches ALL siswa across all classes (may show students from other teachers' classes depending on RLS)
 - `next.config.ts` has `allowedDevOrigins: ['10.17.217.122']` for dev from network IP
