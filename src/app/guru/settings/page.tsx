@@ -72,12 +72,12 @@ export default function SettingsPage() {
     setSaving(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Session tidak valid')
+      if (!session) throw new Error('Sesi tidak valid')
       const { error } = await supabase.from('users').update(formData).eq('id', session.user.id)
       if (error) throw error
       toast.success('Profil berhasil diupdate')
       fetchUser()
-    } catch (e: any) { toast.error(e.message || 'Gagal') }
+    } catch (e: any) { toast.error(e.message || 'Terjadi kesalahan') }
     finally { setSaving(false) }
   }
 
@@ -105,7 +105,7 @@ export default function SettingsPage() {
       toast.success('Kelas ditambahkan')
       setNewKelas('')
       fetchKelas()
-    } catch (e: any) { toast.error(e.message || 'Gagal') }
+    } catch (e: any) { toast.error(e.message || 'Terjadi kesalahan') }
   }
 
   const handleUpdateKelas = async (id: string, createdBy?: string | null) => {
@@ -137,7 +137,7 @@ export default function SettingsPage() {
       toast.success('Kelas diupdate')
       setEditingKelas(null)
       fetchKelas()
-    } catch (e: any) { toast.error(e.message || 'Gagal') }
+    } catch (e: any) { toast.error(e.message || 'Terjadi kesalahan') }
   }
 
   const handleDeleteKelas = async (id: string, createdBy?: string | null) => {

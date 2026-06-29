@@ -142,7 +142,7 @@ export default function siswaKerjakanKuis() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Session tidak valid')
+      if (!session) throw new Error('Sesi tidak valid')
 
       let skor: number | null = null
       if (kuis?.tipe === 'pilihan_ganda') {

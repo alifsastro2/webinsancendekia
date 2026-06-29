@@ -222,7 +222,7 @@ export default function GuruKuisDetail() {
         .eq('id', hasilId)
         .single()
       if (verifyError) throw verifyError
-      if (verify?.skor === null) throw new Error('Nilai tidak tersimpan — kemungkinan RLS blocking update')
+      if (verify?.skor === null) throw new Error('Nilai gagal disimpan. Coba lagi.')
 
       toast.success('Nilai berhasil disimpan')
       setEditingNilai(prev => ({ ...prev, [hasilId]: false }))

@@ -72,7 +72,7 @@ export default function siswaProfil() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Session tidak valid')
+      if (!session) throw new Error('Sesi tidak valid')
 
       const { error } = await supabase
         .from('users')
@@ -114,7 +114,7 @@ export default function siswaProfil() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Session tidak valid')
+      if (!session) throw new Error('Sesi tidak valid')
 
       const { error } = await supabase.auth.updateUser({
         password: passwordForm.newPassword
@@ -226,7 +226,7 @@ export default function siswaProfil() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="email@contoh.com"
+                    placeholder="contoh@email.com"
                   />
                 </div>
 
@@ -307,7 +307,7 @@ export default function siswaProfil() {
                   type="password"
                   value={passwordForm.newPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                  placeholder="Password baru (min. 6 karakter)"
+                  placeholder="Password baru (minimal 6 karakter)"
                 />
               </div>
 

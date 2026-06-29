@@ -208,7 +208,7 @@ export default function siswaMapelDetail() {
                     <FileText className="h-8 w-8 text-gray-400" />
                   </div>
                   <p className="text-gray-500 font-medium">Belum ada materi</p>
-                  <p className="text-gray-400 text-sm mt-1">Materi akan muncul setelah guru upload</p>
+                  <p className="text-gray-400 text-sm mt-1">Materi akan muncul setelah guru unggah</p>
                 </div>
               ) : (
                 <div className="space-y-3">

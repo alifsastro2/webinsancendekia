@@ -132,7 +132,7 @@ export default function MataPelajaranDetail() {
     const file = e.target.files?.[0]
     if (file) {
       if (file.size > 50 * 1024 * 1024) {
-        toast.error('File terlalu besar. Maksimal 50MB')
+        toast.error('File terlalu besar. Maksimal 50 MB')
         return
       }
       setSelectedFile(file)
@@ -157,14 +157,14 @@ export default function MataPelajaranDetail() {
       const result = await response.json()
 
       if (result.error) {
-        toast.error(`Gagal upload: ${result.error}`)
+        toast.error(`Gagal mengunggah: ${result.error}`)
         return null
       }
 
-      toast.success('File berhasil diupload!')
+      toast.success('File berhasil diunggah!')
       return result.url
     } catch (error: any) {
-      toast.error(`Gagal upload: ${error.message || 'Terjadi kesalahan'}`)
+      toast.error(`Gagal mengunggah: ${error.message || 'Terjadi kesalahan'}`)
       return null
     }
   }
@@ -408,7 +408,7 @@ export default function MataPelajaranDetail() {
                             className="w-full p-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-amber-400 hover:bg-amber-50/50 transition-all text-center"
                           >
                             <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-sm text-gray-600 font-medium">Klik untuk upload</p>
+                            <p className="text-sm text-gray-600 font-medium">Klik untuk unggah</p>
                             <p className="text-xs text-gray-400 mt-1">PDF, Word, Excel, PowerPoint, Gambar (max 50MB)</p>
                           </button>
                         )}
@@ -449,7 +449,7 @@ export default function MataPelajaranDetail() {
                       {uploading ? (
                         <>
                           <Upload className="mr-2 h-4 w-4 animate-spin" />
-                          Mengupload...
+                          Mengunggah...
                         </>
                       ) : 'Simpan'}
                     </Button>

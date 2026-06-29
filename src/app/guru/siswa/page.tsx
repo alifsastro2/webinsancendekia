@@ -191,7 +191,7 @@ export default function KelolaSiswa() {
       })
 
       if (authError) throw authError
-      if (!authData.user) throw new Error('Gagal membuat user')
+      if (!authData.user) throw new Error('Gagal membuat akun')
 
       // Upsert to users table (trigger may have already inserted)
       const { error: upsertError } = await supabase.from('users').upsert({
@@ -413,7 +413,7 @@ export default function KelolaSiswa() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="email@contoh.com"
+                  placeholder="contoh@email.com"
                   className="mt-2 h-11 rounded-xl"
                 />
               </div>

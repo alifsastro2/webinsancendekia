@@ -151,7 +151,7 @@ export default function GuruMataPelajaran() {
     try {
       const sessionData = await supabase.auth.getSession()
       const session = sessionData.data.session
-      if (!session) throw new Error('Session tidak valid')
+      if (!session) throw new Error('Sesi tidak valid')
 
       if (!formData.nama || !formData.kelas_id) {
         toast.error('Nama mata pelajaran dan kelas wajib diisi')
