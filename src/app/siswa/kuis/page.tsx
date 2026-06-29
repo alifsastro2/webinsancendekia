@@ -35,6 +35,7 @@ interface AvailableQuiz {
   judul: string
   tipe: string
   waktu_menit: number | null
+  due_date: string | null
   mata_pelajaran_id: string
   mata_pelajaran: {
     nama: string
@@ -74,14 +75,14 @@ export default function SiswaKuisPage() {
       const mapelIds = mapelData.map(m => m.id)
 
       const now = new Date().toISOString()
-      const { data: kuisData } = await supabase
+
+      const { data: allKuisData } = await supabase
         .from('kuis')
-        .select('id, judul, tipe, waktu_menit, mata_pelajaran_id, mata_pelajaran!inner(nama)')
+        .select('id, judul, tipe, waktu_menit, due_date, mata_pelajaran_id, mata_pelajaran!inner(nama)')
         .in('mata_pelajaran_id', mapelIds)
         .eq('published', true)
-        .or(`due_date.is.null,due_date.gte.${now}`)
 
-      if (!kuisData) return
+      if (!allKuisData) return
 
       const { data: hasilData } = await supabase
         .from('hasil_kuis')
@@ -90,14 +91,18 @@ export default function SiswaKuisPage() {
 
       const completedIds = new Set((hasilData || []).map(h => h.kuis_id))
 
+      const availableKuis = (allKuisData as unknown as AvailableQuiz[]).filter(
+        k => !completedIds.has(k.id) && (!k.due_date || new Date(k.due_date) >= new Date())
+      )
+
       setResults((hasilData as unknown as QuizResult[]) || [])
-      setAvailable((kuisData as unknown as AvailableQuiz[]).filter(k => !completedIds.has(k.id)))
+      setAvailable(availableKuis)
 
       const scores = (hasilData || []).filter(h => h.skor !== null).map(h => h.skor!)
       const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
 
       setStats({
-        total: kuisData.length,
+        total: allKuisData.length,
         completed: hasilData?.length || 0,
         avgSkor: Math.round(avg)
       })
