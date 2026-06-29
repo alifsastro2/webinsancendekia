@@ -21,7 +21,6 @@ interface User {
   id: string
   nama: string
   username: string
-  email: string | null
   is_active: boolean
 }
 
@@ -36,7 +35,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [kelas, setKelas] = useState<(Kelas & { created_by?: string })[]>([])
   const [loadingKelas, setLoadingKelas] = useState(true)
-  const [formData, setFormData] = useState({ nama: '', username: '', email: '' })
+  const [formData, setFormData] = useState({ nama: '', username: '' })
   const [newKelas, setNewKelas] = useState('')
   const [editingKelas, setEditingKelas] = useState<string | null>(null)
   const [editKelasName, setEditKelasName] = useState('')
@@ -53,7 +52,7 @@ export default function SettingsPage() {
       const { data } = await supabase.from('users').select('*').eq('id', session.user.id).single()
       if (data) {
         setUser(data)
-        setFormData({ nama: data.nama, username: data.username, email: data.email || '' })
+        setFormData({ nama: data.nama, username: data.username })
       }
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
@@ -231,11 +230,6 @@ export default function SettingsPage() {
                 <div>
                   <Label>Username</Label>
                   <Input value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} className="mt-2" />
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <Input type="email" value={formData.email} disabled className="mt-2 bg-gray-50" />
-                  <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
                 </div>
                 <button
                   onClick={handleSave}

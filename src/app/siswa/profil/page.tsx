@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { User, Mail, Calendar, Save, GraduationCap, Key, Shield, Edit3 } from 'lucide-react'
+import { User, Calendar, Save, GraduationCap, Key, Shield, Edit3 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { slideUpVariants } from '@/components/common/motion'
@@ -20,7 +20,6 @@ export default function siswaProfil() {
   const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState({
     nama: '',
-    email: '',
     username: ''
   })
   const [passwordForm, setPasswordForm] = useState({
@@ -51,7 +50,6 @@ export default function siswaProfil() {
         setUser(data)
         setFormData({
           nama: data.nama,
-          email: data.email || '',
           username: data.username
         })
       }
@@ -229,18 +227,6 @@ export default function siswaProfil() {
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                     placeholder="Username"
                   />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
                 </div>
 
                 <Button onClick={handleSaveProfile} disabled={saving} className="w-full">

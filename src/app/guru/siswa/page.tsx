@@ -234,19 +234,13 @@ export default function KelolaSiswa() {
     if (!selectedSiswa) return
 
     try {
-      const updates: any = {
-        nama: formData.nama,
-        username: formData.username,
-        kelas_id: formData.kelas_id
-      }
-
-      if (formData.email !== undefined) {
-        updates.email = formData.email
-      }
-
       const { error } = await supabase
         .from('users')
-        .update(updates)
+        .update({
+          nama: formData.nama,
+          username: formData.username,
+          kelas_id: formData.kelas_id
+        })
         .eq('id', selectedSiswa.id)
 
       if (error) throw error
@@ -556,17 +550,6 @@ export default function KelolaSiswa() {
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="mt-2 h-11 rounded-xl"
               />
-            </div>
-            <div>
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={formData.email}
-                disabled
-                className="mt-2 h-11 rounded-xl bg-gray-50"
-              />
-              <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
             </div>
             <div>
               <Label htmlFor="edit-kelas">Kelas</Label>
