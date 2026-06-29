@@ -30,6 +30,30 @@
 - [x] Buat profil page untuk guru & siswa
 - [x] Script pembuatan akun guru test (Azka Muhamad Naufal)
 - [x] Buat setup instructions & quickstart guide
+- [x] **Middleware.ts untuk route protection (auth + RBAC)**
+
+## 🛡️ Route Protection (Middleware)
+
+Project menggunakan `middleware.ts` untuk security:
+
+| Fitur | Penjelasan |
+|-------|------------|
+| **Authentication Check** | Cek user sudah login via Supabase session cookie |
+| **Role-Based Access** | Guru hanya bisa akses `/guru/*`, Siswa hanya bisa akses `/siswa/*` |
+| **Auto Redirect** | User belum login → redirect ke `/login?redirect=<path>` |
+| **Session Refresh** | Auto refresh token jika expired |
+
+### Protected Routes:
+- `/guru/*` → Hanya untuk role `guru`
+- `/siswa/*` → Hanya untuk role `siswa`
+
+### Public Routes:
+- `/login` → Semua orang
+- `/register` → Semua orang
+
+### File:
+- `middleware.ts` → Route protection utama
+- `src/lib/supabase/middleware.ts` → Supabase SSR helper
 
 ---
 
@@ -77,11 +101,15 @@ src/
 │   │   └── sidebar.tsx             # Sidebar siswa
 │   └── ui/                         # shadcn/ui components
 ├── lib/
-│   ├── supabase.ts                 # Supabase client + types
+│   ├── supabase.ts                 # Supabase client
+│   ├── supabase/
+│   │   └── middleware.ts           # Supabase SSR helper untuk middleware
 │   ├── types.ts                    # TypeScript types
 │   └── utils.ts                    # Utility functions
 └── styles/
     └── globals.css                 # Global styles
+
+middleware.ts                        # Route protection (auth + RBAC)
 
 scripts/
 ├── create-guru.js                  # Script buat akun guru
@@ -90,7 +118,6 @@ scripts/
 supabase/
 ├── schema.sql                      # Database schema
 └── rls.sql                         # Row Level Security policies
-```
 
 ---
 

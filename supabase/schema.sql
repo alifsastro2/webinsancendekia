@@ -1,3 +1,8 @@
+-- ============================================
+-- SCHEMA: Sekolah Online - Insan Cendekia Nusantara
+-- Database Schema untuk project sekolah online
+-- ============================================
+
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -7,22 +12,15 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS kelas (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nama VARCHAR(20) NOT NULL UNIQUE,
-  created_by UUID REFERENCES public.users(id),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_by UUID REFERENCES public.users(id)
 );
-
--- Insert default classes
-INSERT INTO kelas (nama) VALUES
-  ('X'),
-  ('XI'),
-  ('XII')
-ON CONFLICT (nama) DO NOTHING;
 
 -- ============================================
 -- TABLE: USERS (Public profile for auth users)
 -- ============================================
 CREATE TABLE IF NOT EXISTS public.users (
-  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  id UUID PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   nama VARCHAR(100) NOT NULL,
   email VARCHAR(100),
@@ -30,7 +28,10 @@ CREATE TABLE IF NOT EXISTS public.users (
   kelas_id UUID REFERENCES kelas(id),
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  google_access_token TEXT,
+  google_refresh_token TEXT,
+  google_connected_at TIMESTAMP WITH TIME ZONE
 );
 
 -- ============================================
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS mata_pelajaran (
   nama VARCHAR(100) NOT NULL,
   deskripsi TEXT,
   guru_id UUID REFERENCES public.users(id),
-  kelas_id UUID REFERENCES kelas(id) NOT NULL,
+  kelas_id UUID NOT NULL REFERENCES kelas(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -67,9 +68,9 @@ CREATE TABLE IF NOT EXISTS kuis (
   judul VARCHAR(200) NOT NULL,
   tipe VARCHAR(20) NOT NULL CHECK (tipe IN ('pilihan_ganda', 'essay')),
   waktu_menit INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   due_date TIMESTAMP WITH TIME ZONE,
-  published BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  published BOOLEAN DEFAULT FALSE
 );
 
 -- ============================================
@@ -115,6 +116,32 @@ CREATE INDEX IF NOT EXISTS idx_pertanyaan_kuis ON pertanyaan_kuis(kuis_id);
 CREATE INDEX IF NOT EXISTS idx_hasil_kuis_siswa ON hasil_kuis(siswa_id);
 
 -- ============================================
+-- TRIGGER: Create user profile after signup
+-- ============================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, username, nama, email, role, kelas_id)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)),
+    COALESCE(NEW.raw_user_meta_data->>'nama', NEW.email),
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'siswa'),
+    (NEW.raw_user_meta_data->>'kelas_id')::UUID
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to create user profile on signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================
 -- TRIGGER: Updated_at
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -123,42 +150,19 @@ BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
 CREATE TRIGGER update_users_updated_at
   BEFORE UPDATE ON public.users
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_matapelajaran_updated_at ON mata_pelajaran;
 CREATE TRIGGER update_matapelajaran_updated_at
   BEFORE UPDATE ON mata_pelajaran
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================
--- FUNCTION: Create user profile after signup
--- ============================================
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.users (id, username, nama, email, role, kelas_id)
-  VALUES (
-    NEW.id,
-    NEW.raw_user_meta_data->>'username',
-    COALESCE(NEW.raw_user_meta_data->>'nama', NEW.email),
-    NEW.email,
-    NEW.raw_user_meta_data->>'role',
-    (NEW.raw_user_meta_data->>'kelas_id')::UUID
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Trigger to create user profile on signup
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_new_user();
 
 -- ============================================
 -- STORAGE BUCKET: materi

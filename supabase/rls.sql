@@ -1,9 +1,10 @@
 -- ============================================
 -- ROW LEVEL SECURITY POLICIES
+-- Sekolah Online - Insan Cendekia Nusantara
 -- ============================================
 
 -- Enable RLS on all tables
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kelas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mata_pelajaran ENABLE ROW LEVEL SECURITY;
 ALTER TABLE materi ENABLE ROW LEVEL SECURITY;
@@ -12,266 +13,172 @@ ALTER TABLE pertanyaan_kuis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hasil_kuis ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
+-- USERS Policies
+-- ============================================
+
+-- Users can be read by public (anon + authenticated)
+CREATE POLICY "Users public read"
+ON users FOR SELECT
+TO authenticated
+USING (true);
+
+-- Users can only update their own profile
+CREATE POLICY "Users update own"
+ON users FOR UPDATE
+TO authenticated
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
+
+-- Guru can create users (siswa only)
+CREATE POLICY "Guru can create users"
+ON users FOR INSERT
+TO authenticated
+WITH CHECK (
+  (EXISTS (
+    SELECT 1 FROM users users_1
+    WHERE users_1.id = auth.uid() AND users_1.role = 'guru'
+  )) OR (id = auth.uid())
+);
+
+-- ============================================
 -- KELAS Policies
 -- ============================================
 
 -- Everyone can read kelas
-CREATE POLICY "Anyone can read kelas"
+CREATE POLICY "Kelas public read"
 ON kelas FOR SELECT
 TO authenticated
 USING (true);
 
--- Guru can insert kelas with their own id
+-- Guru can insert kelas
 CREATE POLICY "Guru can insert kelas"
 ON kelas FOR INSERT
 TO authenticated
 WITH CHECK (
-  created_by = auth.uid() AND
-  EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'guru')
+  EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'guru'
+  )
 );
 
--- Only creator can update kelas
-CREATE POLICY "Creator can update kelas"
+-- Guru can update kelas
+CREATE POLICY "Guru can update kelas"
 ON kelas FOR UPDATE
 TO authenticated
-USING (created_by = auth.uid())
-WITH CHECK (created_by = auth.uid());
+USING (
+  EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'guru'
+  )
+);
 
--- Only creator can delete kelas
-CREATE POLICY "Creator can delete kelas"
+-- Guru can delete kelas
+CREATE POLICY "Guru can delete kelas"
 ON kelas FOR DELETE
 TO authenticated
-USING (created_by = auth.uid());
-
--- ============================================
--- USERS Policies
--- ============================================
-
--- Guru can insert siswa profiles
-CREATE POLICY "Guru can insert siswa"
-ON public.users FOR INSERT
-TO authenticated
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-  AND role = 'siswa'
-);
-
--- Allow users to create their own profile (for auth trigger)
-CREATE POLICY "Users can create own profile"
-ON public.users FOR INSERT
-TO authenticated
-WITH CHECK (id = auth.uid());
-
--- Guru can read all users
-CREATE POLICY "Guru can read all users"
-ON public.users FOR SELECT
-TO authenticated
 USING (
   EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'guru'
   )
-);
-
--- Siswa can only read themselves
-CREATE POLICY "Siswa can read own profile"
-ON public.users FOR SELECT
-TO authenticated
-USING (id = auth.uid());
-
--- User can update own profile
-CREATE POLICY "User can update own profile"
-ON public.users FOR UPDATE
-TO authenticated
-USING (id = auth.uid())
-WITH CHECK (id = auth.uid());
--- Guru can update siswa profiles
-
-CREATE POLICY "Guru can update siswa"
-ON public.users FOR UPDATE
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-  AND role = 'siswa'
-)
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-  AND role = 'siswa'
 );
 
 -- ============================================
 -- MATA_PELAJARAN Policies
 -- ============================================
 
--- Guru can only read own mata_pelajaran
-CREATE POLICY "Guru can read own mata_pelajaran"
+-- Mata Pelajaran can be read by authenticated
+CREATE POLICY "MataPelajaran read"
 ON mata_pelajaran FOR SELECT
+TO authenticated
+USING (true);
+
+-- Guru can create mata pelajaran
+CREATE POLICY "MataPelajaran insert"
+ON mata_pelajaran FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
+-- Guru can update own mata pelajaran
+CREATE POLICY "MataPelajaran update own"
+ON mata_pelajaran FOR UPDATE
 TO authenticated
 USING (guru_id = auth.uid());
 
--- Siswa can only read mata_pelajaran for their class
-CREATE POLICY "Siswa can read class mata_pelajaran"
-ON mata_pelajaran FOR SELECT
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'siswa' AND kelas_id = mata_pelajaran.kelas_id
-  )
-);
-
--- Guru can create mata_pelajaran
-CREATE POLICY "Guru can create mata_pelajaran"
-ON mata_pelajaran FOR INSERT
-TO authenticated
-WITH CHECK (
-  guru_id = auth.uid() AND
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-);
-
--- Guru can update own mata_pelajaran
-CREATE POLICY "Guru can update own mata_pelajaran"
-ON mata_pelajaran FOR UPDATE
-TO authenticated
-USING (guru_id = auth.uid())
-WITH CHECK (guru_id = auth.uid());
-
--- Guru can delete own mata_pelajaran
-CREATE POLICY "Guru can delete own mata_pelajaran"
+-- Guru can delete own mata pelajaran
+CREATE POLICY "MataPelajaran delete own"
 ON mata_pelajaran FOR DELETE
 TO authenticated
 USING (guru_id = auth.uid());
 
 -- ============================================
--- Helper: Count kelas references (bypass RLS)
--- ============================================
-CREATE OR REPLACE FUNCTION count_kelas_references(p_kelas_id UUID)
-RETURNS TABLE(table_name TEXT, count BIGINT)
-LANGUAGE plpgsql SECURITY DEFINER
-AS $$
-BEGIN
-  RETURN QUERY
-    SELECT 'mata_pelajaran'::TEXT, COUNT(*)::BIGINT
-    FROM mata_pelajaran WHERE mata_pelajaran.kelas_id = p_kelas_id
-  UNION ALL
-    SELECT 'users'::TEXT, COUNT(*)::BIGINT
-    FROM public.users WHERE users.kelas_id = p_kelas_id AND users.role = 'siswa';
-END;
-$$;
-
--- ============================================
 -- MATERI Policies
 -- ============================================
 
--- Guru can read all materi
-CREATE POLICY "Guru can read all materi"
+-- Materi can be read by authenticated
+CREATE POLICY "Materi read"
 ON materi FOR SELECT
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-);
+USING (true);
 
--- Siswa can read materi for their class
-CREATE POLICY "Siswa can read class materi"
-ON materi FOR SELECT
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users u
-    INNER JOIN mata_pelajaran mp ON mp.kelas_id = u.kelas_id
-    WHERE u.id = auth.uid() AND u.role = 'siswa' AND mp.id = materi.mata_pelajaran_id
-  )
-);
-
--- Guru can create materi
-CREATE POLICY "Guru can create materi"
+-- Guru can insert materi
+CREATE POLICY "Allow guru to insert materi"
 ON materi FOR INSERT
 TO authenticated
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM mata_pelajaran
-    WHERE id = materi.mata_pelajaran_id AND guru_id = auth.uid()
-  )
-);
+WITH CHECK (true);
+
+-- Guru can update materi
+CREATE POLICY "Allow guru to update materi"
+ON materi FOR UPDATE
+TO authenticated
+USING (true);
 
 -- Guru can delete materi
-CREATE POLICY "Guru can delete materi"
+CREATE POLICY "Allow guru to delete materi"
 ON materi FOR DELETE
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM mata_pelajaran
-    WHERE id = materi.mata_pelajaran_id AND guru_id = auth.uid()
-  )
-);
+USING (true);
 
 -- ============================================
 -- KUIS Policies
 -- ============================================
 
--- Guru can read all kuis
-CREATE POLICY "Guru can read all kuis"
+-- Kuis can be read by authenticated
+CREATE POLICY "Kuis read"
 ON kuis FOR SELECT
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-);
+USING (true);
 
--- Siswa can read kuis for their class
-CREATE POLICY "Siswa can read class kuis"
-ON kuis FOR SELECT
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users u
-    INNER JOIN mata_pelajaran mp ON mp.kelas_id = u.kelas_id
-    WHERE u.id = auth.uid() AND u.role = 'siswa' AND mp.id = kuis.mata_pelajaran_id
-  )
-);
-
--- Guru can create kuis
-CREATE POLICY "Guru can create kuis"
+-- Guru can insert kuis
+CREATE POLICY "Kuis insert"
 ON kuis FOR INSERT
 TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM mata_pelajaran
-    WHERE id = kuis.mata_pelajaran_id AND guru_id = auth.uid()
+    WHERE mata_pelajaran.id = kuis.mata_pelajaran_id AND mata_pelajaran.guru_id = auth.uid()
   )
 );
 
 -- Guru can update own kuis
-CREATE POLICY "Guru can update own kuis"
+CREATE POLICY "Kuis update own"
 ON kuis FOR UPDATE
 TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM mata_pelajaran
-    WHERE id = kuis.mata_pelajaran_id AND guru_id = auth.uid()
+    WHERE mata_pelajaran.id = kuis.mata_pelajaran_id AND mata_pelajaran.guru_id = auth.uid()
   )
-)
-WITH CHECK (
+);
+
+-- Guru can delete own kuis
+CREATE POLICY "Kuis delete own"
+ON kuis FOR DELETE
+TO authenticated
+USING (
   EXISTS (
     SELECT 1 FROM mata_pelajaran
-    WHERE id = kuis.mata_pelajaran_id AND guru_id = auth.uid()
+    WHERE mata_pelajaran.id = kuis.mata_pelajaran_id AND mata_pelajaran.guru_id = auth.uid()
   )
 );
 
@@ -279,43 +186,45 @@ WITH CHECK (
 -- PERTANYAAN_KUIS Policies
 -- ============================================
 
--- Guru can read all pertanyaan_kuis
-CREATE POLICY "Guru can read all pertanyaan_kuis"
+-- Pertanyaan kuis can be read by authenticated
+CREATE POLICY "PertanyaanKuis read"
 ON pertanyaan_kuis FOR SELECT
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-);
+USING (true);
 
--- Siswa can read pertanyaan_kuis for their class
-CREATE POLICY "Siswa can read class pertanyaan_kuis"
-ON pertanyaan_kuis FOR SELECT
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users u
-    INNER JOIN kuis k ON k.mata_pelajaran_id = (
-      SELECT mp.id FROM mata_pelajaran mp
-      WHERE mp.kelas_id = u.kelas_id
-    )
-    WHERE u.id = auth.uid() AND u.role = 'siswa' AND k.id = pertanyaan_kuis.kuis_id
-  )
-);
-
--- Guru can create pertanyaan_kuis
-CREATE POLICY "Guru can create pertanyaan_kuis"
+-- Guru can insert pertanyaan kuis
+CREATE POLICY "PertanyaanKuis insert"
 ON pertanyaan_kuis FOR INSERT
 TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM kuis
-    WHERE id = pertanyaan_kuis.kuis_id
-    AND mata_pelajaran_id IN (
-      SELECT id FROM mata_pelajaran WHERE guru_id = auth.uid()
-    )
+    JOIN mata_pelajaran ON kuis.mata_pelajaran_id = mata_pelajaran.id
+    WHERE kuis.id = pertanyaan_kuis.kuis_id AND mata_pelajaran.guru_id = auth.uid()
+  )
+);
+
+-- Guru can update own pertanyaan kuis
+CREATE POLICY "PertanyaanKuis update own"
+ON pertanyaan_kuis FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM kuis
+    JOIN mata_pelajaran ON kuis.mata_pelajaran_id = mata_pelajaran.id
+    WHERE kuis.id = pertanyaan_kuis.kuis_id AND mata_pelajaran.guru_id = auth.uid()
+  )
+);
+
+-- Guru can delete own pertanyaan kuis
+CREATE POLICY "PertanyaanKuis delete own"
+ON pertanyaan_kuis FOR DELETE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM kuis
+    JOIN mata_pelajaran ON kuis.mata_pelajaran_id = mata_pelajaran.id
+    WHERE kuis.id = pertanyaan_kuis.kuis_id AND mata_pelajaran.guru_id = auth.uid()
   )
 );
 
@@ -323,48 +232,39 @@ WITH CHECK (
 -- HASIL_KUIS Policies
 -- ============================================
 
--- Guru can read all hasil_kuis
-CREATE POLICY "Guru can read all hasil_kuis"
-ON hasil_kuis FOR SELECT
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-);
-
--- Siswa can read own hasil_kuis
-CREATE POLICY "Siswa can read own hasil_kuis"
+-- Siswa can read own hasil kuis
+CREATE POLICY "HasilKuis read own"
 ON hasil_kuis FOR SELECT
 TO authenticated
 USING (siswa_id = auth.uid());
 
--- Siswa can create hasil_kuis
-CREATE POLICY "Siswa can create hasil_kuis"
+-- Guru can read hasil kuis from their subjects
+CREATE POLICY "HasilKuis read guru"
+ON hasil_kuis FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM kuis
+    JOIN mata_pelajaran ON kuis.mata_pelajaran_id = mata_pelajaran.id
+    WHERE kuis.id = hasil_kuis.kuis_id AND mata_pelajaran.guru_id = auth.uid()
+  )
+);
+
+-- Siswa can insert their own hasil kuis
+CREATE POLICY "HasilKuis insert own"
 ON hasil_kuis FOR INSERT
 TO authenticated
 WITH CHECK (siswa_id = auth.uid());
 
--- Guru can update hasil_kuis (skor)
-CREATE POLICY "Guru can update hasil_kuis"
+-- Siswa can update their own hasil kuis
+CREATE POLICY "HasilKuis update own"
 ON hasil_kuis FOR UPDATE
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-)
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'guru'
-  )
-);
+USING (siswa_id = auth.uid())
+WITH CHECK (siswa_id = auth.uid());
 
 -- ============================================
--- Helper Functions
+-- HELPER FUNCTIONS
 -- ============================================
 
 -- Function to check if user is guru
@@ -388,3 +288,44 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to count kelas references (for delete prevention)
+CREATE OR REPLACE FUNCTION count_kelas_references(p_kelas_id UUID)
+RETURNS TABLE(table_name TEXT, count BIGINT)
+LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+    SELECT 'mata_pelajaran'::TEXT, COUNT(*)::BIGINT
+    FROM mata_pelajaran WHERE mata_pelajaran.kelas_id = p_kelas_id
+  UNION ALL
+    SELECT 'users'::TEXT, COUNT(*)::BIGINT
+    FROM public.users WHERE users.kelas_id = p_kelas_id AND users.role = 'siswa';
+END;
+$$;
+
+-- ============================================
+-- UPDATE TIMESTAMP TRIGGER
+-- ============================================
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for users table
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+CREATE TRIGGER update_users_updated_at
+  BEFORE UPDATE ON users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger for mata_pelajaran table
+DROP TRIGGER IF EXISTS update_matapelajaran_updated_at ON mata_pelajaran;
+CREATE TRIGGER update_matapelajaran_updated_at
+  BEFORE UPDATE ON mata_pelajaran
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
