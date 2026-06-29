@@ -42,7 +42,7 @@ export default function siswaProfil() {
         .from('users')
         .select(`
           *,
-          kelas:kelas(nama)
+          kelas:kelas!users_kelas_id_fkey(nama)
         `)
         .eq('id', session.user.id)
         .maybeSingle()
