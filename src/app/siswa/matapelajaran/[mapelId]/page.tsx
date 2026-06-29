@@ -218,14 +218,14 @@ export default function siswaMapelDetail() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group"
                     >
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center text-white shadow-sm">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0">
                           <FileText className="h-6 w-6" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900">{m.judul}</h3>
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-gray-900 truncate">{m.judul}</h3>
                           {m.deskripsi && (
                             <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{m.deskripsi}</p>
                           )}
@@ -241,7 +241,7 @@ export default function siswaMapelDetail() {
                           href={getFileUrl(m.file_url)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors shadow-sm"
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors shadow-sm sm:self-auto"
                         >
                           <Eye className="h-4 w-4" />
                           <span className="font-medium text-sm">Lihat Materi</span>
