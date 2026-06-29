@@ -88,7 +88,7 @@ export default function siswaKerjakanKuis() {
         .select('*')
         .eq('kuis_id', kuisId)
         .eq('siswa_id', session.user.id)
-        .single()
+        .maybeSingle()
 
       if (existingResult) {
         toast.info('Anda sudah mengerjakan kuis ini')

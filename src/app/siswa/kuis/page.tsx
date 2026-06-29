@@ -73,11 +73,13 @@ export default function SiswaKuisPage() {
 
       const mapelIds = mapelData.map(m => m.id)
 
+      const now = new Date().toISOString()
       const { data: kuisData } = await supabase
         .from('kuis')
         .select('id, judul, tipe, waktu_menit, mata_pelajaran_id, mata_pelajaran!inner(nama)')
         .in('mata_pelajaran_id', mapelIds)
         .eq('published', true)
+        .or(`due_date.is.null,due_date.gte.${now}`)
 
       if (!kuisData) return
 

@@ -169,7 +169,7 @@ export default function KelolaSiswa() {
         .from('users')
         .select('id')
         .eq('username', formData.username)
-        .single()
+        .maybeSingle()
 
       if (existingUser) {
         toast.error('Username sudah digunakan')

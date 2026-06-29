@@ -91,7 +91,7 @@ export default function SettingsPage() {
       .from('kelas')
       .select('id')
       .eq('nama', kelasName)
-      .single()
+      .maybeSingle()
 
     if (existing) {
       return toast.error(`Kelas "${kelasName}" sudah ada`)
@@ -125,7 +125,7 @@ export default function SettingsPage() {
       .select('id')
       .eq('nama', kelasName)
       .neq('id', id)
-      .single()
+      .maybeSingle()
 
     if (existing) {
       return toast.error(`Kelas "${kelasName}" sudah ada`)
