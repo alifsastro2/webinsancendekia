@@ -275,62 +275,64 @@ export default function siswaMapelDetail() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors"
                     >
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center text-white shadow-sm">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0">
                           <ClipboardList className="h-6 w-6" />
                         </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900">{k.judul}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              {k.waktu_menit && (
-                                <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  {k.waktu_menit} menit
-                                </Badge>
-                              )}
-                              {k.due_date && (
-                                <Badge className={`border-0 text-xs ${new Date(k.due_date) < new Date() ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
-                                  <CalendarClock className="h-3 w-3 mr-1" />
-                                  {new Date(k.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                </Badge>
-                              )}
-                              {hasilKuis[k.id]?.skor !== null && hasilKuis[k.id] ? (
-                                <Badge className="bg-green-100 text-green-700 border-0 text-xs">
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Nilai: {hasilKuis[k.id].skor}
-                                </Badge>
-                              ) : hasilKuis[k.id]?.skor === null ? (
-                                <Badge className="bg-gray-100 text-gray-500 border-0 text-xs">
-                                  <AlertCircle className="h-3 w-3 mr-1" />
-                                  Belum dinilai
-                                </Badge>
-                              ) : null}
-                            </div>
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-gray-900 truncate">{k.judul}</h3>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            {k.waktu_menit && (
+                              <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
+                                <Clock className="h-3 w-3 mr-1" />
+                                {k.waktu_menit} menit
+                              </Badge>
+                            )}
+                            {k.due_date && (
+                              <Badge className={`border-0 text-xs ${new Date(k.due_date) < new Date() ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                                <CalendarClock className="h-3 w-3 mr-1" />
+                                {new Date(k.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </Badge>
+                            )}
+                            {hasilKuis[k.id]?.skor !== null && hasilKuis[k.id] ? (
+                              <Badge className="bg-green-100 text-green-700 border-0 text-xs">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Nilai: {hasilKuis[k.id].skor}
+                              </Badge>
+                            ) : hasilKuis[k.id]?.skor === null ? (
+                              <Badge className="bg-gray-100 text-gray-500 border-0 text-xs">
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                Belum dinilai
+                              </Badge>
+                            ) : null}
                           </div>
                         </div>
+                      </div>
 
+                      <div className="shrink-0 self-stretch sm:self-auto">
                         {hasilKuis[k.id] ? (
                           <Link href={`/siswa/matapelajaran/${mapelId}/kuis/${k.id}/review`}>
-                            <Button className="bg-amber-500 hover:bg-amber-600">
+                            <Button className="bg-amber-500 hover:bg-amber-600 w-full sm:w-auto">
                               <ClipboardList className="mr-2 h-4 w-4" />
                               Lihat
                             </Button>
                           </Link>
                         ) : k.due_date && new Date(k.due_date) < new Date() ? (
-                          <Button disabled className="bg-gray-300 text-gray-500 cursor-not-allowed">
+                          <Button disabled className="bg-gray-300 text-gray-500 cursor-not-allowed w-full sm:w-auto">
                             <Clock className="mr-2 h-4 w-4" />
                             Ditutup
                           </Button>
                         ) : (
                           <Link href={`/siswa/matapelajaran/${mapelId}/kuis/${k.id}`}>
-                            <Button className="bg-amber-500 hover:bg-amber-600">
+                            <Button className="bg-amber-500 hover:bg-amber-600 w-full sm:w-auto">
                               <ClipboardList className="mr-2 h-4 w-4" />
                               Mulai
                             </Button>
                           </Link>
                         )}
+                      </div>
                     </motion.div>
                   ))}
                 </div>
