@@ -178,7 +178,7 @@ export default function KelolaSiswa() {
 
       // Create user in Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email || `${formData.username}@sekolah.app`,
+        email: formData.email || `${formData.username}@insancendekia.com`,
         password: formData.password,
         options: {
           data: {
@@ -198,7 +198,7 @@ export default function KelolaSiswa() {
         id: authData.user.id,
         username: formData.username,
         nama: formData.nama,
-        email: formData.email || `${formData.username}@sekolah.app`,
+        email: formData.email || `${formData.username}@insancendekia.com`,
         role: 'siswa',
         kelas_id: formData.kelas_id,
         is_active: true
@@ -407,17 +407,6 @@ export default function KelolaSiswa() {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email (Opsional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="contoh@email.com"
-                  className="mt-2 h-11 rounded-xl"
-                />
-              </div>
-              <div>
                 <Label htmlFor="kelas">Kelas</Label>
                 <Select value={formData.kelas_id} onValueChange={(v) => v && setFormData({ ...formData, kelas_id: v })}>
                   <SelectTrigger id="kelas" className="h-11 rounded-xl mt-2">
@@ -574,9 +563,10 @@ export default function KelolaSiswa() {
                 id="edit-email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="mt-2 h-11 rounded-xl"
+                disabled
+                className="mt-2 h-11 rounded-xl bg-gray-50"
               />
+              <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
             </div>
             <div>
               <Label htmlFor="edit-kelas">Kelas</Label>

@@ -234,7 +234,8 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <Label>Email</Label>
-                  <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="mt-2" />
+                  <Input type="email" value={formData.email} disabled className="mt-2 bg-gray-50" />
+                  <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
                 </div>
                 <button
                   onClick={handleSave}

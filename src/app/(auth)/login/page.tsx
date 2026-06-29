@@ -13,10 +13,9 @@ export default function LoginPage() {
   const handleLogin = async (data: { username: string; password: string }) => {
     setIsLoading(true)
     try {
-      // Get user by username
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('id, email, role, is_active, kelas_id, nama')
+        .select('id, role, is_active, kelas_id, nama')
         .eq('username', data.username)
         .single()
 
@@ -28,13 +27,10 @@ export default function LoginPage() {
         throw new Error('Akun Anda dinonaktifkan. Hubungi guru.')
       }
 
-      // Sign in with Supabase Auth
-      if (!userData.email) {
-        throw new Error('Email tidak ditemukan')
-      }
+      const authEmail = `${data.username.toLowerCase()}@insancendekia.com`
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: userData.email,
+        email: authEmail,
         password: data.password,
       })
 

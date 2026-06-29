@@ -220,14 +220,15 @@ export default function siswaProfil() {
                 </div>
 
                 <div>
-                  <Label htmlFor="email">Email (Opsional)</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="contoh@email.com"
+                    disabled
+                    className="bg-gray-50"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
                 </div>
 
                 <Button onClick={handleSaveProfile} disabled={saving} className="w-full">

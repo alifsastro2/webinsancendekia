@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Username sudah digunakan' }, { status: 400 })
     }
 
-    const email = `${usernameLower}@sekolah.app`
+    const email = `${usernameLower}@insancendekia.com`
 
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
