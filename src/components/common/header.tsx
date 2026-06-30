@@ -74,7 +74,7 @@ export default function Header({ role }: HeaderProps) {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <NotificationBell />
+          <NotificationBell role={role} />
 
           <DropdownMenu>
             <DropdownMenuTrigger
