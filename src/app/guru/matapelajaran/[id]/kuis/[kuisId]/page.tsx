@@ -39,6 +39,9 @@ import {
   Trophy,
   Circle,
   Users,
+  Medal,
+  Award,
+  FileText,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -746,20 +749,26 @@ export default function GuruKuisDetail() {
                       {leaderboard.map((entry) => (
                         <tr key={entry.siswa_id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-center">
                               {entry.rank === 1 && (
-                                <span className="text-2xl">🥇</span>
+                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 shadow-lg shadow-amber-500/30">
+                                  <Medal className="h-5 w-5 text-white" />
+                                </div>
                               )}
                               {entry.rank === 2 && (
-                                <span className="text-2xl">🥈</span>
+                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 shadow-lg shadow-gray-400/30">
+                                  <Award className="h-5 w-5 text-white" />
+                                </div>
                               )}
                               {entry.rank === 3 && (
-                                <span className="text-2xl">🥉</span>
+                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-600 to-amber-700 shadow-lg shadow-amber-700/30">
+                                  <Award className="h-5 w-5 text-white" />
+                                </div>
                               )}
                               {entry.rank > 3 && (
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-sm font-bold text-gray-600">
+                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-sm font-bold text-gray-600">
                                   {entry.rank}
-                                </span>
+                                </div>
                               )}
                             </div>
                           </td>
@@ -789,7 +798,7 @@ export default function GuruKuisDetail() {
                             )}
                             {entry.status === 'belum' && (
                               <Badge variant="outline" className="text-gray-500 gap-1">
-                                <Circle className="h-3 w-3" />
+                                <FileText className="h-3 w-3" />
                                 Belum Mengerjakan
                               </Badge>
                             )}
