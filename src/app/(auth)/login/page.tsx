@@ -16,7 +16,7 @@ export default function LoginPage() {
       // 1. Validasi user di database
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('id, role, is_active, kelas_id, nama')
+        .select('id, role, is_active, kelas_id, nama, email')
         .eq('username', data.username)
         .single()
 
@@ -28,8 +28,8 @@ export default function LoginPage() {
         throw new Error('Akun Anda dinonaktifkan. Hubungi guru.')
       }
 
-      // 2. Login dengan Supabase Auth
-      const authEmail = `${data.username.toLowerCase()}@insancendekia.com`
+      // 2. Login dengan Supabase Auth - pakai email dari database
+      const authEmail = userData.email || `${data.username.toLowerCase()}@insancendekia.com`
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: authEmail,

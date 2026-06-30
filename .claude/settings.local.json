@@ -103,7 +103,8 @@
       "Bash(git commit -m 'fix: Use createBrowserClient from @supabase/ssr for proper cookie handling *)",
       "Bash(sed -i 's/<DropdownMenuItem>\\\\n                              <a href={getFileUrl\\(m.file_url\\)} target=\"_blank\" rel=\"noopener noreferrer\" className=\"flex items-center gap-2\">\\\\n                                <Eye className=\"h-4 w-4\" \\\\/>\\\\n                                Lihat Materi\\\\n                              <\\\\/a>\\\\n                            <\\\\/DropdownMenuItem>/<DropdownMenuItem onClick={\\(\\) => handleShowViewers\\(m.id\\)} className=\"cursor-pointer\">\\\\n                            <Users className=\"h-4 w-4 mr-2\" \\\\/>\\\\n                            Siapa yang Membuka\\\\n                          <\\\\/DropdownMenuItem>\\\\n                          {m.file_url \\\\&\\\\& \\(\\\\n                            <DropdownMenuItem>\\\\n                              <a href={getFileUrl\\(m.file_url\\)} target=\"_blank\" rel=\"noopener noreferrer\" className=\"flex items-center gap-2\">\\\\n                                <Eye className=\"h-4 w-4\" \\\\/>\\\\n                                Lihat Materi\\\\n                              <\\\\/a>\\\\n                            <\\\\/DropdownMenuItem>\\\\n                          \\)}/g' /home/alif/sekolah-online/src/app/guru/matapelajaran/\\\\[id\\\\]/page.tsx)",
       "Bash(git checkout *)",
-      "Bash(git commit -m 'feat: Add materi view tracking *)"
+      "Bash(git commit -m 'feat: Add materi view tracking *)",
+      "Bash(git commit -m 'fix: Use actual email from database for login *)"
     ],
     "additionalDirectories": [
       "/home/alif",
