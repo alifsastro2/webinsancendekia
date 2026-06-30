@@ -36,6 +36,9 @@ import {
   Star,
   CalendarClock,
   MoreVertical,
+  Trophy,
+  Circle,
+  Users,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -65,6 +68,16 @@ interface HasilWithSiswa {
   }
 }
 
+interface LeaderboardEntry {
+  rank: number
+  siswa_id: string
+  nama: string
+  username: string
+  status: 'selesai' | 'belum' | 'belum_dinilai'
+  skor: number | null
+  submitted_at: string | null
+}
+
 export default function GuruKuisDetail() {
   const params = useParams()
   const router = useRouter()
@@ -79,6 +92,7 @@ export default function GuruKuisDetail() {
   const [nilaiMap, setNilaiMap] = useState<Record<string, string>>({})
   const [savingNilai, setSavingNilai] = useState<Record<string, boolean>>({})
   const [editingNilai, setEditingNilai] = useState<Record<string, boolean>>({})
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
 
   const [pertanyaanForm, setPertanyaanForm] = useState({
     pertanyaan: '',
@@ -97,7 +111,7 @@ export default function GuruKuisDetail() {
     try {
       const { data } = await supabase
         .from('kuis')
-        .select('*, pertanyaan:pertanyaan_kuis(*)')
+        .select('*, mata_pelajaran:mata_pelajaran_id(kelas_id)')
         .eq('id', kuisId)
         .single()
 
@@ -109,9 +123,93 @@ export default function GuruKuisDetail() {
           )
         }
         setKuis(sorted as KuisWithPertanyaan)
+
+        // Fetch leaderboard data after kuis is loaded
+        if (data.mata_pelajaran?.kelas_id) {
+          fetchLeaderboard(data.mata_pelajaran.kelas_id)
+        }
       }
     } catch (error) {
       console.error('Error fetching kuis:', error)
+    }
+  }
+
+  const fetchLeaderboard = async (kelasId: string) => {
+    try {
+      // Get all students from this class
+      const { data: students } = await supabase
+        .from('users')
+        .select('id, nama, username')
+        .eq('role', 'siswa')
+        .eq('kelas_id', kelasId)
+
+      // Get all results for this kuis
+      const { data: results } = await supabase
+        .from('hasil_kuis')
+        .select('siswa_id, skor, submitted_at')
+        .eq('kuis_id', kuisId)
+
+      if (students && results) {
+        // Create a map of siswa_id to result
+        const resultsMap = new Map(
+          results.map(r => [r.siswa_id, r])
+        )
+
+        // Build leaderboard entries
+        const entries: LeaderboardEntry[] = students.map((student, index) => {
+          const result = resultsMap.get(student.id)
+
+          let status: 'selesai' | 'belum' | 'belum_dinilai' = 'belum'
+          let skor: number | null = null
+          let submittedAt: string | null = null
+
+          if (result) {
+            submittedAt = result.submitted_at
+            if (result.skor !== null) {
+              status = 'selesai'
+              skor = result.skor
+            } else {
+              status = 'belum_dinilai'
+            }
+          }
+
+          return {
+            rank: 0, // Will be calculated after sorting
+            siswa_id: student.id,
+            nama: student.nama,
+            username: student.username,
+            status,
+            skor,
+            submitted_at: submittedAt
+          }
+        })
+
+        // Sort: completed (by score DESC), then incomplete at bottom
+        entries.sort((a, b) => {
+          // Both completed - sort by score
+          if (a.status === 'selesai' && b.status === 'selesai') {
+            return (b.skor || 0) - (a.skor || 0)
+          }
+          // Completed first
+          if (a.status === 'selesai') return -1
+          if (b.status === 'selesai') return 1
+          // Ungraded next
+          if (a.status === 'belum_dinilai') return -1
+          if (b.status === 'belum_dinilai') return 1
+          // Not started last
+          return 0
+        })
+
+        // Assign ranks
+        let currentRank = 1
+        entries.forEach((entry) => {
+          entry.rank = currentRank++
+        })
+
+        setLeaderboard(entries)
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error)
     }
   }
 
@@ -356,7 +454,11 @@ export default function GuruKuisDetail() {
           </TabsTrigger>
           <TabsTrigger value="hasil" className="data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-sm rounded-lg px-4 py-2">
             <Star className="mr-2 h-4 w-4" />
-            Hasil Siswa ({totalSiswa})
+            Hasil ({totalSiswa})
+          </TabsTrigger>
+          <TabsTrigger value="leaderboard" className="data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-sm rounded-lg px-4 py-2">
+            <Trophy className="mr-2 h-4 w-4" />
+            Leaderboard ({leaderboard.length})
           </TabsTrigger>
         </TabsList>
 
@@ -606,6 +708,113 @@ export default function GuruKuisDetail() {
               })}
             </div>
           )}
+        </TabsContent>
+
+        {/* Tab Leaderboard */}
+        <TabsContent value="leaderboard" className="mt-6">
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Trophy className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Leaderboard Kuis</CardTitle>
+                  <p className="text-sm text-gray-500">Peringkat siswa berdasarkan nilai</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {leaderboard.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">Belum ada data siswa</p>
+                  <p className="text-gray-400 text-sm">Siswa akan muncul setelah kuis dibuat</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Peringkat</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Nilai</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {leaderboard.map((entry) => (
+                        <tr key={entry.siswa_id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              {entry.rank === 1 && (
+                                <span className="text-2xl">🥇</span>
+                              )}
+                              {entry.rank === 2 && (
+                                <span className="text-2xl">🥈</span>
+                              )}
+                              {entry.rank === 3 && (
+                                <span className="text-2xl">🥉</span>
+                              )}
+                              {entry.rank > 3 && (
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-sm font-bold text-gray-600">
+                                  {entry.rank}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                                {entry.nama.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">{entry.nama}</p>
+                                <p className="text-sm text-gray-500">@{entry.username}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-center">
+                            {entry.status === 'selesai' && (
+                              <Badge className="bg-green-100 text-green-700 border-0 gap-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                Selesai
+                              </Badge>
+                            )}
+                            {entry.status === 'belum_dinilai' && (
+                              <Badge className="bg-amber-100 text-amber-700 border-0 gap-1">
+                                <Clock className="h-3 w-3" />
+                                Belum Dinilai
+                              </Badge>
+                            )}
+                            {entry.status === 'belum' && (
+                              <Badge variant="outline" className="text-gray-500 gap-1">
+                                <Circle className="h-3 w-3" />
+                                Belum Mengerjakan
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-center">
+                            {entry.skor !== null ? (
+                              <span className={`inline-flex items-center justify-center min-w-[48px] px-3 py-1 rounded-full text-lg font-bold ${
+                                entry.skor >= 80 ? 'bg-green-100 text-green-700' :
+                                entry.skor >= 60 ? 'bg-amber-100 text-amber-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {entry.skor}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-lg">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
