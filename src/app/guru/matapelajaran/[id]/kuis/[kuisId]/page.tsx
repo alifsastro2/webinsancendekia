@@ -240,7 +240,7 @@ export default function GuruKuisDetail() {
         return
       }
       if (kuis.tipe === 'pilihan_ganda' && (!pertanyaanForm.opsi_a || !pertanyaanForm.opsi_b || !pertanyaanForm.opsi_c || !pertanyaanForm.opsi_d)) {
-        toast.error('Semua opsi jawaban wajib diisi untuk pilihan ganda')
+        toast.error('Semua pilihan jawaban (A, B, C, D) wajib diisi untuk soal pilihan ganda')
         return
       }
       const nextOrder = kuis.pertanyaan.length + 1
@@ -255,22 +255,22 @@ export default function GuruKuisDetail() {
         urutan: nextOrder
       })
       if (error) throw error
-      toast.success('Pertanyaan berhasil ditambahkan')
+      toast.success('Pertanyaan berhasil ditambahkan!')
       setPertanyaanDialogOpen(false)
       resetPertanyaanForm()
       fetchKuis()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal menambahkan pertanyaan')
+      toast.error('Gagal menyimpan pertanyaan. Silakan coba lagi.')
     }
   }
 
   const handleDeletePertanyaan = async (id: string) => {
     try {
       await supabase.from('pertanyaan_kuis').delete().eq('id', id)
-      toast.success('Pertanyaan berhasil dihapus')
+      toast.success('Pertanyaan berhasil dihapus!')
       fetchKuis()
     } catch (error) {
-      toast.error('Gagal menghapus pertanyaan')
+      toast.error('Gagal menghapus pertanyaan. Silakan coba lagi.')
     }
   }
 
@@ -278,17 +278,17 @@ export default function GuruKuisDetail() {
     if (!confirm('Apakah Anda yakin ingin menghapus kuis ini?')) return
     try {
       await supabase.from('kuis').delete().eq('id', kuisId)
-      toast.success('Kuis berhasil dihapus')
+      toast.success('Kuis berhasil dihapus!')
       router.push(`/guru/matapelajaran/${mapelId}`)
     } catch (error) {
-      toast.error('Gagal menghapus kuis')
+      toast.error('Gagal menghapus kuis. Silakan coba lagi.')
     }
   }
 
   const handlePublishKuis = async () => {
     try {
       if (!kuis || kuis.pertanyaan.length === 0) {
-        toast.error('Tambahkan minimal 1 pertanyaan sebelum menerbitkan')
+        toast.error('Minimal harus ada 1 pertanyaan sebelum bisa diterbitkan')
         return
       }
       const { error } = await supabase
@@ -296,17 +296,17 @@ export default function GuruKuisDetail() {
         .update({ published: true })
         .eq('id', kuisId)
       if (error) throw error
-      toast.success('Kuis berhasil diterbitkan')
+      toast.success('Kuis berhasil diterbitkan!')
       fetchKuis()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal menerbitkan kuis')
+      toast.error('Gagal menerbitkan kuis. Silakan coba lagi.')
     }
   }
 
   const handleSaveNilai = async (hasilId: string) => {
     const skor = parseInt(nilaiMap[hasilId])
     if (isNaN(skor) || skor < 0 || skor > 100) {
-      toast.error('Nilai harus antara 0-100')
+      toast.error('Nilai harus diisi angka antara 0 sampai 100')
       return
     }
     setSavingNilai(prev => ({ ...prev, [hasilId]: true }))
@@ -323,9 +323,9 @@ export default function GuruKuisDetail() {
         .eq('id', hasilId)
         .single()
       if (verifyError) throw verifyError
-      if (verify?.skor === null) throw new Error('Nilai gagal disimpan. Coba lagi.')
+      toast.error('Nilai gagal disimpan. Silakan coba lagi.')
 
-      toast.success('Nilai berhasil disimpan')
+      toast.success('Nilai berhasil disimpan!')
       setEditingNilai(prev => ({ ...prev, [hasilId]: false }))
       setNilaiMap(prev => {
         const next = { ...prev }
@@ -335,7 +335,7 @@ export default function GuruKuisDetail() {
       fetchHasil()
     } catch (error: any) {
       console.error('Save nilai error:', error)
-      toast.error(error.message || 'Gagal menyimpan nilai')
+      toast.error('Gagal menyimpan nilai. Silakan coba lagi.')
     } finally {
       setSavingNilai(prev => ({ ...prev, [hasilId]: false }))
     }

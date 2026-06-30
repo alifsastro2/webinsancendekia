@@ -123,7 +123,7 @@ export default function KelolaSiswa() {
 
       if (error) {
         console.error('Supabase error:', error)
-        toast.error('Gagal memuat data siswa: ' + error.message)
+        toast.error('Gagal memuat data. Silakan refresh halaman.')
         return
       }
 
@@ -158,7 +158,7 @@ export default function KelolaSiswa() {
 
   const handleCreate = async () => {
     if (!formData.nama || !formData.username || !formData.password || !formData.kelas_id) {
-      toast.error('Semua field wajib diisi')
+      toast.error('Semua data harus diisi dengan lengkap')
       return
     }
 
@@ -170,7 +170,7 @@ export default function KelolaSiswa() {
         .maybeSingle()
 
       if (existingUser) {
-        toast.error('Username sudah digunakan')
+        toast.error('Username sudah digunakan. Silakan pilih username lain.')
         return
       }
 
@@ -189,7 +189,7 @@ export default function KelolaSiswa() {
       })
 
       if (authError) throw authError
-      if (!authData.user) throw new Error('Gagal membuat akun')
+      toast.error('Gagal membuat akun siswa. Silakan coba lagi.')
 
       // Upsert to users table (trigger may have already inserted)
       const { error: upsertError } = await supabase.from('users').upsert({
@@ -219,12 +219,12 @@ export default function KelolaSiswa() {
         console.error('Confirm email error:', errData)
       }
 
-      toast.success('siswa berhasil ditambahkan')
+      toast.error('Akun siswa berhasil dibuat!')
       setDialogOpen(false)
       resetForm()
       fetchSiswa()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal menambahkan siswa')
+      toast.error('Gagal menyimpan data siswa. Silakan coba lagi.')
     }
   }
 
@@ -243,12 +243,12 @@ export default function KelolaSiswa() {
 
       if (error) throw error
 
-      toast.success('Data siswa berhasil diupdate')
+      toast.success('Data siswa berhasil diperbarui!')
       setEditDialogOpen(false)
       resetForm()
       fetchSiswa()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mengupdate siswa')
+      toast.error('Gagal memperbarui data siswa. Silakan coba lagi.')
     }
   }
 
@@ -294,9 +294,9 @@ export default function KelolaSiswa() {
         throw new Error(data.error || 'Gagal mereset password')
       }
 
-      toast.success('Password berhasil direset')
+      toast.success('Password berhasil direset!')
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mereset password')
+      toast.error('Gagal mereset password. Silakan coba lagi.')
     }
   }
 

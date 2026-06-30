@@ -70,7 +70,7 @@ export default function siswaProfil() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Sesi tidak valid')
+      toast.error('Sesi login habis. Silakan login ulang.')
 
       const { data: existing } = await supabase
         .from('users')
@@ -80,7 +80,7 @@ export default function siswaProfil() {
         .maybeSingle()
 
       if (existing) {
-        toast.error('Username sudah digunakan')
+        toast.error('Username sudah digunakan. Silakan pilih username lain.')
         setSaving(false)
         return
       }
@@ -95,10 +95,10 @@ export default function siswaProfil() {
 
       if (error) throw error
 
-      toast.success('Profil berhasil diupdate')
+      toast.success('Profil berhasil diperbarui!')
       fetchUser()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mengupdate profil')
+      toast.error('Gagal menyimpan profil. Silakan coba lagi.')
     } finally {
       setSaving(false)
     }
@@ -106,12 +106,12 @@ export default function siswaProfil() {
 
   const handleChangePassword = async () => {
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-      toast.error('Semua field password wajib diisi')
+      toast.error('Semua kolom password wajib diisi')
       return
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('Password baru dan konfirmasi tidak sama')
+      toast.error('Password baru dan konfirmasi password tidak cocok')
       return
     }
 
@@ -124,7 +124,7 @@ export default function siswaProfil() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Sesi tidak valid')
+      toast.error('Sesi login habis. Silakan login ulang.')
 
       const { error } = await supabase.auth.updateUser({
         password: passwordForm.newPassword
@@ -132,14 +132,14 @@ export default function siswaProfil() {
 
       if (error) throw error
 
-      toast.success('Password berhasil diubah')
+      toast.success('Password berhasil diubah!')
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       })
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mengubah password')
+      toast.error('Gagal mengubah password. Silakan coba lagi.')
     } finally {
       setSaving(false)
     }

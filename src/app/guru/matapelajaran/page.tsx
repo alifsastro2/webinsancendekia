@@ -151,7 +151,7 @@ export default function GuruMataPelajaran() {
     try {
       const sessionData = await supabase.auth.getSession()
       const session = sessionData.data.session
-      if (!session) throw new Error('Sesi tidak valid')
+      toast.error('Sesi login habis. Silakan login ulang.')
 
       if (!formData.nama || !formData.kelas_id) {
         toast.error('Nama mata pelajaran dan kelas wajib diisi')
@@ -169,12 +169,12 @@ export default function GuruMataPelajaran() {
 
       if (error) throw error
 
-      toast.success('Mata pelajaran berhasil ditambahkan')
+      toast.success('Mata pelajaran berhasil dibuat!')
       setDialogOpen(false)
       resetForm()
       fetchMapel()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal menambahkan mata pelajaran')
+      toast.error('Gagal menyimpan mata pelajaran. Silakan coba lagi.')
     }
   }
 
@@ -193,12 +193,12 @@ export default function GuruMataPelajaran() {
 
       if (error) throw error
 
-      toast.success('Mata pelajaran berhasil diupdate')
+      toast.success('Mata pelajaran berhasil diperbarui!')
       setEditDialogOpen(false)
       resetForm()
       fetchMapel()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mengupdate mata pelajaran')
+      toast.error('Gagal memperbarui mata pelajaran. Silakan coba lagi.')
     }
   }
 
@@ -207,10 +207,10 @@ export default function GuruMataPelajaran() {
 
     try {
       await supabase.from('mata_pelajaran').delete().eq('id', id)
-      toast.success('Mata pelajaran berhasil dihapus')
+      toast.success('Mata pelajaran berhasil dihapus!')
       fetchMapel()
     } catch (error) {
-      toast.error('Gagal menghapus mata pelajaran')
+      toast.error('Gagal menghapus mata pelajaran. Silakan coba lagi.')
     }
   }
 

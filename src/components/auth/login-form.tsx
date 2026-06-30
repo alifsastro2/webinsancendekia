@@ -23,14 +23,16 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
     setLocalError('')
 
     if (!username || !password) {
-      setLocalError('Username dan password harus diisi')
+      setLocalError('Username dan password wajib diisi')
       return
     }
 
     try {
       await onSubmit({ username, password })
     } catch (err: any) {
-      setLocalError(err.message || 'Gagal login. Silakan coba lagi.')
+      // Error sudah ditangani oleh parent component dengan toast
+      // Jadi kita tidak perlu menampilkan error di sini
+      setLocalError('')
     }
   }
 

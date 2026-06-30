@@ -141,7 +141,7 @@ export default function MataPelajaranDetail() {
     const file = e.target.files?.[0]
     if (file) {
       if (file.size > 50 * 1024 * 1024) {
-        toast.error('File terlalu besar. Maksimal 50 MB')
+        toast.error('File terlalu besar. Maksimal ukuran file adalah 50 MB')
         return
       }
       setSelectedFile(file)
@@ -166,14 +166,14 @@ export default function MataPelajaranDetail() {
       const result = await response.json()
 
       if (result.error) {
-        toast.error(`Gagal mengunggah: ${result.error}`)
+        toast.error('Gagal mengunggah file. Silakan coba lagi.')
         return null
       }
 
       toast.success('File berhasil diunggah!')
       return result.url
     } catch (error: any) {
-      toast.error(`Gagal mengunggah: ${error.message || 'Terjadi kesalahan'}`)
+      toast.error('Gagal menyimpan file. Silakan coba lagi.')
       return null
     }
   }
@@ -186,7 +186,7 @@ export default function MataPelajaranDetail() {
       }
 
       if (!selectedFile && !materiForm.file_url) {
-        toast.error('Upload file atau masukkan URL')
+        toast.error('Silakan upload file atau masukkan tautan (URL) materi')
         return
       }
 
@@ -214,12 +214,12 @@ export default function MataPelajaranDetail() {
 
       if (error) throw error
 
-      toast.success('Materi berhasil ditambahkan')
+      toast.success('Materi berhasil ditambahkan!')
       setMateriDialogOpen(false)
       resetMateriForm()
       fetchData()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal menambahkan materi')
+      toast.error('Gagal menyimpan materi. Silakan coba lagi.')
     }
   }
 
@@ -228,10 +228,10 @@ export default function MataPelajaranDetail() {
 
     try {
       await supabase.from('materi').delete().eq('id', id)
-      toast.success('Materi berhasil dihapus')
+      toast.success('Materi berhasil dihapus!')
       fetchData()
     } catch (error) {
-      toast.error('Gagal menghapus materi')
+      toast.error('Gagal menghapus materi. Silakan coba lagi.')
     }
   }
 
@@ -252,12 +252,12 @@ export default function MataPelajaranDetail() {
 
       if (error) throw error
 
-      toast.success('Kuis berhasil ditambahkan')
+      toast.success('Kuis berhasil dibuat!')
       setKuisDialogOpen(false)
       setKuisForm({ judul: '', tipe: 'pilihan_ganda', waktu_menit: '', due_date: '' })
       fetchData()
     } catch (error: any) {
-      toast.error(error.message || 'Gagal menambahkan kuis')
+      toast.error('Gagal menyimpan kuis. Silakan coba lagi.')
     }
   }
 

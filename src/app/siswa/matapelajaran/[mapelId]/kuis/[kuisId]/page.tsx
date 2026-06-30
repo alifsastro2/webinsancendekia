@@ -91,7 +91,7 @@ export default function siswaKerjakanKuis() {
         .maybeSingle()
 
       if (existingResult) {
-        toast.info('Anda sudah mengerjakan kuis ini')
+        toast.info('Anda sudah mengerjakan kuis ini sebelumnya')
         router.back()
         return
       }
@@ -107,12 +107,12 @@ export default function siswaKerjakanKuis() {
 
       if (data) {
         if (!data.published) {
-          toast.error('Kuis belum diterbitkan')
+          toast.error('Kuis ini belum dibuka oleh guru. Silakan hubungi guru Anda.')
           router.back()
           return
         }
         if (data.due_date && new Date(data.due_date) < new Date()) {
-          toast.error('Batas waktu pengerjaan kuis telah berakhir')
+          toast.error('Batas waktu pengerjaan sudah berakhir. Kuis ditutup.')
           router.back()
           return
         }
@@ -129,7 +129,7 @@ export default function siswaKerjakanKuis() {
       }
     } catch (error) {
       console.error('Error fetching kuis:', error)
-      toast.error('Gagal memuat kuis')
+      toast.error('Gagal memuat kuis. Silakan coba lagi.')
     } finally {
       setLoading(false)
     }
@@ -142,7 +142,7 @@ export default function siswaKerjakanKuis() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Sesi tidak valid')
+      toast.error('Sesi login habis. Silakan login ulang.')
 
       let skor: number | null = null
       if (kuis?.tipe === 'pilihan_ganda') {
@@ -170,14 +170,14 @@ export default function siswaKerjakanKuis() {
       if (error) throw error
 
       if (expired) {
-        toast.error('Waktu habis! Jawaban Anda sudah dikirim otomatis.')
+        toast.error('Waktu habis! Jawaban Anda otomatis terkirim.')
       } else {
-        toast.success(kuis?.tipe === 'pilihan_ganda' ? `Jawaban dikirim! Nilai Anda: ${skor}` : 'Jawaban dikirim!')
+        toast.success(kuis?.tipe === 'pilihan_ganda' ? `Jawaban terkirim! Nilai Anda: ${skor}` : 'Jawaban terkirim!')
       }
 
       setTimeout(() => router.back(), 1500)
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mengirim jawaban')
+      toast.error('Gagal mengirim jawaban. Silakan coba lagi.')
     } finally {
       setSubmitting(false)
     }

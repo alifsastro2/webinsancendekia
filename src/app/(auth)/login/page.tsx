@@ -21,11 +21,13 @@ export default function LoginPage() {
         .single()
 
       if (userError || !userData) {
-        throw new Error('Username tidak ditemukan')
+        toast.error('Akun tidak ditemukan. Pastikan username sudah benar.')
+        return
       }
 
       if (!userData.is_active) {
-        throw new Error('Akun Anda dinonaktifkan. Hubungi guru.')
+        toast.error('Akun Anda dinonaktifkan. Silakan hubungi guru.')
+        return
       }
 
       // 2. Login dengan Supabase Auth - pakai email dari database
@@ -37,7 +39,8 @@ export default function LoginPage() {
       })
 
       if (signInError) {
-        throw new Error(signInError.message || 'Password salah')
+        toast.error('Username atau password salah. Silakan coba lagi.')
+        return
       }
 
       toast.success(`Selamat datang, ${userData.nama}!`)
@@ -50,7 +53,7 @@ export default function LoginPage() {
         window.location.href = '/siswa'
       }
     } catch (error: any) {
-      throw error
+      toast.error('Terjadi kesalahan. Silakan coba lagi nanti.')
     } finally {
       setIsLoading(false)
     }
