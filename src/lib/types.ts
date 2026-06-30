@@ -134,6 +134,7 @@ export interface KuisForm {
   tipe: 'pilihan_ganda' | 'essay'
   waktu_menit?: number
   due_date?: string
+  attempt_limits?: number | null
 }
 
 export interface PertanyaanForm {

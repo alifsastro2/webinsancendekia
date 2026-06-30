@@ -489,11 +489,15 @@ export default function GuruKuisDetail() {
                 <MoreVertical className="h-5 w-5 text-gray-500" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => setPertanyaanDialogOpen(true)} className="cursor-pointer">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Tambah Pertanyaan
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {!kuis.published && (
+                  <>
+                    <DropdownMenuItem onClick={() => setPertanyaanDialogOpen(true)} className="cursor-pointer">
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Tambah Pertanyaan
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={handleDeleteKuis} className="cursor-pointer text-red-600">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Hapus Kuis
@@ -578,9 +582,11 @@ export default function GuruKuisDetail() {
                             </div>
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeletePertanyaan(p.id)} className="text-red-600 hover:text-red-700 shrink-0">
-                          <Trash className="h-4 w-4" />
-                        </Button>
+                        {!kuis.published && (
+                          <Button variant="ghost" size="icon" onClick={() => handleDeletePertanyaan(p.id)} className="text-red-600 hover:text-red-700 shrink-0">
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}

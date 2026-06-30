@@ -83,19 +83,14 @@ export default function siswaKerjakanKuis() {
         return
       }
 
-      const { data: existingResult } = await supabase
+      // Get all attempts for this student on this kuis
+      const { data: allAttempts } = await supabase
         .from('hasil_kuis')
         .select('*')
         .eq('kuis_id', kuisId)
         .eq('siswa_id', session.user.id)
-        .maybeSingle()
 
-      if (existingResult) {
-        toast.info('Anda sudah mengerjakan kuis ini sebelumnya')
-        router.back()
-        return
-      }
-
+      // Get kuis data with attempt_limits
       const { data } = await supabase
         .from('kuis')
         .select(`
@@ -116,13 +111,29 @@ export default function siswaKerjakanKuis() {
           router.back()
           return
         }
+
+        // Check attempt limits
+        const attemptCount = allAttempts?.length || 0
+        if (data.attempt_limits && attemptCount >= data.attempt_limits) {
+          toast.error(`Batas percobaan sudah habis. Anda telah mengerjakan kuis ini ${attemptCount} kali.`)
+          router.back()
+          return
+        }
+
+        // Calculate highest score from previous attempts
+        const highestScore = allAttempts?.length
+          ? Math.max(...allAttempts.filter((a: { skor: number | null }) => a.skor !== null).map((a: { skor: number | null }) => a.skor || 0))
+          : null
+
         const sorted = {
           ...data,
           pertanyaan: [...(data.pertanyaan || [])].sort(
             (a: any, b: any) => (a.urutan || 0) - (b.urutan || 0)
-          )
+          ),
+          attemptCount,
+          highestScore
         }
-        setKuis(sorted as KuisWithPertanyaan)
+        setKuis(sorted as KuisWithPertanyaan & { attemptCount: number; highestScore: number | null })
         if (data.waktu_menit) {
           setTimeLeft(data.waktu_menit * 60)
         }
@@ -142,7 +153,11 @@ export default function siswaKerjakanKuis() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      toast.error('Sesi login habis. Silakan login ulang.')
+      if (!session) {
+        toast.error('Sesi login habis. Silakan login ulang.')
+        router.push('/login')
+        return
+      }
 
       let skor: number | null = null
       if (kuis?.tipe === 'pilihan_ganda') {
@@ -158,24 +173,43 @@ export default function siswaKerjakanKuis() {
         skor = Math.round((correct / total) * 100)
       }
 
+      // Calculate attempt number
+      const attemptNumber = (kuis as any)?.attemptCount ? (kuis as any).attemptCount + 1 : 1
+
       const { error } = await supabase
         .from('hasil_kuis')
         .insert({
           kuis_id: kuisId,
           siswa_id: session.user.id,
           jawaban,
-          skor
+          skor,
+          attempt_number: attemptNumber
         })
 
       if (error) throw error
 
+      // Get all attempts to find highest score
+      const { data: allAttempts } = await supabase
+        .from('hasil_kuis')
+        .select('skor')
+        .eq('kuis_id', kuisId)
+        .eq('siswa_id', session.user.id)
+
+      const highestScore = allAttempts?.length
+        ? Math.max(...allAttempts.filter((a: { skor: number | null }) => a.skor !== null).map((a: { skor: number | null }) => a.skor || 0))
+        : skor
+
       if (expired) {
         toast.error('Waktu habis! Jawaban Anda otomatis terkirim.')
       } else {
-        toast.success(kuis?.tipe === 'pilihan_ganda' ? `Jawaban terkirim! Nilai Anda: ${skor}` : 'Jawaban terkirim!')
+        toast.success(
+          kuis?.tipe === 'pilihan_ganda'
+            ? `Jawaban terkirim! Nilai Anda: ${skor}${highestScore !== skor ? ` (Tertinggi: ${highestScore})` : ''}`
+            : 'Jawaban terkirim!'
+        )
       }
 
-      setTimeout(() => router.back(), 1500)
+      setTimeout(() => router.back(), 2000)
     } catch (error: any) {
       toast.error('Gagal mengirim jawaban. Silakan coba lagi.')
     } finally {
@@ -254,6 +288,12 @@ export default function siswaKerjakanKuis() {
           <h1 className="font-semibold text-gray-900 truncate">{kuis.judul}</h1>
           <p className="text-xs text-gray-500">
             {kuis.tipe === 'pilihan_ganda' ? 'Pilihan Ganda' : 'Essay'} &bull; {total} Soal
+            {(kuis as any).attemptCount > 0 && (
+              <span className="ml-2 text-amber-600">
+                &bull; Percobaan ke-{(kuis as any).attemptCount + 1}
+                {(kuis as any).highestScore !== null && ` (Tertinggi: ${(kuis as any).highestScore})`}
+              </span>
+            )}
           </p>
         </div>
         {timeLeft !== null && (

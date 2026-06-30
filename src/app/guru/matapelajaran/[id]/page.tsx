@@ -75,7 +75,8 @@ export default function MataPelajaranDetail() {
     judul: '',
     tipe: 'pilihan_ganda' as 'pilihan_ganda' | 'essay',
     waktu_menit: '',
-    due_date: ''
+    due_date: '',
+    attempt_limits: null as number | null
   })
 
   const [materiForm, setMateriForm] = useState({
@@ -268,6 +269,7 @@ export default function MataPelajaranDetail() {
         tipe: kuisForm.tipe,
         waktu_menit: kuisForm.waktu_menit ? parseInt(kuisForm.waktu_menit) : null,
         due_date: kuisForm.due_date ? new Date(kuisForm.due_date).toISOString() : null,
+        attempt_limits: kuisForm.attempt_limits,
         mata_pelajaran_id: mapelId
       })
 
@@ -275,7 +277,7 @@ export default function MataPelajaranDetail() {
 
       toast.success('Kuis berhasil dibuat!')
       setKuisDialogOpen(false)
-      setKuisForm({ judul: '', tipe: 'pilihan_ganda', waktu_menit: '', due_date: '' })
+      setKuisForm({ judul: '', tipe: 'pilihan_ganda', waktu_menit: '', due_date: '', attempt_limits: null })
       fetchData()
     } catch (error: any) {
       toast.error('Gagal menyimpan kuis. Silakan coba lagi.')
@@ -683,9 +685,30 @@ export default function MataPelajaranDetail() {
                       />
                       <p className="text-xs text-gray-500 mt-1">Setelah waktu ini, kuis tidak bisa dikerjakan</p>
                     </div>
+                    <div>
+                      <Label htmlFor="kuis-attempt">Batasan Percobaan - Opsional</Label>
+                      <Select
+                        value={kuisForm.attempt_limits?.toString() || ''}
+                        onValueChange={(v) => setKuisForm({
+                          ...kuisForm,
+                          attempt_limits: !v ? null : parseInt(v)
+                        })}
+                      >
+                        <SelectTrigger id="kuis-attempt">
+                          <SelectValue placeholder="Tidak terbatas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Tidak terbatas</SelectItem>
+                          <SelectItem value="1">1 kali</SelectItem>
+                          <SelectItem value="2">2 kali</SelectItem>
+                          <SelectItem value="3">3 kali</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500 mt-1">Kosongkan untuk unlimited. Nilai yang diambil adalah nilai tertinggi.</p>
+                    </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => { setKuisDialogOpen(false); setKuisForm({ judul: '', tipe: 'pilihan_ganda', waktu_menit: '', due_date: '' }) }}>
+                    <Button variant="outline" onClick={() => { setKuisDialogOpen(false); setKuisForm({ judul: '', tipe: 'pilihan_ganda', waktu_menit: '', due_date: '', attempt_limits: null }) }}>
                       Batal
                     </Button>
                     <Button onClick={handleCreateKuis}>Buat</Button>
