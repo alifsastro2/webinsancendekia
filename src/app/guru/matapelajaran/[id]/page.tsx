@@ -98,6 +98,7 @@ export default function MataPelajaranDetail() {
         .from('mata_pelajaran')
         .select(`
           *,
+          kelas_id,
           kelas:kelas(nama),
           guru:users(nama)
         `)

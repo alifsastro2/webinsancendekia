@@ -114,7 +114,11 @@ export default function GuruKuisDetail() {
     try {
       const { data } = await supabase
         .from('kuis')
-        .select('*, mata_pelajaran:mata_pelajaran_id(kelas_id)')
+        .select(`
+          *,
+          mata_pelajaran:mata_pelajaran_id(kelas_id),
+          pertanyaan:pertanyaan_kuis(*)
+        `)
         .eq('id', kuisId)
         .single()
 
