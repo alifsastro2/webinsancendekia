@@ -99,11 +99,11 @@ export default function siswaMapelDetail() {
         .from('hasil_kuis')
         .select('kuis_id, skor')
         .eq('siswa_id', session.user.id)
-        .in('kuis_id', (kuisData || []).map(k => k.id))
+        .in('kuis_id', (kuisData || []).map((k: { id: string }) => k.id))
 
       if (hasilData) {
-        const map: Record<string, HasilKuis> = {}
-        hasilData.forEach(h => { map[h.kuis_id] = h })
+        const map: Record<string, { kuis_id: string; skor: number | null }> = {}
+        hasilData.forEach((h: { kuis_id: string; skor: number | null }) => { map[h.kuis_id] = h })
         setHasilKuis(map)
       }
     } catch (error) {

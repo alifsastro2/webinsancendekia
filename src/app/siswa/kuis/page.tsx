@@ -72,7 +72,7 @@ export default function SiswaKuisPage() {
 
       if (!mapelData || mapelData.length === 0) return
 
-      const mapelIds = mapelData.map(m => m.id)
+      const mapelIds = mapelData.map((m: { id: string }) => m.id)
 
       const now = new Date().toISOString()
 
@@ -89,7 +89,7 @@ export default function SiswaKuisPage() {
         .select('id, kuis_id, skor, kuis!inner(judul, tipe, waktu_menit, mata_pelajaran!inner(nama))')
         .eq('siswa_id', session.user.id)
 
-      const completedIds = new Set((hasilData || []).map(h => h.kuis_id))
+      const completedIds = new Set((hasilData || []).map((h: { kuis_id: string }) => h.kuis_id))
 
       const availableKuis = (allKuisData as unknown as AvailableQuiz[]).filter(
         k => !completedIds.has(k.id) && (!k.due_date || new Date(k.due_date) >= new Date())
@@ -98,8 +98,8 @@ export default function SiswaKuisPage() {
       setResults((hasilData as unknown as QuizResult[]) || [])
       setAvailable(availableKuis)
 
-      const scores = (hasilData || []).filter(h => h.skor !== null).map(h => h.skor!)
-      const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
+      const scores = (hasilData || []).filter((h: { skor: number | null }) => h.skor !== null).map((h: { skor: number }) => h.skor)
+      const avg = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0
 
       setStats({
         total: allKuisData.length,

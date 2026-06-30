@@ -95,7 +95,12 @@
       "Bash(git commit -m 'Fix: Professional UI/UX improvements *)",
       "mcp__supabase__get_advisors",
       "mcp__supabase__list_extensions",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(git commit -m 'feat: Add middleware.ts for route protection + sync supabase files *)",
+      "Bash(git commit -m 'feat: Add Leaderboard tab to quiz detail page *)",
+      "Bash(git commit -m 'fix: Replace emoji with professional Lucide icons in Leaderboard *)",
+      "Bash(git commit -m 'fix: Use window.location.href for navigation after login/logout *)",
+      "Bash(git commit -m 'fix: Use createBrowserClient from @supabase/ssr for proper cookie handling *)"
     ],
     "additionalDirectories": [
       "/home/alif",

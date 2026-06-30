@@ -60,8 +60,8 @@ export default function GuruDashboard() {
         .select('id, kelas_id')
         .eq('guru_id', session.user.id)
 
-      const mapelIds = mapelData?.map(m => m.id) || []
-      const kelasIds = mapelData?.map(m => m.kelas_id) || []
+      const mapelIds = mapelData?.map((m: { id: string }) => m.id) || []
+      const kelasIds = mapelData?.map((m: { kelas_id: string }) => m.kelas_id) || []
 
       let siswaCount = 0
       if (kelasIds.length > 0) {

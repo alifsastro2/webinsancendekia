@@ -154,12 +154,12 @@ export default function GuruKuisDetail() {
 
       if (students && results) {
         // Create a map of siswa_id to result
-        const resultsMap = new Map(
-          results.map(r => [r.siswa_id, r])
+        const resultsMap = new Map<string, { siswa_id: string; skor: number | null; submitted_at: string }>(
+          results.map((r: { siswa_id: string; skor: number | null; submitted_at: string }) => [r.siswa_id, r])
         )
 
         // Build leaderboard entries
-        const entries: LeaderboardEntry[] = students.map((student, index) => {
+        const entries: LeaderboardEntry[] = students.map((student: { id: string; nama: string; username: string }) => {
           const result = resultsMap.get(student.id)
 
           let status: 'selesai' | 'belum' | 'belum_dinilai' = 'belum'

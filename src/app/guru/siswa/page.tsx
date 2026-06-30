@@ -129,7 +129,7 @@ export default function KelolaSiswa() {
 
       if (data) {
         // Fetch kelas data for each siswa
-        const kelasIds = [...new Set(data.map(s => s.kelas_id).filter(Boolean))]
+        const kelasIds = [...new Set(data.map((s: { kelas_id: string | null }) => s.kelas_id).filter(Boolean))] as string[]
         let kelasMap: Record<string, string> = {}
         if (kelasIds.length > 0) {
           const { data: kelasData } = await supabase
@@ -137,11 +137,11 @@ export default function KelolaSiswa() {
             .select('id, nama')
             .in('id', kelasIds)
           if (kelasData) {
-            kelasMap = Object.fromEntries(kelasData.map(k => [k.id, k.nama]))
+            kelasMap = Object.fromEntries(kelasData.map((k: { id: string; nama: string }) => [k.id, k.nama]))
           }
         }
 
-        const enriched = data.map(s => ({
+        const enriched = data.map((s: { kelas_id: string | null }) => ({
           ...s,
           kelas: s.kelas_id ? { nama: kelasMap[s.kelas_id] || '' } : undefined
         }))

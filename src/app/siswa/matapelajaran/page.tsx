@@ -66,13 +66,13 @@ export default function siswaMataPelajaran() {
         .order('created_at', { ascending: false })
 
       if (data) {
-        const mapelWithCounts = data.map(m => ({
+        const mapelWithCounts = data.map((m: Record<string, unknown>) => ({
           ...m,
-          materi_count: (m.materi as any)?.[0]?.count || 0,
-          kuis_count: (m.kuis as any)?.[0]?.count || 0
+          materi_count: (m.materi as { count: number }[])?.[0]?.count || 0,
+          kuis_count: (m.kuis as { count: number }[])?.[0]?.count || 0
         }))
-        setMapel(mapelWithCounts as any)
-        setFilteredMapel(mapelWithCounts as any)
+        setMapel(mapelWithCounts as unknown as typeof mapel)
+        setFilteredMapel(mapelWithCounts as unknown as typeof filteredMapel)
       }
     } catch (error) {
       console.error('Error fetching data:', error)
