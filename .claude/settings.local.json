@@ -105,12 +105,14 @@
       "Bash(git checkout *)",
       "Bash(git commit -m 'feat: Add materi view tracking *)",
       "Bash(git commit -m 'fix: Use actual email from database for login *)",
-      "Bash(git commit -m 'fix: Update error messages to be user-friendly *)"
+      "Bash(git commit -m 'fix: Update error messages to be user-friendly *)",
+      "Bash(sed -i \"s/students.map\\(s =>/students.map\\(\\(s: {id: string}\\) =>/g\" /home/alif/sekolah-online/src/app/guru/matapelajaran/\\\\[id\\\\]/kuis/\\\\[kuisId\\\\]/page.tsx && npm run build 2>&1 | tail -25)"
     ],
     "additionalDirectories": [
       "/home/alif",
       "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]/kuis",
-      "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]"
+      "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]",
+      "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]/kuis/[kuisId]"
     ]
   },
   "enableAllProjectMcpServers": true,

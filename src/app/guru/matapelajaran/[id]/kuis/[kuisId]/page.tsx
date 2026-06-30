@@ -291,11 +291,47 @@ export default function GuruKuisDetail() {
         toast.error('Minimal harus ada 1 pertanyaan sebelum bisa diterbitkan')
         return
       }
+
+      // Get mapel data for link
+      const { data: mapelData } = await supabase
+        .from('mata_pelajaran')
+        .select('id')
+        .eq('id', params.id as string)
+        .single()
+
       const { error } = await supabase
         .from('kuis')
         .update({ published: true })
         .eq('id', kuisId)
       if (error) throw error
+
+      // Create notifications for all students in class
+      if (mapelData) {
+        const { data: kelasId } = await supabase
+          .from('mata_pelajaran')
+          .select('kelas_id')
+          .eq('id', mapelData.id)
+          .single()
+
+        if (kelasId?.kelas_id) {
+          const { data: students } = await supabase
+            .from('users')
+            .select('id')
+            .eq('role', 'siswa')
+            .eq('kelas_id', kelasId.kelas_id)
+
+          if (students) {
+            const notifications = students.map((s: {id: string}) => ({
+              user_id: s.id,
+              type: 'quiz_published',
+              title: `Kuis baru: ${kuis.judul}`,
+              link: `/siswa/matapelajaran/${params.id}/kuis/${kuisId}`
+            }))
+            await supabase.from('notifications').insert(notifications)
+          }
+        }
+      }
+
       toast.success('Kuis berhasil diterbitkan!')
       fetchKuis()
     } catch (error: any) {
@@ -317,13 +353,29 @@ export default function GuruKuisDetail() {
         .eq('id', hasilId)
       if (updateError) throw updateError
 
-      const { data: verify, error: verifyError } = await supabase
+      // Notify student
+      const { data: hasil } = await supabase
         .from('hasil_kuis')
-        .select('skor')
+        .select('siswa_id, kuis_id')
         .eq('id', hasilId)
         .single()
-      if (verifyError) throw verifyError
-      toast.error('Nilai gagal disimpan. Silakan coba lagi.')
+
+      if (hasil) {
+        const { data: kuisData } = await supabase
+          .from('kuis')
+          .select('judul, mata_pelajaran_id')
+          .eq('id', hasil.kuis_id)
+          .single()
+
+        if (kuisData) {
+          await supabase.from('notifications').insert({
+            user_id: hasil.siswa_id,
+            type: 'quiz_graded',
+            title: `Nilai ${kuisData.judul} sudah keluar!`,
+            link: `/siswa/matapelajaran/${kuisData.mata_pelajaran_id}/kuis/${hasil.kuis_id}/review`
+          })
+        }
+      }
 
       toast.success('Nilai berhasil disimpan!')
       setEditingNilai(prev => ({ ...prev, [hasilId]: false }))
@@ -333,8 +385,7 @@ export default function GuruKuisDetail() {
         return next
       })
       fetchHasil()
-    } catch (error: any) {
-      console.error('Save nilai error:', error)
+    } catch (error) {
       toast.error('Gagal menyimpan nilai. Silakan coba lagi.')
     } finally {
       setSavingNilai(prev => ({ ...prev, [hasilId]: false }))
