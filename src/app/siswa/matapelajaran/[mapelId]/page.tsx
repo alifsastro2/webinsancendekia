@@ -113,6 +113,32 @@ export default function siswaMapelDetail() {
     }
   }
 
+  // Track when siswa opens a materi
+  const handleOpenMateri = async (materiId: string, fileUrl: string | null) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      // Insert or ignore if already exists
+      await supabase
+        .from('materi_views')
+        .upsert({
+          materi_id: materiId,
+          siswa_id: session.user.id,
+          viewed_at: new Date().toISOString()
+        }, {
+          onConflict: 'materi_id,siswa_id'
+        })
+    } catch (error) {
+      console.error('Error tracking materi view:', error)
+    } finally {
+      // Open the file in new tab
+      if (fileUrl) {
+        window.open(getFileUrl(fileUrl), '_blank')
+      }
+    }
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
@@ -237,15 +263,13 @@ export default function siswaMapelDetail() {
                       </div>
 
                       {m.file_url && (
-                        <a
-                          href={getFileUrl(m.file_url)}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => handleOpenMateri(m.id, m.file_url)}
                           className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors shadow-sm sm:self-auto"
                         >
                           <Eye className="h-4 w-4" />
                           <span className="font-medium text-sm">Lihat Materi</span>
-                        </a>
+                        </button>
                       )}
                     </motion.div>
                   ))}

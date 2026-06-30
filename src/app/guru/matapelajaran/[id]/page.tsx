@@ -33,7 +33,9 @@ import {
   CalendarClock,
   CheckCircle2,
   XCircle,
-  MoreVertical
+  MoreVertical,
+  Users,
+  Check
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { MataPelajaran, Materi } from '@/lib/types'
@@ -62,6 +64,13 @@ export default function MataPelajaranDetail() {
   const [materiDialogOpen, setMateriDialogOpen] = useState(false)
   const [kuisDialogOpen, setKuisDialogOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [selectedMateriId, setSelectedMateriId] = useState<string | null>(null)
+  const [viewStats, setViewStats] = useState<{
+    viewed: Array<{ siswa_id: string; nama: string; username: string; viewed_at: string }>
+    totalSiswa: number
+  } | null>(null)
+  const [loadingViews, setLoadingViews] = useState(false)
   const [kuisForm, setKuisForm] = useState({
     judul: '',
     tipe: 'pilihan_ganda' as 'pilihan_ganda' | 'essay',
@@ -255,6 +264,48 @@ export default function MataPelajaranDetail() {
   const resetMateriForm = () => {
     setMateriForm({ judul: '', deskripsi: '', file_url: '' })
     setSelectedFile(null)
+  }
+
+  const handleShowViewers = async (materiId: string) => {
+    setSelectedMateriId(materiId)
+    setViewDialogOpen(true)
+    setLoadingViews(true)
+    setViewStats(null)
+
+    try {
+      const kelasId = (mapel as any)?.kelas_id
+
+      const { data: students } = await supabase
+        .from('users')
+        .select('id, nama, username')
+        .eq('role', 'siswa')
+        .eq('kelas_id', kelasId)
+
+      const { data: views } = await supabase
+        .from('materi_views')
+        .select('siswa_id, viewed_at')
+        .eq('materi_id', materiId)
+        .order('viewed_at', { ascending: false })
+
+      const viewedList = (views || []).map((v: any) => {
+        const student = students?.find((s: any) => s.id === v.siswa_id)
+        return {
+          siswa_id: v.siswa_id,
+          nama: student?.nama || '-',
+          username: student?.username || '-',
+          viewed_at: v.viewed_at
+        }
+      })
+
+      setViewStats({
+        viewed: viewedList,
+        totalSiswa: students?.length || 0
+      })
+    } catch (error) {
+      console.error('Error fetching view stats:', error)
+    } finally {
+      setLoadingViews(false)
+    }
   }
 
   const formatFileSize = (bytes: number) => {
@@ -522,6 +573,10 @@ export default function MataPelajaranDetail() {
                               </a>
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuItem onClick={() => handleShowViewers(m.id)} className="cursor-pointer">
+                            <Users className="mr-2 h-4 w-4" />
+                            Siapa yang Membuka
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => handleDeleteMateri(m.id)} className="text-red-600">
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -687,6 +742,62 @@ export default function MataPelajaranDetail() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog: Siapa yang Membuka */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Siapa yang Membuka
+            </DialogTitle>
+            <DialogDescription>
+              Daftar siswa yang sudah membuka materi ini
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {loadingViews ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-2 border-amber-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-gray-500 text-sm">Memuat...</p>
+              </div>
+            ) : viewStats ? (
+              <div className="space-y-2">
+                <div className="text-sm text-gray-500 mb-4">
+                  {viewStats.viewed.length} dari {viewStats.totalSiswa} siswa sudah membuka
+                </div>
+                {viewStats.viewed.map((student) => (
+                  <div key={student.siswa_id} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold">
+                      {student.nama.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 text-sm">{student.nama}</p>
+                      <p className="text-xs text-gray-500">@{student.username}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 text-green-600">
+                        <Check className="h-4 w-4" />
+                        <span className="text-xs">Sudah</span>
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {new Date(student.viewed_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-4">Tidak ada data</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+              Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }

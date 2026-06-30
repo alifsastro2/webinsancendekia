@@ -18,6 +18,22 @@ export type MataPelajaranUpdate = Tables['mata_pelajaran']['Update']
 export type Materi = Tables['materi']['Row']
 export type MateriInsert = Tables['materi']['Insert']
 
+// Materi Views types (tracking siapa yang sudah buka materi)
+export interface MateriView {
+  id: string
+  materi_id: string
+  siswa_id: string
+  viewed_at: string
+}
+
+export interface MateriViewWithSiswa extends MateriView {
+  siswa: {
+    id: string
+    nama: string
+    username: string
+  }
+}
+
 // Kuis types
 export type Kuis = Tables['kuis']['Row']
 export type KuisInsert = Tables['kuis']['Insert']
