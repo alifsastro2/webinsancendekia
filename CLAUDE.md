@@ -31,6 +31,11 @@
 - [x] Script pembuatan akun guru test (Azka Muhamad Naufal)
 - [x] Buat setup instructions & quickstart guide
 - [x] **Middleware.ts untuk route protection (auth + RBAC)**
+- [x] **Fitur Notifikasi (Bell icon + dropdown)**
+- [x] **Attempt Limits untuk Kuis**
+- [x] **Highest Score Logic untuk retry kuis**
+
+---
 
 ## 🛡️ Route Protection (Middleware)
 
@@ -54,6 +59,70 @@ Project menggunakan `middleware.ts` untuk security:
 ### File:
 - `middleware.ts` → Route protection utama
 - `src/lib/supabase/middleware.ts` → Supabase SSR helper
+
+---
+
+## 🔔 Sistem Notifikasi
+
+### Fitur
+- **Bell Icon** di header dengan badge angka unread
+- **Dropdown list** dengan semua notifikasi
+- **Mark as read** saat klik notifikasi
+- **Mark all as read** button
+- **Link navigasi** ke halaman terkait
+
+### Jenis Notifikasi
+
+| Type | Trigger | Untuk | Halaman Tujuan |
+|------|---------|-------|----------------|
+| `quiz_published` | Guru menerbitkan kuis | Siswa di kelas itu | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]` |
+| `materi_published` | Guru upload materi | Siswa di kelas itu | `/siswa/matapelajaran/[mapelId]` |
+| `quiz_graded` | Guru menyimpan nilai essay | Siswa terkait | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/review` |
+| `quiz_deadline_soon` | Auto-check saat load (siswa) | Siswa | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]` |
+
+### Komponen
+- `src/components/common/notification-bell.tsx` - Bell icon + dropdown
+- Tabel `notifications` di database
+
+### Database Schema
+```sql
+notifications (
+  id, user_id, type, title, message, link, is_read, created_at
+)
+```
+
+---
+
+## 📝 Kuis Workflow
+
+### Aturan Setelah Kuis Published
+| Aksi | Status |
+|------|--------|
+| Tambah Pertanyaan | ❌ Disabled |
+| Hapus Pertanyaan | ❌ Disabled |
+| Hapus Kuis | ✅ Allowed |
+
+### Attempt Limits (Batasan Pengerjaan)
+
+**Opsi:**
+- `NULL` / kosong = Unlimited
+- `1` = Maksimal 1 kali
+- `2` = Maksimal 2 kali
+- `3` = Maksimal 3 kali
+
+**Scoring Logic:**
+- Setiap submit = attempt baru
+- Nilai yang direcord = **nilai tertinggi** dari semua percobaan
+- Siswa bisa lihat info "Percobaan ke-X (Tertinggi: Y)"
+
+### Database Columns
+```sql
+-- Di tabel kuis
+attempt_limits INTEGER -- NULL = unlimited
+
+-- Di tabel hasil_kuis
+attempt_number INTEGER -- urutan percobaan
+```
 
 ---
 
@@ -93,7 +162,8 @@ src/
 │   ├── common/
 │   │   ├── logo.tsx                # Logo component
 │   │   ├── motion.tsx              # Framer Motion variants
-│   │   ├── header.tsx              # Header dengan user menu
+│   │   ├── header.tsx              # Header dengan user menu + notification bell
+│   │   ├── notification-bell.tsx    # Bell icon notification component
 │   │   └── timer.tsx               # Timer component
 │   ├── guru/
 │   │   └── sidebar.tsx             # Sidebar guru
@@ -118,6 +188,7 @@ scripts/
 supabase/
 ├── schema.sql                      # Database schema
 └── rls.sql                         # Row Level Security policies
+```
 
 ---
 
@@ -183,8 +254,12 @@ Danger:      #ef4444 (Red 500)
 ### Kuis (Guru)
 - ✅ Buat kuis pilihan ganda & essay
 - ✅ Set waktu kuis (opsional)
-- ✅ Tambah/hapus pertanyaan
+- ✅ Set batas akhir (deadline) kuis
+- ✅ Set batasan percobaan (attempt limits)
+- ✅ Tambah pertanyaan (hanya sebelum publish)
+- ✅ Hapus pertanyaan (hanya sebelum publish)
 - ✅ Hapus kuis
+- ✅ Terbitkan kuis + kirim notifikasi
 - ✅ Lihat semua hasil siswa per kuis
 - ✅ Review jawaban (pilihan ganda otomatis, essay manual)
 - ✅ Input & simpan nilai essay (0-100)
@@ -203,6 +278,17 @@ Danger:      #ef4444 (Red 500)
 - ✅ Progress pills & sidebar map soal
 - ✅ Validasi & konfirmasi jika ada soal belum dijawab
 - ✅ Submit jawaban & lihat skor (pilihan ganda)
+- ✅ Attempt limits (bisa retry dengan nilai tertinggi)
+
+### Notifikasi
+- ✅ Bell icon di header dengan badge unread
+- ✅ Dropdown list notifikasi
+- ✅ Notifikasi saat guru publish kuis
+- ✅ Notifikasi saat guru upload materi
+- ✅ Notifikasi saat guru nilai essay
+- ✅ Notifikasi deadline < 24 jam (auto-check)
+- ✅ Mark as read on click
+- ✅ Mark all as read
 
 ### Profil
 - ✅ Edit nama, username, email
@@ -227,9 +313,30 @@ Danger:      #ef4444 (Red 500)
 2. Copy semua isi dari `supabase/rls.sql`
 3. Click Run
 
-**Atau jalankan script untuk melihat SQL:**
-```bash
-node scripts/setup-database-v2.js
+**Step 3 - Tambah Kolom untuk Fitur Baru:**
+```sql
+-- Attempt limits
+ALTER TABLE kuis ADD COLUMN IF NOT EXISTS attempt_limits INTEGER DEFAULT NULL;
+ALTER TABLE hasil_kuis ADD COLUMN IF NOT EXISTS attempt_number INTEGER DEFAULT 1;
+CREATE INDEX IF NOT EXISTS idx_hasil_kuis_siswa_kuis ON hasil_kuis(siswa_id, kuis_id);
+
+-- Notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT,
+  link TEXT,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS for notifications
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "users_read_own_notifications" ON notifications FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "users_update_own_notifications" ON notifications FOR UPDATE USING (user_id = auth.uid());
+CREATE POLICY "users_insert_notifications" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
 ```
 
 ### 2. Buat Akun Guru Test
@@ -281,21 +388,7 @@ Purple:      #8b5cf6 (Purple 500)
 - `GradientText` - Gradient text animation
 - `GlassCard` - Glassmorphism card component
 - `ShimmerButton` - Button with shimmer effect
-
----
-
-## 🚀 Cara Menjalankan Project (Quick)
-
-```bash
-# 1. Setup Database (run SQL in Supabase Dashboard)
-node scripts/setup-database-v2.js
-
-# 2. Create teacher account
-node scripts/create-guru.js
-
-# 3. Start server
-npm run dev
-```
+- `NotificationBell` - Bell icon with notification dropdown
 
 ---
 
@@ -311,57 +404,6 @@ npm run dev
 | `scripts/setup-database-v2.js` | Display setup instructions |
 | `SETUP_DATABASE.md` | Detailed setup guide |
 | `SETUP_QUICKSTART.md` | Quick reference guide |
-
----
-
-## 🚀 Cara Menjalankan Project
-
-### 1. Setup Supabase
-
-```bash
-# Buat project baru di https://supabase.com
-# Salin URL dan ANON KEY ke .env.local
-```
-
-### 2. Setup Environment Variables
-
-```bash
-cp .env.local.example .env.local
-# Edit .env.local dan isi dengan Supabase credentials
-```
-
-### 3. Setup Database
-
-```bash
-# Jalankan SQL schema di Supabase SQL Editor:
-# 1. Buka Supabase Dashboard
-# 2. SQL Editor > New Query
-# 3. Copy & paste isi file: supabase/schema.sql
-# 4. Run
-
-# Kemudian jalankan RLS policies:
-# Copy & paste isi file: supabase/rls.sql
-# Run
-```
-
-### 4. Buat Akun Guru Test
-
-```bash
-node scripts/create-guru.js
-```
-
-**Credential Test:**
-- Username: `azka`
-- Password: `Azka123456`
-- Email: `azka@sekolah.test`
-
-### 5. Jalankan Development Server
-
-```bash
-npm run dev
-```
-
-Buka http://localhost:3000
 
 ---
 
@@ -384,6 +426,16 @@ Buka http://localhost:3000
 - Siswa hanya bisa akses mapel, materi, kuis di kelasnya
 - Guru hanya bisa edit mapel miliknya
 - Semua policies menggunakan role `siswa` (bukan `murid`)
+
+### Notifikasi
+- Tabel `notifications` perlu dibuat manual (lihat SQL di atas)
+- Policy INSERT menggunakan `WITH CHECK (true)` agar guru bisa insert untuk siswa
+- Deadline check auto-run saat siswa load halaman
+
+### Kuis Attempt Limits
+- Kolom `attempt_limits` di tabel `kuis` perlu ditambahkan manual
+- Kolom `attempt_number` di tabel `hasil_kuis` perlu ditambahkan manual
+- Scoring menggunakan highest score logic
 
 ---
 
@@ -409,12 +461,11 @@ Buka http://localhost:3000
 
 - [ ] Halaman register (opsional, guru buat akun siswa)
 - [ ] Laporan statistik siswa (guru bisa lihat performa siswa)
-- [ ] Laporan statistik kuis (guru bisa lihat hasil kuis siswa)
 - [ ] File upload dengan Supabase Storage
 - [ ] Email verification
-- [ ] Notifikasi saat kuis baru ditambahkan
 - [ ] Dark mode
 - [ ] Mobile responsive improvements
+- [ ] Fitur unpublish kuis (tidak direkomendasikan)
 
 ---
 
@@ -423,4 +474,4 @@ Buka http://localhost:3000
 Untuk pertanyaan atau issue, hubungi:
 - Project di: `/home/alif/sekolah-online`
 - Database schema: `supabase/schema.sql`
-- RLS policies: `supabase/rls.js`
+- RLS policies: `supabase/rls.sql`
