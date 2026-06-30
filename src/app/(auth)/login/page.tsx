@@ -13,6 +13,7 @@ export default function LoginPage() {
   const handleLogin = async (data: { username: string; password: string }) => {
     setIsLoading(true)
     try {
+      // 1. Validasi user di database
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('id, role, is_active, kelas_id, nama')
@@ -27,6 +28,7 @@ export default function LoginPage() {
         throw new Error('Akun Anda dinonaktifkan. Hubungi guru.')
       }
 
+      // 2. Login dengan Supabase Auth
       const authEmail = `${data.username.toLowerCase()}@insancendekia.com`
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -40,14 +42,13 @@ export default function LoginPage() {
 
       toast.success(`Selamat datang, ${userData.nama}!`)
 
-      // Redirect based on role
-      setTimeout(() => {
-        if (userData.role === 'guru') {
-          router.push('/guru')
-        } else {
-          router.push('/siswa')
-        }
-      }, 500)
+      // 3. Redirect menggunakan full page reload
+      // Ini memastikan cookies di-set sebelum middleware berjalan
+      if (userData.role === 'guru') {
+        window.location.href = '/guru'
+      } else {
+        window.location.href = '/siswa'
+      }
     } catch (error: any) {
       throw error
     } finally {
