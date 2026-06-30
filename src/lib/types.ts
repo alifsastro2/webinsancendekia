@@ -34,6 +34,20 @@ export interface MateriViewWithSiswa extends MateriView {
   }
 }
 
+// Notification types
+export type NotificationType = 'quiz_published' | 'quiz_graded' | 'quiz_deadline_soon'
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  message: string | null
+  link: string | null
+  is_read: boolean
+  created_at: string
+}
+
 // Kuis types
 export type Kuis = Tables['kuis']['Row']
 export type KuisInsert = Tables['kuis']['Insert']
