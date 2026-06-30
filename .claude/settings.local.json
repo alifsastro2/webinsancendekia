@@ -109,7 +109,8 @@
       "Bash(sed -i \"s/students.map\\(s =>/students.map\\(\\(s: {id: string}\\) =>/g\" /home/alif/sekolah-online/src/app/guru/matapelajaran/\\\\[id\\\\]/kuis/\\\\[kuisId\\\\]/page.tsx && npm run build 2>&1 | tail -25)",
       "Bash(git commit -m 'fix: Syntax errors in notification-bell and add role prop *)",
       "Bash(git commit -m 'feat: Add notification for new materi *)",
-      "Bash(git commit -m 'fix: Bug fixes for materi notification and pertanyaan kuis *)"
+      "Bash(git commit -m 'fix: Bug fixes for materi notification and pertanyaan kuis *)",
+      "Bash(git commit *)"
     ],
     "additionalDirectories": [
       "/home/alif",

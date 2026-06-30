@@ -217,11 +217,14 @@ export default function MataPelajaranDetail() {
 
       // Notify students about new materi
       if (mapel?.kelas_id) {
-        const { data: students } = await supabase
+        console.log('DEBUG: mapel.kelas_id =', mapel.kelas_id)
+        const { data: students, error: studentsError } = await supabase
           .from('users')
           .select('id')
           .eq('kelas_id', mapel.kelas_id)
           .eq('role', 'siswa')
+
+        console.log('DEBUG: students =', students, 'error =', studentsError)
 
         if (students && students.length > 0) {
           const notifications = students.map((s: { id: string }) => ({
@@ -231,8 +234,13 @@ export default function MataPelajaranDetail() {
             link: `/siswa/matapelajaran/${mapelId}`
           }))
 
-          await supabase.from('notifications').insert(notifications)
+          const { error: notifyError } = await supabase.from('notifications').insert(notifications)
+          console.log('DEBUG: notification insert =', notifyError)
+        } else {
+          console.log('DEBUG: No students found in class', mapel.kelas_id)
         }
+      } else {
+        console.log('DEBUG: mapel.kelas_id is undefined!')
       }
 
       toast.success('Materi berhasil ditambahkan!')
