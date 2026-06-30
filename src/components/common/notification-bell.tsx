@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, GraduationCap, ClipboardCheck, Clock } from 'lucide-react'
+import { Bell, GraduationCap, ClipboardCheck, Clock, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Notification } from '@/lib/types'
 
@@ -146,6 +146,7 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
       case 'quiz_published': return <GraduationCap className="h-5 w-5 text-blue-500" />
       case 'quiz_graded': return <ClipboardCheck className="h-5 w-5 text-green-500" />
       case 'quiz_deadline_soon': return <Clock className="h-5 w-5 text-amber-500" />
+      case 'materi_published': return <FileText className="h-5 w-5 text-purple-500" />
       default: return <Bell className="h-5 w-5 text-gray-500" />
     }
   }

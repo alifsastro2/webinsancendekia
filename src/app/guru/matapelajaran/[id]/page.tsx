@@ -214,6 +214,26 @@ export default function MataPelajaranDetail() {
 
       if (error) throw error
 
+      // Notify students about new materi
+      if (mapel?.kelas_id) {
+        const { data: students } = await supabase
+          .from('users')
+          .select('id')
+          .eq('kelas_id', mapel.kelas_id)
+          .eq('role', 'siswa')
+
+        if (students && students.length > 0) {
+          const notifications = students.map((s: { id: string }) => ({
+            user_id: s.id,
+            type: 'materi_published',
+            title: `Materi baru: ${materiForm.judul}`,
+            link: `/siswa/matapelajaran/${mapelId}`
+          }))
+
+          await supabase.from('notifications').insert(notifications)
+        }
+      }
+
       toast.success('Materi berhasil ditambahkan!')
       setMateriDialogOpen(false)
       resetMateriForm()
