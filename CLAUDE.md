@@ -77,6 +77,7 @@ Project menggunakan `middleware.ts` untuk security:
 |------|---------|-------|----------------|
 | `quiz_published` | Guru menerbitkan kuis | Siswa di kelas itu | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]` |
 | `materi_published` | Guru upload materi | Siswa di kelas itu | `/siswa/matapelajaran/[mapelId]` |
+| `essay_submitted` | Siswa submit essay | Guru mapel | `/guru/matapelajaran/[mapelId]/kuis/[kuisId]` |
 | `quiz_graded` | Guru menyimpan nilai essay | Siswa terkait | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/review` |
 | `quiz_deadline_soon` | Auto-check saat load (siswa) | Siswa | `/siswa/matapelajaran/[mapelId]/kuis/[kuisId]` |
 
@@ -123,6 +124,29 @@ attempt_limits INTEGER -- NULL = unlimited
 -- Di tabel hasil_kuis
 attempt_number INTEGER -- urutan percobaan
 ```
+
+### Grading Essay (Per-Soal)
+
+**Konsep:**
+- Setiap soal essay dinilai terpisah (0-100 masing-masing)
+- Total score = **rata-rata** dari semua soal
+- Skor per soal disimpan di JSON `jawaban`
+
+**Format Jawaban Essay:**
+```json
+{
+  "pertanyaanId1": { "jawaban": "isi jawaban siswa", "skor": 80 },
+  "pertanyaanId2": { "jawaban": "isi jawaban siswa", "skor": 90 }
+}
+```
+
+**Contoh:**
+| Soal | Nilai |
+|------|-------|
+| Soal 1 | 80 |
+| Soal 2 | 90 |
+| Soal 3 | 70 |
+| **Rata-rata** | **80** |
 
 ---
 
@@ -262,7 +286,7 @@ Danger:      #ef4444 (Red 500)
 - ✅ Terbitkan kuis + kirim notifikasi
 - ✅ Lihat semua hasil siswa per kuis
 - ✅ Review jawaban (pilihan ganda otomatis, essay manual)
-- ✅ Input & simpan nilai essay (0-100)
+- ✅ Input & simpan nilai essay **per-soal** (rata-rata otomatis)
 - ✅ Statistik rata-rata nilai
 
 ### Dashboard Siswa
