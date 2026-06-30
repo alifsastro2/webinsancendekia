@@ -680,137 +680,35 @@ export default function GuruKuisDetail() {
                                     </div>
                                   ) : (
                                     <div className="ml-8 space-y-2">
-                                      {/* Parse jawaban - handle both old format (string) and new format (object) */}
-                                      {(() => {
-                                        const answerData = typeof jawabanSiswa === 'object'
-                                          ? jawabanSiswa
-                                          : { jawaban: jawabanSiswa, skor: null }
-                                        return (
-                                          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap">
-                                            {answerData.jawaban || <span className="text-gray-400 italic">Tidak dijawab</span>}
-                                          </div>
-                                        )
-                                      })()}
-
-                                      {/* Per-question scoring for essay */}
-                                      <div className="space-y-3 mt-3">
-                                        {kuis.pertanyaan.map((p, pi) => {
-                                          const rawAnswer = hasil.jawaban?.[p.id]
-                                          const questionAnswer = typeof rawAnswer === 'object' && rawAnswer !== null
-                                            ? rawAnswer as { jawaban: string; skor: number | null }
-                                            : { jawaban: String(rawAnswer || ''), skor: null as number | null }
-                                          const currentScore = essayScoresMap[hasil.id]?.[p.id] ?? String(questionAnswer.skor ?? '')
-                                          const isAllGraded = kuis.pertanyaan.every(q => {
-                                            const qRaw = hasil.jawaban?.[q.id]
-                                            const qAnswer = typeof qRaw === 'object' && qRaw !== null
-                                              ? qRaw as { jawaban: string; skor: number | null }
-                                              : { jawaban: '', skor: null as number | null }
-                                            return essayScoresMap[hasil.id]?.[q.id] !== undefined
-                                              || qAnswer.skor !== null
-                                          })
-
-                                          return (
-                                            <div key={p.id} className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg">
-                                              <span className="text-xs font-medium text-amber-700 w-20">Soal {pi + 1}</span>
-                                              <Input
-                                                type="number"
-                                                min={0}
-                                                max={100}
-                                                placeholder="0-100"
-                                                value={currentScore}
-                                                onChange={(e) => setEssayScoresMap(prev => ({
-                                                  ...prev,
-                                                  [hasil.id]: {
-                                                    ...(prev[hasil.id] || {}),
-                                                    [p.id]: e.target.value
-                                                  }
-                                                }))}
-                                                className="w-24 text-sm"
-                                              />
-                                              {currentScore && <span className="text-xs text-gray-500">/ 100</span>}
-                                            </div>
-                                          )
-                                        })}
-
-                                        {/* Calculate average and show */}
-                                        {(() => {
-                                          const scores = kuis.pertanyaan.map(p => {
-                                            const rawAnswer = hasil.jawaban?.[p.id]
-                                            const qAnswer = typeof rawAnswer === 'object' && rawAnswer !== null
-                                              ? rawAnswer as { jawaban: string; skor: number | null }
-                                              : { jawaban: '', skor: null as number | null }
-                                            const fromMap = essayScoresMap[hasil.id]?.[p.id]
-                                            const score = fromMap !== undefined
-                                              ? parseInt(fromMap)
-                                              : (qAnswer.skor !== null ? qAnswer.skor : null)
-                                            return score
-                                          }).filter(s => s !== null && !isNaN(s))
-
-                                          const avgScore = scores.length > 0
-                                            ? Math.round((scores as number[]).reduce((a, b) => a + b, 0) / scores.length)
-                                            : null
-
-                                          return (
-                                            <div className="flex items-center gap-3 pt-2 border-t">
-                                              <span className="text-sm text-gray-600">
-                                                Rata-rata: <strong className="text-amber-600">{avgScore ?? '-'}</strong>
-                                              </span>
-                                              <Button
-                                                size="sm"
-                                                onClick={async () => {
-                                                  // Calculate total score from essay scores
-                                                  const totalScores = kuis.pertanyaan.map(p => {
-                                                    const fromMap = essayScoresMap[hasil.id]?.[p.id]
-                                                    return fromMap !== undefined ? parseInt(fromMap) : null
-                                                  })
-
-                                                  const validScores = totalScores.filter(s => s !== null && !isNaN(s))
-                                                  if (validScores.length !== kuis.pertanyaan.length) {
-                                                    toast.error('Nilai semua soal harus diisi!')
-                                                    return
-                                                  }
-
-                                                  const avg = Math.round((validScores as number[]).reduce((a, b) => a + b, 0) / validScores.length)
-
-                                                  // Update score in database
-                                                  const { error } = await supabase
-                                                    .from('hasil_kuis')
-                                                    .update({ skor: avg })
-                                                    .eq('id', hasil.id)
-
-                                                  if (error) {
-                                                    toast.error('Gagal menyimpan nilai')
-                                                    return
-                                                  }
-
-                                                  // Update jawaban with individual scores
-                                                  const updatedJawaban: Record<string, any> = {}
-                                                  kuis.pertanyaan.forEach(p => {
-                                                    const fromMap = essayScoresMap[hasil.id]?.[p.id]
-                                                    const rawJawaban = hasil.jawaban?.[p.id]
-                                                    const isObject = typeof rawJawaban === 'object' && rawJawaban !== null
-                                                    updatedJawaban[p.id] = {
-                                                      jawaban: isObject ? (rawJawaban as { jawaban: string }).jawaban : String(rawJawaban || ''),
-                                                      skor: parseInt(fromMap)
-                                                    }
-                                                  })
-
-                                                  await supabase
-                                                    .from('hasil_kuis')
-                                                    .update({ jawaban: updatedJawaban })
-                                                    .eq('id', hasil.id)
-
-                                                  toast.success('Nilai berhasil disimpan!')
-                                                  fetchHasil()
-                                                }}
-                                                className="bg-green-600 hover:bg-green-700"
-                                              >
-                                                <Save className="h-4 w-4 mr-1" />
-                                                Simpan Semua
-                                              </Button>
-                                            </div>
-                                          )
-                                        })()}
+                                      {/* Jawaban siswa */}
+                                      <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap">
+                                        {typeof jawabanSiswa === 'object' && jawabanSiswa !== null
+                                          ? (jawabanSiswa as { jawaban: string }).jawaban || <span className="text-gray-400 italic">Tidak dijawab</span>
+                                          : String(jawabanSiswa || '')}
+                                      </div>
+                                      {/* Input nilai per soal */}
+                                      <div className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg">
+                                        <span className="text-xs font-medium text-amber-700">Nilai:</span>
+                                        <Input
+                                          type="number"
+                                          min={0}
+                                          max={100}
+                                          placeholder="0-100"
+                                          value={essayScoresMap[hasil.id]?.[p.id] ?? String(
+                                            typeof jawabanSiswa === 'object' && jawabanSiswa !== null
+                                              ? (jawabanSiswa as { jawaban: string; skor: number | null }).skor ?? ''
+                                              : ''
+                                          )}
+                                          onChange={(e) => setEssayScoresMap(prev => ({
+                                            ...prev,
+                                            [hasil.id]: {
+                                              ...(prev[hasil.id] || {}),
+                                              [p.id]: e.target.value
+                                            }
+                                          }))}
+                                          className="w-24 text-sm"
+                                        />
+                                        <span className="text-xs text-gray-500">/ 100</span>
                                       </div>
                                     </div>
                                   )}
@@ -818,34 +716,90 @@ export default function GuruKuisDetail() {
                               )
                             })}
 
-                            {/* Show per-question scores summary for essay */}
-                            {kuis.tipe === 'essay' && hasil.skor !== null && !editingNilai[hasil.id] && (
-                              <div className="pt-4 border-t mt-4">
+                            {/* Tombol Simpan untuk Essay */}
+                            {kuis.tipe === 'essay' && (
+                              <div className="pt-4 mt-4 border-t">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-sm">
-                                    <span className="text-gray-500">Nilai Akhir: </span>
-                                    <strong className="text-green-600 text-lg">{hasil.skor}</strong>
-                                  </div>
+                                  <span className="text-sm text-gray-500">
+                                    {/* Preview rata-rata */}
+                                    {(() => {
+                                      const scores = kuis.pertanyaan.map(p => {
+                                        const fromMap = essayScoresMap[hasil.id]?.[p.id]
+                                        const jawaban = hasil.jawaban?.[p.id]
+                                        if (fromMap && fromMap !== '') return parseInt(fromMap)
+                                        if (typeof jawaban === 'object' && jawaban !== null) return (jawaban as { skor: number | null }).skor
+                                        return null
+                                      }).filter(s => s !== null && !isNaN(s as number)) as number[]
+
+                                      const avg = scores.length > 0
+                                        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+                                        : null
+
+                                      return avg !== null ? (
+                                        <span>Rata-rata sementara: <strong className="text-amber-600">{avg}</strong></span>
+                                      ) : (
+                                        <span className="text-gray-400">Masukkan nilai untuk melihat rata-rata</span>
+                                      )
+                                    })()}
+                                  </span>
                                   <Button
                                     size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      // Load existing scores into essayScoresMap for editing
-                                      const existingScores: Record<string, string> = {}
+                                    onClick={async () => {
+                                      const scores: number[] = []
                                       kuis.pertanyaan.forEach(p => {
-                                        const rawJawaban = hasil.jawaban?.[p.id]
-                                        const qAnswer = typeof rawJawaban === 'object' && rawJawaban !== null
-                                          ? rawJawaban as { jawaban: string; skor: number | null }
-                                          : null
-                                        if (qAnswer?.skor !== null && qAnswer?.skor !== undefined) {
-                                          existingScores[p.id] = String(qAnswer.skor)
+                                        const fromMap = essayScoresMap[hasil.id]?.[p.id]
+                                        if (fromMap && fromMap !== '') {
+                                          scores.push(parseInt(fromMap))
+                                        } else {
+                                          const jawaban = hasil.jawaban?.[p.id]
+                                          if (typeof jawaban === 'object' && jawaban !== null) {
+                                            const s = (jawaban as { skor: number | null }).skor
+                                            if (s !== null) scores.push(s)
+                                          }
                                         }
                                       })
-                                      setEssayScoresMap(prev => ({ ...prev, [hasil.id]: existingScores }))
-                                      setEditingNilai(prev => ({ ...prev, [hasil.id]: true }))
+
+                                      if (scores.length !== kuis.pertanyaan.length) {
+                                        toast.error('Semua soal harus dinilai!')
+                                        return
+                                      }
+
+                                      const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+
+                                      const { error } = await supabase
+                                        .from('hasil_kuis')
+                                        .update({ skor: avg })
+                                        .eq('id', hasil.id)
+
+                                      if (error) {
+                                        toast.error('Gagal menyimpan nilai')
+                                        return
+                                      }
+
+                                      // Update jawaban with scores
+                                      const updatedJawaban: Record<string, any> = {}
+                                      kuis.pertanyaan.forEach(p => {
+                                        const fromMap = essayScoresMap[hasil.id]?.[p.id]
+                                        const jawaban = hasil.jawaban?.[p.id]
+                                        const isObj = typeof jawaban === 'object' && jawaban !== null
+                                        updatedJawaban[p.id] = {
+                                          jawaban: isObj ? (jawaban as { jawaban: string }).jawaban : String(jawaban || ''),
+                                          skor: parseInt(fromMap || '0')
+                                        }
+                                      })
+
+                                      await supabase
+                                        .from('hasil_kuis')
+                                        .update({ jawaban: updatedJawaban })
+                                        .eq('id', hasil.id)
+
+                                      toast.success('Nilai berhasil disimpan!')
+                                      fetchHasil()
                                     }}
+                                    className="bg-green-600 hover:bg-green-700"
                                   >
-                                    Edit Nilai
+                                    <Save className="h-4 w-4 mr-1" />
+                                    Simpan Nilai
                                   </Button>
                                 </div>
                               </div>
