@@ -93,6 +93,7 @@ export default function GuruKuisDetail() {
   const [pertanyaanDialogOpen, setPertanyaanDialogOpen] = useState(false)
   const [expandedSiswa, setExpandedSiswa] = useState<string | null>(null)
   const [nilaiMap, setNilaiMap] = useState<Record<string, string>>({})
+  const [essayScoresMap, setEssayScoresMap] = useState<Record<string, Record<string, string>>>({})
   const [savingNilai, setSavingNilai] = useState<Record<string, boolean>>({})
   const [editingNilai, setEditingNilai] = useState<Record<string, boolean>>({})
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
@@ -679,88 +680,174 @@ export default function GuruKuisDetail() {
                                     </div>
                                   ) : (
                                     <div className="ml-8 space-y-2">
-                                      <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap">
-                                        {jawabanSiswa || <span className="text-gray-400 italic">Tidak dijawab</span>}
-                                      </div>
-                                      {hasil.skor === null && (
-                                        <div className="flex items-center gap-2">
-                                          <Input
-                                            type="number"
-                                            min={0}
-                                            max={100}
-                                            placeholder="Nilai (0-100)"
-                                            value={nilaiMap[hasil.id] ?? ''}
-                                            onChange={(e) => setNilaiMap({ ...nilaiMap, [hasil.id]: e.target.value })}
-                                            className="w-36 text-sm"
-                                          />
-                                          <Button
-                                            size="sm"
-                                            onClick={() => handleSaveNilai(hasil.id)}
-                                            disabled={savingNilai[hasil.id]}
-                                            className="bg-green-600 hover:bg-green-700"
-                                          >
-                                            <Save className="h-4 w-4 mr-1" />
-                                            {savingNilai[hasil.id] ? 'Menyimpan...' : 'Simpan Nilai'}
-                                          </Button>
-                                        </div>
-                                      )}
+                                      {/* Parse jawaban - handle both old format (string) and new format (object) */}
+                                      {(() => {
+                                        const answerData = typeof jawabanSiswa === 'object'
+                                          ? jawabanSiswa
+                                          : { jawaban: jawabanSiswa, skor: null }
+                                        return (
+                                          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap">
+                                            {answerData.jawaban || <span className="text-gray-400 italic">Tidak dijawab</span>}
+                                          </div>
+                                        )
+                                      })()}
 
-                                      {editingNilai[hasil.id] && (
-                                        <div className="flex items-center gap-2 mt-2">
-                                          <Input
-                                            type="number"
-                                            min={0}
-                                            max={100}
-                                            placeholder="Nilai (0-100)"
-                                            value={nilaiMap[hasil.id] ?? hasil.skor ?? ''}
-                                            onChange={(e) => setNilaiMap({ ...nilaiMap, [hasil.id]: e.target.value })}
-                                            className="w-36 text-sm"
-                                          />
-                                          <Button
-                                            size="sm"
-                                            onClick={() => handleSaveNilai(hasil.id)}
-                                            disabled={savingNilai[hasil.id]}
-                                            className="bg-green-600 hover:bg-green-700"
-                                          >
-                                            <Save className="h-4 w-4 mr-1" />
-                                            {savingNilai[hasil.id] ? 'Menyimpan...' : 'Simpan Nilai'}
-                                          </Button>
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => {
-                                              setEditingNilai(prev => ({ ...prev, [hasil.id]: false }))
-                                              setNilaiMap(prev => {
-                                                const next = { ...prev }
-                                                delete next[hasil.id]
-                                                return next
-                                              })
-                                            }}
-                                          >
-                                            Batal
-                                          </Button>
-                                        </div>
-                                      )}
+                                      {/* Per-question scoring for essay */}
+                                      <div className="space-y-3 mt-3">
+                                        {kuis.pertanyaan.map((p, pi) => {
+                                          const rawAnswer = hasil.jawaban?.[p.id]
+                                          const questionAnswer = typeof rawAnswer === 'object' && rawAnswer !== null
+                                            ? rawAnswer as { jawaban: string; skor: number | null }
+                                            : { jawaban: String(rawAnswer || ''), skor: null as number | null }
+                                          const currentScore = essayScoresMap[hasil.id]?.[p.id] ?? String(questionAnswer.skor ?? '')
+                                          const isAllGraded = kuis.pertanyaan.every(q => {
+                                            const qRaw = hasil.jawaban?.[q.id]
+                                            const qAnswer = typeof qRaw === 'object' && qRaw !== null
+                                              ? qRaw as { jawaban: string; skor: number | null }
+                                              : { jawaban: '', skor: null as number | null }
+                                            return essayScoresMap[hasil.id]?.[q.id] !== undefined
+                                              || qAnswer.skor !== null
+                                          })
+
+                                          return (
+                                            <div key={p.id} className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg">
+                                              <span className="text-xs font-medium text-amber-700 w-20">Soal {pi + 1}</span>
+                                              <Input
+                                                type="number"
+                                                min={0}
+                                                max={100}
+                                                placeholder="0-100"
+                                                value={currentScore}
+                                                onChange={(e) => setEssayScoresMap(prev => ({
+                                                  ...prev,
+                                                  [hasil.id]: {
+                                                    ...(prev[hasil.id] || {}),
+                                                    [p.id]: e.target.value
+                                                  }
+                                                }))}
+                                                className="w-24 text-sm"
+                                              />
+                                              {currentScore && <span className="text-xs text-gray-500">/ 100</span>}
+                                            </div>
+                                          )
+                                        })}
+
+                                        {/* Calculate average and show */}
+                                        {(() => {
+                                          const scores = kuis.pertanyaan.map(p => {
+                                            const rawAnswer = hasil.jawaban?.[p.id]
+                                            const qAnswer = typeof rawAnswer === 'object' && rawAnswer !== null
+                                              ? rawAnswer as { jawaban: string; skor: number | null }
+                                              : { jawaban: '', skor: null as number | null }
+                                            const fromMap = essayScoresMap[hasil.id]?.[p.id]
+                                            const score = fromMap !== undefined
+                                              ? parseInt(fromMap)
+                                              : (qAnswer.skor !== null ? qAnswer.skor : null)
+                                            return score
+                                          }).filter(s => s !== null && !isNaN(s))
+
+                                          const avgScore = scores.length > 0
+                                            ? Math.round((scores as number[]).reduce((a, b) => a + b, 0) / scores.length)
+                                            : null
+
+                                          return (
+                                            <div className="flex items-center gap-3 pt-2 border-t">
+                                              <span className="text-sm text-gray-600">
+                                                Rata-rata: <strong className="text-amber-600">{avgScore ?? '-'}</strong>
+                                              </span>
+                                              <Button
+                                                size="sm"
+                                                onClick={async () => {
+                                                  // Calculate total score from essay scores
+                                                  const totalScores = kuis.pertanyaan.map(p => {
+                                                    const fromMap = essayScoresMap[hasil.id]?.[p.id]
+                                                    return fromMap !== undefined ? parseInt(fromMap) : null
+                                                  })
+
+                                                  const validScores = totalScores.filter(s => s !== null && !isNaN(s))
+                                                  if (validScores.length !== kuis.pertanyaan.length) {
+                                                    toast.error('Nilai semua soal harus diisi!')
+                                                    return
+                                                  }
+
+                                                  const avg = Math.round((validScores as number[]).reduce((a, b) => a + b, 0) / validScores.length)
+
+                                                  // Update score in database
+                                                  const { error } = await supabase
+                                                    .from('hasil_kuis')
+                                                    .update({ skor: avg })
+                                                    .eq('id', hasil.id)
+
+                                                  if (error) {
+                                                    toast.error('Gagal menyimpan nilai')
+                                                    return
+                                                  }
+
+                                                  // Update jawaban with individual scores
+                                                  const updatedJawaban: Record<string, any> = {}
+                                                  kuis.pertanyaan.forEach(p => {
+                                                    const fromMap = essayScoresMap[hasil.id]?.[p.id]
+                                                    const rawJawaban = hasil.jawaban?.[p.id]
+                                                    const isObject = typeof rawJawaban === 'object' && rawJawaban !== null
+                                                    updatedJawaban[p.id] = {
+                                                      jawaban: isObject ? (rawJawaban as { jawaban: string }).jawaban : String(rawJawaban || ''),
+                                                      skor: parseInt(fromMap)
+                                                    }
+                                                  })
+
+                                                  await supabase
+                                                    .from('hasil_kuis')
+                                                    .update({ jawaban: updatedJawaban })
+                                                    .eq('id', hasil.id)
+
+                                                  toast.success('Nilai berhasil disimpan!')
+                                                  fetchHasil()
+                                                }}
+                                                className="bg-green-600 hover:bg-green-700"
+                                              >
+                                                <Save className="h-4 w-4 mr-1" />
+                                                Simpan Semua
+                                              </Button>
+                                            </div>
+                                          )
+                                        })()}
+                                      </div>
                                     </div>
                                   )}
                                 </div>
                               )
                             })}
 
+                            {/* Show per-question scores summary for essay */}
                             {kuis.tipe === 'essay' && hasil.skor !== null && !editingNilai[hasil.id] && (
-                              <div className="pt-2 text-sm text-gray-500 flex items-center gap-3">
-                                <span>Sudah dinilai: <strong>{hasil.skor}</strong></span>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 text-xs"
-                                  onClick={() => {
-                                    setNilaiMap(prev => ({ ...prev, [hasil.id]: String(hasil.skor) }))
-                                    setEditingNilai(prev => ({ ...prev, [hasil.id]: true }))
-                                  }}
-                                >
-                                  Edit
-                                </Button>
+                              <div className="pt-4 border-t mt-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="text-sm">
+                                    <span className="text-gray-500">Nilai Akhir: </span>
+                                    <strong className="text-green-600 text-lg">{hasil.skor}</strong>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      // Load existing scores into essayScoresMap for editing
+                                      const existingScores: Record<string, string> = {}
+                                      kuis.pertanyaan.forEach(p => {
+                                        const rawJawaban = hasil.jawaban?.[p.id]
+                                        const qAnswer = typeof rawJawaban === 'object' && rawJawaban !== null
+                                          ? rawJawaban as { jawaban: string; skor: number | null }
+                                          : null
+                                        if (qAnswer?.skor !== null && qAnswer?.skor !== undefined) {
+                                          existingScores[p.id] = String(qAnswer.skor)
+                                        }
+                                      })
+                                      setEssayScoresMap(prev => ({ ...prev, [hasil.id]: existingScores }))
+                                      setEditingNilai(prev => ({ ...prev, [hasil.id]: true }))
+                                    }}
+                                  >
+                                    Edit Nilai
+                                  </Button>
+                                </div>
                               </div>
                             )}
                           </div>

@@ -160,7 +160,16 @@ export default function siswaKerjakanKuis() {
       }
 
       let skor: number | null = null
+
+      // Format jawaban for essay (needs skor field per question)
+      const formattedJawaban: Record<string, any> = {}
       if (kuis?.tipe === 'pilihan_ganda') {
+        // PG: store answer as simple string
+        Object.entries(jawaban).forEach(([id, ans]) => {
+          formattedJawaban[id] = ans
+        })
+
+        // Calculate PG score
         let correct = 0
         const total = kuis.pertanyaan.length
 
@@ -171,6 +180,13 @@ export default function siswaKerjakanKuis() {
         })
 
         skor = Math.round((correct / total) * 100)
+      } else {
+        // Essay: store answer with empty skor (to be filled by guru)
+        Object.entries(jawaban).forEach(([id, ans]) => {
+          formattedJawaban[id] = { jawaban: ans, skor: null }
+        })
+        // Essay score will be calculated after guru grades
+        skor = null
       }
 
       // Calculate attempt number
@@ -181,12 +197,39 @@ export default function siswaKerjakanKuis() {
         .insert({
           kuis_id: kuisId,
           siswa_id: session.user.id,
-          jawaban,
+          jawaban: formattedJawaban,
           skor,
           attempt_number: attemptNumber
         })
 
       if (error) throw error
+
+      // Notify guru if this is an essay kuis (needs grading)
+      if (kuis?.tipe === 'essay') {
+        // Get guru_id from kuis
+        const { data: kuisData } = await supabase
+          .from('kuis')
+          .select('mata_pelajaran_id, judul')
+          .eq('id', kuisId)
+          .single()
+
+        if (kuisData) {
+          const { data: mapelData } = await supabase
+            .from('mata_pelajaran')
+            .select('guru_id')
+            .eq('id', kuisData.mata_pelajaran_id)
+            .single()
+
+          if (mapelData?.guru_id) {
+            await supabase.from('notifications').insert({
+              user_id: mapelData.guru_id,
+              type: 'essay_submitted',
+              title: `Jawaban essay perlu dinilai: ${kuisData.judul}`,
+              link: `/guru/matapelajaran/${kuisData.mata_pelajaran_id}/kuis/${kuisId}`
+            })
+          }
+        }
+      }
 
       // Get all attempts to find highest score
       const { data: allAttempts } = await supabase

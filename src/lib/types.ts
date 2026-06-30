@@ -35,7 +35,7 @@ export interface MateriViewWithSiswa extends MateriView {
 }
 
 // Notification types
-export type NotificationType = 'quiz_published' | 'quiz_graded' | 'quiz_deadline_soon' | 'materi_published'
+export type NotificationType = 'quiz_published' | 'quiz_graded' | 'quiz_deadline_soon' | 'materi_published' | 'essay_submitted'
 
 export interface Notification {
   id: string
