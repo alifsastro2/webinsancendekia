@@ -481,6 +481,12 @@ export default function SiswaKerjakanKuis() {
   const isCritical = timeLeft !== null && timeLeft <= 10
   const isWarning = timeLeft !== null && timeLeft <= 60 && timeLeft > 10
 
+  // Attempt info
+  const currentAttempt = (kuis as any).attemptCount || 0
+  const attemptLimits = kuis.attempt_limits
+  const remaining = attemptLimits ? Math.max(0, attemptLimits - currentAttempt - 1) : -1
+  const highestScore = (kuis as any).highestScore
+
   return (
     <div className="min-h-dvh bg-gray-50 flex flex-col relative">
       <Toaster />
@@ -498,10 +504,16 @@ export default function SiswaKerjakanKuis() {
           <h1 className="font-semibold text-gray-900 truncate">{kuis.judul}</h1>
           <p className="text-xs text-gray-500">
             {kuis.tipe === 'pilihan_ganda' ? 'Pilihan Ganda' : 'Essay'} &bull; {total} Soal
-            {(kuis as any).attemptCount > 0 && (
+            {currentAttempt > 0 && (
               <span className="ml-2 text-amber-600">
-                &bull; Percobaan ke-{(kuis as any).attemptCount + 1}
-                {(kuis as any).highestScore !== null && ` (Tertinggi: ${(kuis as any).highestScore})`}
+                &bull; Percobaan ke-{currentAttempt + 1}
+                {attemptLimits && ` dari ${attemptLimits}`}
+                {attemptLimits && remaining >= 0 && (
+                  <span className="text-blue-600 ml-1">({remaining} tersisa)</span>
+                )}
+                {highestScore !== null && (
+                  <span className="text-green-600 ml-1">Tertinggi: {highestScore}</span>
+                )}
               </span>
             )}
           </p>
