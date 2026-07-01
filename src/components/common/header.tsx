@@ -105,7 +105,7 @@ export default function Header({ role }: HeaderProps) {
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="my-2" />
               <DropdownMenuItem
-                onClick={() => router.push(`/${role}/profil`)}
+                onClick={() => router.push(role === 'guru' ? '/guru/settings' : '/siswa/profil')}
                 className="p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
               >
                 <Settings className="mr-3 h-4 w-4 text-gray-500" />

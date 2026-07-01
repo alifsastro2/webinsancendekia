@@ -179,7 +179,6 @@ src/
 │   │   │   └── [id]/kuis/
 │   │   │       ├── page.tsx        # Kelola semua kuis
 │   │   │       └── [kuisId]/page.tsx # Kelola 1 kuis + review hasil + nilai essay
-│   │   └── profil/page.tsx         # Profil guru
 │   ├── siswa/
 │   │   ├── page.tsx                # Dashboard siswa
 │   │   ├── layout.tsx              # Layout siswa

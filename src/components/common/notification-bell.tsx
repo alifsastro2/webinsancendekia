@@ -240,11 +240,11 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl border-t overflow-auto w-full max-w-sm mx-auto"
+            className="absolute right-0 top-full mt-2 z-50 bg-white rounded-2xl shadow-2xl border overflow-auto w-80 sm:w-96"
           >
             <div className="flex items-center justify-between p-4 border-b bg-gray-50">
               <div className="flex items-center gap-2">
