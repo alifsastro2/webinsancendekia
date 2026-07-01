@@ -56,24 +56,24 @@ export default function Header({ role }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-md">
-      <div className="px-4 lg:px-6 py-3 flex items-center justify-between">
+      <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex items-center justify-between gap-2">
         {/* Left side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm"
           >
             <Logo size="sm" showName={false} />
           </motion.div>
 
           <div className="hidden sm:block">
-            <h1 className="font-bold text-gray-900">Insan Cendekia</h1>
+            <h1 className="font-bold text-gray-900 text-sm sm:text-base">Insan Cendekia</h1>
             <p className="text-xs text-gray-500">{user?.nama || (role === 'guru' ? 'Guru' : 'Siswa')}</p>
           </div>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <NotificationBell role={role} />
 
           <DropdownMenu>

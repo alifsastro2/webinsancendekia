@@ -26,11 +26,11 @@ export default function MobileBottomNav() {
       initial={{ y: 60 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="bg-white border-t border-gray-200 lg:hidden"
+      className="bg-white border-t border-gray-200 lg:hidden safe-area-inset-bottom"
     >
-      <nav className="flex items-center justify-around py-2">
+      <nav className="flex items-center justify-around py-2 px-1">
         {bottomNavItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href || (item.href !== '/guru' && pathname.startsWith(item.href))
           const Icon = item.icon
           const colorMap: Record<string, { bg: string, text: string }> = {
             red: { bg: 'bg-red-100 text-red-600', text: 'text-red-600' },
@@ -41,20 +41,22 @@ export default function MobileBottomNav() {
           const colors = colorMap[item.color] || colorMap.red
 
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.href} className="flex-1">
               <motion.div
                 whileTap={{ scale: 0.9 }}
-                className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors"
+                className={cn(
+                  "flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-colors min-h-[56px] justify-center",
+                  isActive ? colors.bg : "text-gray-500"
+                )}
               >
                 <div className={cn(
-                  "p-2 rounded-xl transition-all",
-                  isActive ? colors.bg : "text-gray-500"
+                  "p-2.5 rounded-xl transition-all",
                 )}>
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-6 w-6" />
                 </div>
                 <span className={cn(
-                  "text-xs font-medium",
-                  isActive ? colors.text : "text-gray-500"
+                  "text-xs sm:text-sm font-medium",
+                  isActive ? colors.text : ""
                 )}>
                   {item.label}
                 </span>

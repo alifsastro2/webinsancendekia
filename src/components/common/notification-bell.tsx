@@ -170,9 +170,9 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors"
+        className="relative p-2.5 rounded-xl hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
       >
-        <Bell className="h-5 w-5 text-gray-600" />
+        <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -186,7 +186,7 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border z-50 overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-80 bg-white rounded-xl shadow-xl border z-50 overflow-hidden"
           >
             <div className="flex items-center justify-between p-4 border-b bg-gray-50">
               <h3 className="font-semibold text-gray-900">Notifikasi</h3>
