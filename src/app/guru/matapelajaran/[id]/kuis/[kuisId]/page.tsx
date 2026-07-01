@@ -793,6 +793,14 @@ export default function GuruKuisDetail() {
                                         .update({ jawaban: updatedJawaban })
                                         .eq('id', hasil.id)
 
+                                      // Notify student about graded essay
+                                      await supabase.from('notifications').insert({
+                                        user_id: hasil.siswa_id,
+                                        type: 'quiz_graded',
+                                        title: `Nilai ${kuis.judul} sudah keluar!`,
+                                        link: `/siswa/matapelajaran/${mapelId}/kuis/${kuisId}/review`
+                                      })
+
                                       toast.success('Nilai berhasil disimpan!')
                                       fetchHasil()
                                     }}
