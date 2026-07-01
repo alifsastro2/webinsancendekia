@@ -371,14 +371,15 @@ export default function SiswaKerjakanKuis() {
       }
 
       // Get highest score
-      const { data: allAttempts } = await supabase
+      const { data: allAttemptsAfter } = await supabase
         .from('hasil_kuis')
         .select('skor')
         .eq('kuis_id', kuisId)
         .eq('siswa_id', session.user.id)
 
-      const highestScore = allAttempts?.length
-        ? Math.max(...allAttempts.filter((a: { skor: number | null }) => a.skor !== null).map((a: { skor: number | null }) => a.skor || 0))
+      const scoredAfter = (allAttemptsAfter || []).filter((a: { skor: number | null }) => a.skor !== null)
+      const highestAfter = scoredAfter.length > 0
+        ? Math.max(...scoredAfter.map((a: { skor: number | null }) => a.skor || 0))
         : skor
 
       setShowSparkle(true)
@@ -393,7 +394,7 @@ export default function SiswaKerjakanKuis() {
         )
       }
 
-      setTimeout(() => router.back(), 2000)
+      setTimeout(() => router.push(`/siswa/matapelajaran/${mapelId}/kuis/${kuisId}/review`), 2000)
     } catch (error: any) {
       toast.error('Gagal mengirim jawaban. Silakan coba lagi.')
     } finally {
