@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
@@ -37,7 +37,7 @@ interface KuisWithPertanyaan extends Kuis {
   pertanyaan: PertanyaanKuis[]
 }
 
-export default function siswaKerjakanKuis() {
+export default function SiswaKerjakanKuis() {
   const params = useParams()
   const router = useRouter()
   const mapelId = params.mapelId as string
@@ -59,11 +59,33 @@ export default function siswaKerjakanKuis() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [showSparkle, setShowSparkle] = useState(false)
+  const [hasRestored, setHasRestored] = useState(false)
 
   const STORAGE_KEY = `quiz_draft_${kuisId}`
+  const answersRef = useRef(jawaban)
+
+  // Keep ref updated
+  useEffect(() => {
+    answersRef.current = jawaban
+  }, [jawaban])
+
+  // Save function
+  const saveToStorage = useCallback(() => {
+    try {
+      const toSave = { data: answersRef.current, timestamp: new Date().toISOString() }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
+      setLastSaved(new Date())
+      setIsSaving(true)
+      setTimeout(() => setIsSaving(false), 1000)
+    } catch (e) {
+      console.error('Save failed:', e)
+    }
+  }, [STORAGE_KEY])
 
   // Check for existing draft on mount
   useEffect(() => {
+    if (hasRestored) return // Only check once
+
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
@@ -77,33 +99,29 @@ export default function siswaKerjakanKuis() {
     } catch {
       // No draft or invalid data
     }
-  }, [kuisId, STORAGE_KEY])
+  }, [kuisId, STORAGE_KEY, hasRestored])
 
-  // Auto-save to localStorage every 5 seconds
+  // Auto-save every 5 seconds
   useEffect(() => {
-    if (!kuis || Object.keys(jawaban).length === 0) return
+    if (!kuis || hasRestored === false) return // Wait until we've checked for draft
 
     const saveInterval = setInterval(() => {
-      try {
-        const toSave = { data: jawaban, timestamp: new Date().toISOString() }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
-        setLastSaved(new Date())
-        setIsSaving(true)
-        setTimeout(() => setIsSaving(false), 1000)
-      } catch (e) {
-        console.error('Auto-save failed:', e)
+      const currentAnswers = answersRef.current
+      if (Object.keys(currentAnswers).length > 0) {
+        saveToStorage()
       }
     }, 5000)
 
     return () => clearInterval(saveInterval)
-  }, [kuis, jawaban, STORAGE_KEY])
+  }, [kuis, STORAGE_KEY, saveToStorage, hasRestored])
 
   // Save on page unload
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (kuis && Object.keys(jawaban).length > 0) {
+      const currentAnswers = answersRef.current
+      if (Object.keys(currentAnswers).length > 0) {
         try {
-          const toSave = { data: jawaban, timestamp: new Date().toISOString() }
+          const toSave = { data: currentAnswers, timestamp: new Date().toISOString() }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
         } catch {
           // Ignore
@@ -113,12 +131,13 @@ export default function siswaKerjakanKuis() {
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [kuis, jawaban, STORAGE_KEY])
+  }, [STORAGE_KEY])
 
   useEffect(() => {
     fetchKuis()
   }, [])
 
+  // Timer effect
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
 
@@ -230,7 +249,6 @@ export default function siswaKerjakanKuis() {
       // Format jawaban for essay (needs skor field per question)
       const formattedJawaban: Record<string, any> = {}
       if (kuis?.tipe === 'pilihan_ganda') {
-        // PG: store answer as simple string
         Object.entries(jawaban).forEach(([id, ans]) => {
           formattedJawaban[id] = ans
         })
@@ -247,11 +265,9 @@ export default function siswaKerjakanKuis() {
 
         skor = Math.round((correct / total) * 100)
       } else {
-        // Essay: store answer with empty skor (to be filled by guru)
         Object.entries(jawaban).forEach(([id, ans]) => {
           formattedJawaban[id] = { jawaban: ans, skor: null }
         })
-        // Essay score will be calculated after guru grades
         skor = null
       }
 
@@ -358,6 +374,7 @@ export default function siswaKerjakanKuis() {
     if (savedDraft) {
       setJawaban(savedDraft)
       setShowRestoreModal(false)
+      setHasRestored(true)
       toast.success('Jawaban sebelumnya telah dipulihkan!')
     }
   }
@@ -370,6 +387,34 @@ export default function siswaKerjakanKuis() {
     }
     setShowRestoreModal(false)
     setSavedDraft(null)
+    setHasRestored(true)
+  }
+
+  // Navigate to next question and save
+  const goToNext = () => {
+    // Save current answer before navigating
+    saveToStorage()
+    if (currentIndex < total - 1) {
+      setCurrentIndex(prev => prev + 1)
+    }
+  }
+
+  // Navigate to previous question and save
+  const goToPrev = () => {
+    // Save current answer before navigating
+    saveToStorage()
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1)
+    }
+  }
+
+  // Handle answer change and save
+  const handleAnswerChange = (questionId: string, value: string) => {
+    const newAnswers = { ...jawaban, [questionId]: value }
+    setJawaban(newAnswers)
+    answersRef.current = newAnswers
+    // Immediately save to localStorage
+    saveToStorage()
   }
 
   if (loading) {
@@ -486,15 +531,15 @@ export default function siswaKerjakanKuis() {
         </div>
 
         {/* Auto-save indicator */}
-        <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
+        <div className="hidden sm:flex items-center gap-1.5 text-xs">
           <motion.div
             animate={isSaving ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 0.3 }}
           >
-            <Save className="h-3.5 w-3.5" />
+            <Save className="h-3.5 w-3.5 text-gray-400" />
           </motion.div>
-          <span>
-            {isSaving ? 'Menyimpan...' : lastSaved ? `Terakhir: ${lastSaved.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` : 'Auto-save'}
+          <span className={isSaving ? 'text-green-600 font-medium' : 'text-gray-400'}>
+            {isSaving ? 'Menyimpan...' : lastSaved ? `Tersimpan ${lastSaved.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` : 'Auto-save'}
           </span>
         </div>
 
@@ -608,7 +653,7 @@ export default function siswaKerjakanKuis() {
                   {kuis.tipe === 'pilihan_ganda' ? (
                     <RadioGroup
                       value={jawaban[current.id] || ''}
-                      onValueChange={(value) => setJawaban({ ...jawaban, [current.id]: value })}
+                      onValueChange={(value) => handleAnswerChange(current.id, value)}
                     >
                       <div className="space-y-2">
                         {['A', 'B', 'C', 'D'].map((opt, idx) => {
@@ -626,7 +671,7 @@ export default function siswaKerjakanKuis() {
                                   ? 'border-green-500 bg-green-50'
                                   : 'border-gray-200 hover:border-gray-300'
                               }`}
-                              onClick={() => setJawaban({ ...jawaban, [current.id]: opt })}
+                              onClick={() => handleAnswerChange(current.id, opt)}
                             >
                               <RadioGroupItem value={opt} id={`${current.id}-${opt}`} className="sr-only" />
                               <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-colors ${
@@ -660,7 +705,7 @@ export default function siswaKerjakanKuis() {
                     >
                       <Textarea
                         value={jawaban[current.id] || ''}
-                        onChange={(e) => setJawaban({ ...jawaban, [current.id]: e.target.value })}
+                        onChange={(e) => handleAnswerChange(current.id, e.target.value)}
                         placeholder="Tulis jawaban Anda di sini..."
                         rows={6}
                         className="mt-2 resize-none"
@@ -678,7 +723,7 @@ export default function siswaKerjakanKuis() {
               <div className="flex items-center gap-3 pb-4">
                 <Button
                   variant="outline"
-                  onClick={() => setCurrentIndex(i => Math.max(0, i - 1))}
+                  onClick={goToPrev}
                   disabled={currentIndex === 0}
                   className="flex items-center gap-1"
                 >
@@ -692,10 +737,10 @@ export default function siswaKerjakanKuis() {
 
                 {currentIndex < total - 1 ? (
                   <Button
-                    onClick={() => setCurrentIndex(i => Math.min(total - 1, i + 1))}
+                    onClick={goToNext}
                     className="flex items-center gap-1"
                   >
-                    Berikutnya
+                    Simpan & Berikutnya
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 ) : (
@@ -744,7 +789,10 @@ export default function siswaKerjakanKuis() {
                   <motion.button
                     key={p.id}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => setCurrentIndex(i)}
+                    onClick={() => {
+                      saveToStorage()
+                      setCurrentIndex(i)
+                    }}
                     className={`h-10 rounded-lg text-sm font-bold transition-all ${
                       i === currentIndex
                         ? 'bg-green-500 text-white ring-2 ring-green-300'
