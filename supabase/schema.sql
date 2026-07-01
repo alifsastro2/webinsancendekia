@@ -60,6 +60,17 @@ CREATE TABLE IF NOT EXISTS materi (
 );
 
 -- ============================================
+-- TABLE: MATERI_VIEWS (Track siapa yang membuka materi)
+-- ============================================
+CREATE TABLE IF NOT EXISTS materi_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  materi_id UUID REFERENCES materi(id) ON DELETE CASCADE,
+  siswa_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  viewed_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(materi_id, siswa_id)
+);
+
+-- ============================================
 -- TABLE: KUIS
 -- ============================================
 CREATE TABLE IF NOT EXISTS kuis (
