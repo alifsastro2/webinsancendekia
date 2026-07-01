@@ -51,6 +51,7 @@ export type Database = {
           is_active: boolean
           google_access_token: string | null
           google_refresh_token: string | null
+          google_connected_at: string | null
           created_at: string
           updated_at: string
         }
@@ -64,6 +65,7 @@ export type Database = {
           is_active?: boolean
           google_access_token?: string | null
           google_refresh_token?: string | null
+          google_connected_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -77,6 +79,7 @@ export type Database = {
           is_active?: boolean
           google_access_token?: string | null
           google_refresh_token?: string | null
+          google_connected_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -145,6 +148,7 @@ export type Database = {
           waktu_menit: number | null
           due_date: string | null
           published: boolean
+          attempt_limits: number | null
           created_at: string
         }
         Insert: {
@@ -155,6 +159,7 @@ export type Database = {
           waktu_menit?: number | null
           due_date?: string | null
           published?: boolean
+          attempt_limits?: number | null
           created_at?: string
         }
         Update: {
@@ -165,6 +170,7 @@ export type Database = {
           waktu_menit?: number | null
           due_date?: string | null
           published?: boolean
+          attempt_limits?: number | null
           created_at?: string
         }
       }
@@ -214,6 +220,7 @@ export type Database = {
           jawaban: any
           skor: number | null
           submitted_at: string
+          attempt_number: number
         }
         Insert: {
           id?: string
@@ -222,6 +229,7 @@ export type Database = {
           jawaban: any
           skor?: number | null
           submitted_at?: string
+          attempt_number?: number
         }
         Update: {
           id?: string
@@ -230,6 +238,39 @@ export type Database = {
           jawaban?: any
           skor?: number | null
           submitted_at?: string
+          attempt_number?: number
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          message: string | null
+          link: string | null
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          message?: string | null
+          link?: string | null
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          message?: string | null
+          link?: string | null
+          is_read?: boolean
+          created_at?: string
         }
       }
     }

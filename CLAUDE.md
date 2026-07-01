@@ -255,6 +255,7 @@ Danger:      #ef4444 (Red 500)
 ### UI & Animation
 - `framer-motion` - Animasi
 - `lucide-react` - Icons
+- `canvas-confetti` - Confetti celebration effect
 - `shadcn/ui` (via @radix-ui/*) - UI components
 
 ### Forms & Validation
@@ -455,6 +456,114 @@ Open http://localhost:3000/login
 
 ---
 
+## 🎨 Animasi dan UI/UX Improvements
+
+### Komponen Baru
+
+| Komponen | File | Fungsi |
+|----------|-------|--------|
+| Skeleton | `src/components/ui/skeleton.tsx` | Loading state dengan shimmer effect |
+| Animated Form Field | `src/components/ui/animated-form-field.tsx` | Label naik saat focus |
+| Empty State | `src/components/ui/empty-state.tsx` | Ilustrasi SVG animasi |
+| Progress Bar | `src/components/ui/progress-bar.tsx` | Progress dengan gradient + shimmer |
+| Timer | `src/components/ui/timer.tsx` | Timer dengan pulse warning |
+| Pull to Refresh | `src/components/ui/pull-to-refresh.tsx` | Swipe down untuk refresh |
+| Sparkle | `src/components/ui/sparkle.tsx` | Partikel sparkle saat submit |
+| Confetti | `src/components/common/confetti.tsx` | Confetti celebration |
+| Auto-save | `src/lib/hooks/use-auto-save.ts` | Draft jawaban tersimpan otomatis |
+
+### CSS Animations (globals.css)
+- `.animate-shimmer` - Shimmer effect
+- `.animate-badge-bounce` - Badge bounce saat notifikasi baru
+- `.animate-timer-pulse` - Timer pulse animation
+- `.animate-timer-critical` - Timer critical (merah berkedip)
+- `.animate-sparkle` - Sparkle particles
+
+### Fitur yang Diimplementasi
+
+#### 1. Skeleton Shimmer Loading
+```tsx
+import { Skeleton, SkeletonCard, SkeletonList } from '@/components/ui/skeleton'
+```
+- `Skeleton` - Generic skeleton dengan shimmer
+- `SkeletonCard` - Card skeleton untuk list
+- `SkeletonList` - List skeleton untuk items
+- `SkeletonTable` - Table skeleton
+
+#### 2. Animated Form Field (Floating Label)
+```tsx
+import { AnimatedFormField, AnimatedTextarea } from '@/components/ui/animated-form-field'
+
+<AnimatedFormField
+  label="Username"
+  value={username}
+  onChange={(e) => setUsername(e.target.value)}
+  error={errors.username}
+/>
+```
+- Label naik ke atas saat focus atau ada value
+- Focus ring animation
+- Error state dengan shake
+- Password toggle dengan eye icon
+
+#### 3. Empty State Illustrations
+```tsx
+import { EmptyState } from '@/components/ui/empty-state'
+
+<EmptyState
+  title="Belum ada kuis"
+  description="Kuis akan muncul setelah guru membuat"
+  illustration="quiz"
+  action={{ label: 'Buat Kuis', onClick: () => {} }}
+/>
+```
+- 8 type ilustrasi: book, quiz, users, folder, check, clock, search
+- SVG animasi untuk setiap ilustrasi
+- Floating particles effect
+- Tombol action opsional
+
+#### 4. Notification Badge Bounce
+- Badge bounce saat ada notifikasi baru
+- Shimmer effect untuk unread
+- Polling setiap 30 detik
+- Pulse indicator di header
+
+#### 5. Auto-save Draft Jawaban Kuis
+- Simpan otomatis setiap 5 detik ke localStorage
+- Modal restore saat buka kuis lagi
+- Indikator "Menyimpan..." saat auto-save
+- Clear draft setelah submit berhasil
+- Simpan juga saat page unload
+
+#### 6. Confetti Animation (Hasil Kuis)
+- Confetti saat nilai >= 80
+- Extra burst untuk nilai >= 95
+- Trophy icon untuk high scores
+- Star rating berdasarkan nilai
+
+#### 7. Progress Bar Animation
+- Gradient fill dengan shimmer
+- Auto color berdasarkan percentage
+- Smooth animation saat update
+- Support circular progress untuk timer
+
+#### 8. Timer Pulse Animation
+- Normal: background abu-abu
+- Warning (< 60 detik): background kuning, pulse
+- Critical (< 10 detik): background merah, pulse cepat, ikon alert
+
+#### 9. Pull-to-Refresh
+- Swipe down gesture
+- Loading spinner animasi
+- Spring physics untuk smooth feel
+
+#### 10. Sparkle Animation
+- Sparkle particles saat submit
+- Button click sparkle effect
+- Success sparkle burst
+
+---
+
 ## 🎨 Animasi yang Digunakan
 
 ### Page Transitions
@@ -467,7 +576,7 @@ Open http://localhost:3000/login
 - Spring animation
 
 ### Form Elements
-- Input focus transitions
+- Input focus transitions (label naik)
 - Button tap scale
 - Modal scale in/out
 
@@ -480,7 +589,6 @@ Open http://localhost:3000/login
 - [ ] File upload dengan Supabase Storage (saat ini pakai URL)
 - [ ] Email verification
 - [ ] Dark mode
-- [ ] Mobile responsive improvements
 - [ ] Fitur unpublish kuis (tidak direkomendasikan)
 
 ---

@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Loader2, LogIn } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { AnimatedFormField } from '@/components/ui/animated-form-field'
 import Logo from '@/components/common/logo'
 
 interface LoginFormProps {
@@ -17,6 +16,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [localError, setLocalError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,12 +27,14 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
       return
     }
 
+    setIsSubmitting(true)
     try {
       await onSubmit({ username, password })
     } catch (err: any) {
       // Error sudah ditangani oleh parent component dengan toast
-      // Jadi kita tidak perlu menampilkan error di sini
       setLocalError('')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -162,23 +164,19 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                 </motion.div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <Label htmlFor="username" className="text-gray-700 font-semibold text-sm">
-                    Username
-                  </Label>
-                  <Input
-                    id="username"
+                  <AnimatedFormField
+                    label="Username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Masukkan username"
-                    className="mt-2 h-12 border-2 border-gray-200 focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all rounded-xl"
                     disabled={isLoading}
+                    required
                   />
                 </motion.div>
 
@@ -187,17 +185,13 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <Label htmlFor="password" className="text-gray-700 font-semibold text-sm">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
+                  <AnimatedFormField
+                    label="Password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Masukkan password"
-                    className="mt-2 h-12 border-2 border-gray-200 focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all rounded-xl"
                     disabled={isLoading}
+                    required
                   />
                 </motion.div>
 
@@ -208,10 +202,10 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                 >
                   <motion.button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || isSubmitting}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold shadow-lg transition-all duration-300 rounded-xl relative overflow-hidden group"
+                    className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold shadow-lg transition-all duration-300 rounded-xl relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <motion.span
                       className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -219,7 +213,7 @@ export default function LoginForm({ onSubmit, isLoading = false, error = '' }: L
                       whileHover={{ x: "100%" }}
                       transition={{ duration: 0.6 }}
                     />
-                    {isLoading ? (
+                    {isLoading || isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Masuk...

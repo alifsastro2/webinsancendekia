@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,14 +8,16 @@ import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { ProgressBar } from '@/components/ui/progress-bar'
 import {
   ArrowLeft,
-  Clock,
   CheckCircle2,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Send
+  Send,
+  Save,
+  RotateCcw
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Kuis, PertanyaanKuis } from '@/lib/types'
@@ -29,6 +31,7 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import { Toaster } from '@/components/ui/sonner'
+import { SparkleAnimation } from '@/components/ui/sparkle'
 
 interface KuisWithPertanyaan extends Kuis {
   pertanyaan: PertanyaanKuis[]
@@ -48,6 +51,69 @@ export default function siswaKerjakanKuis() {
   const [timeExpired, setTimeExpired] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showConfirm, setShowConfirm] = useState(false)
+
+  // Auto-save states
+  const [showRestoreModal, setShowRestoreModal] = useState(false)
+  const [savedDraft, setSavedDraft] = useState<Record<string, string> | null>(null)
+  const [draftTimestamp, setDraftTimestamp] = useState<Date | null>(null)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [showSparkle, setShowSparkle] = useState(false)
+
+  const STORAGE_KEY = `quiz_draft_${kuisId}`
+
+  // Check for existing draft on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.data && Object.keys(parsed.data).length > 0) {
+          setSavedDraft(parsed.data)
+          setDraftTimestamp(new Date(parsed.timestamp))
+          setShowRestoreModal(true)
+        }
+      }
+    } catch {
+      // No draft or invalid data
+    }
+  }, [kuisId, STORAGE_KEY])
+
+  // Auto-save to localStorage every 5 seconds
+  useEffect(() => {
+    if (!kuis || Object.keys(jawaban).length === 0) return
+
+    const saveInterval = setInterval(() => {
+      try {
+        const toSave = { data: jawaban, timestamp: new Date().toISOString() }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
+        setLastSaved(new Date())
+        setIsSaving(true)
+        setTimeout(() => setIsSaving(false), 1000)
+      } catch (e) {
+        console.error('Auto-save failed:', e)
+      }
+    }, 5000)
+
+    return () => clearInterval(saveInterval)
+  }, [kuis, jawaban, STORAGE_KEY])
+
+  // Save on page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (kuis && Object.keys(jawaban).length > 0) {
+        try {
+          const toSave = { data: jawaban, timestamp: new Date().toISOString() }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
+        } catch {
+          // Ignore
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [kuis, jawaban, STORAGE_KEY])
 
   useEffect(() => {
     fetchKuis()
@@ -204,9 +270,15 @@ export default function siswaKerjakanKuis() {
 
       if (error) throw error
 
+      // Clear draft after successful submit
+      try {
+        localStorage.removeItem(STORAGE_KEY)
+      } catch {
+        // Ignore
+      }
+
       // Notify guru if this is an essay kuis (needs grading)
       if (kuis?.tipe === 'essay') {
-        // Get guru_id from kuis
         const { data: kuisData } = await supabase
           .from('kuis')
           .select('mata_pelajaran_id, judul')
@@ -241,6 +313,9 @@ export default function siswaKerjakanKuis() {
       const highestScore = allAttempts?.length
         ? Math.max(...allAttempts.filter((a: { skor: number | null }) => a.skor !== null).map((a: { skor: number | null }) => a.skor || 0))
         : skor
+
+      // Trigger sparkle on submit
+      setShowSparkle(true)
 
       if (expired) {
         toast.error('Waktu habis! Jawaban Anda otomatis terkirim.')
@@ -279,6 +354,24 @@ export default function siswaKerjakanKuis() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  const restoreDraft = () => {
+    if (savedDraft) {
+      setJawaban(savedDraft)
+      setShowRestoreModal(false)
+      toast.success('Jawaban sebelumnya telah dipulihkan!')
+    }
+  }
+
+  const discardDraft = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Ignore
+    }
+    setShowRestoreModal(false)
+    setSavedDraft(null)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -301,6 +394,7 @@ export default function siswaKerjakanKuis() {
 
   const total = kuis.pertanyaan.length
   const current = kuis.pertanyaan[currentIndex]
+  const answeredCount = kuis.pertanyaan.filter(p => !!jawaban[p.id]).length
 
   if (total === 0) {
     return (
@@ -310,14 +404,65 @@ export default function siswaKerjakanKuis() {
       </div>
     )
   }
+
   const isAnswered = (id: string) => !!jawaban[id]
   const unansweredIndices = kuis.pertanyaan
     .map((p, i) => ({ id: p.id, num: i + 1 }))
     .filter(p => !jawaban[p.id])
 
+  // Timer styling based on time left
+  const isCritical = timeLeft !== null && timeLeft <= 10
+  const isWarning = timeLeft !== null && timeLeft <= 60 && timeLeft > 10
+
   return (
-    <div className="min-h-dvh bg-gray-50 flex flex-col">
+    <div className="min-h-dvh bg-gray-50 flex flex-col relative">
       <Toaster />
+      <SparkleAnimation isActive={showSparkle} onComplete={() => setShowSparkle(false)} />
+
+      {/* Restore Draft Modal */}
+      <Dialog open={showRestoreModal} onOpenChange={setShowRestoreModal}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <div className="mx-auto w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-3">
+              <RotateCcw className="h-7 w-7 text-blue-600" />
+            </div>
+            <DialogTitle className="text-center">Jawaban Tersimpan Ditemukan</DialogTitle>
+            <DialogDescription className="text-center">
+              Kami menemukan jawaban yang tersimpan dari sebelumnya.
+              {draftTimestamp && (
+                <span className="block mt-1 text-xs text-gray-400">
+                  Tersimpan pada: {draftTimestamp.toLocaleString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="bg-blue-50 rounded-xl p-4 text-sm">
+              <p className="font-medium text-blue-800 mb-2">
+                {savedDraft ? Object.keys(savedDraft).length : 0} dari {total} soal telah dijawab
+              </p>
+              <p className="text-blue-600 text-xs">
+                Ingin melanjutkan pekerjaan sebelumnya?
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={discardDraft} className="flex-1">
+              Mulai Baru
+            </Button>
+            <Button onClick={restoreDraft} className="flex-1 bg-blue-600 hover:bg-blue-700">
+              Lanjutkan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Header */}
       <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
@@ -339,33 +484,97 @@ export default function siswaKerjakanKuis() {
             )}
           </p>
         </div>
+
+        {/* Auto-save indicator */}
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
+          <motion.div
+            animate={isSaving ? { scale: [1, 1.2, 1] } : {}}
+            transition={{ duration: 0.3 }}
+          >
+            <Save className="h-3.5 w-3.5" />
+          </motion.div>
+          <span>
+            {isSaving ? 'Menyimpan...' : lastSaved ? `Terakhir: ${lastSaved.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` : 'Auto-save'}
+          </span>
+        </div>
+
+        {/* Timer with enhanced styling */}
         {timeLeft !== null && (
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm font-bold ${
-            timeLeft < 60 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
-          }`}>
-            <Clock className="h-4 w-4" />
-            {formatTime(timeLeft)}
-          </div>
+          <motion.div
+            animate={
+              isCritical ? {
+                scale: [1, 1.05, 1],
+                backgroundColor: [
+                  'rgb(254, 242, 242)',
+                  'rgb(254, 226, 226)',
+                  'rgb(254, 242, 242)',
+                ],
+              } : isWarning ? {
+                backgroundColor: [
+                  'rgb(254, 252, 232)',
+                  'rgb(254, 250, 220)',
+                  'rgb(254, 252, 232)',
+                ],
+              } : {}
+            }
+            transition={{ duration: isCritical ? 0.5 : 1, repeat: isCritical || isWarning ? Infinity : 0 }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm font-bold ${
+              isCritical ? 'text-red-600' : isWarning ? 'text-amber-600' : 'bg-gray-100 text-gray-700'
+            }`}
+          >
+            {isCritical && (
+              <motion.span
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 0.5, repeat: Infinity }}
+                className="w-2 h-2 rounded-full bg-red-500"
+              />
+            )}
+            {isWarning && !isCritical && (
+              <motion.span
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="w-2 h-2 rounded-full bg-amber-500"
+              />
+            )}
+            <span>{formatTime(timeLeft)}</span>
+          </motion.div>
         )}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="bg-white border-b px-4 py-3">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-gray-500">Progress Pengerjaan</span>
+          <span className="text-xs font-medium text-gray-700">{answeredCount}/{total} soal</span>
+        </div>
+        <ProgressBar
+          value={answeredCount}
+          max={total}
+          size="sm"
+          animated
+        />
       </div>
 
       {/* Progress Pills (mobile only) */}
       <div className="bg-white border-b px-4 py-3 overflow-x-auto lg:hidden">
         <div className="flex gap-1.5 min-w-max">
           {kuis.pertanyaan.map((p, i) => (
-            <button
+            <motion.button
               key={p.id}
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
               onClick={() => setCurrentIndex(i)}
+              whileTap={{ scale: 0.9 }}
               className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                 i === currentIndex
-                  ? 'bg-green-500 text-white ring-2 ring-green-200 scale-110'
+                  ? 'bg-green-500 text-white ring-2 ring-green-200'
                   : isAnswered(p.id)
                     ? 'bg-green-100 text-green-700'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
               {i + 1}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -385,9 +594,14 @@ export default function siswaKerjakanKuis() {
               <Card className="border-0 shadow-lg mb-4">
                 <CardContent className="p-5 lg:p-6">
                   <div className="flex items-start gap-3 mb-5">
-                    <span className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-sm shrink-0">
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                      className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+                    >
                       {currentIndex + 1}
-                    </span>
+                    </motion.span>
                     <p className="text-gray-900 text-base font-medium pt-1">{current.pertanyaan}</p>
                   </div>
 
@@ -397,13 +611,16 @@ export default function siswaKerjakanKuis() {
                       onValueChange={(value) => setJawaban({ ...jawaban, [current.id]: value })}
                     >
                       <div className="space-y-2">
-                        {['A', 'B', 'C', 'D'].map((opt) => {
+                        {['A', 'B', 'C', 'D'].map((opt, idx) => {
                           const opsiKey = `opsi_${opt.toLowerCase()}` as keyof typeof current
                           const opsiVal = current[opsiKey] as string | undefined
                           if (!opsiVal) return null
                           return (
-                            <div
+                            <motion.div
                               key={opt}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.05 }}
                               className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all cursor-pointer ${
                                 jawaban[current.id] === opt
                                   ? 'border-green-500 bg-green-50'
@@ -412,7 +629,7 @@ export default function siswaKerjakanKuis() {
                               onClick={() => setJawaban({ ...jawaban, [current.id]: opt })}
                             >
                               <RadioGroupItem value={opt} id={`${current.id}-${opt}`} className="sr-only" />
-                              <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold ${
+                              <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold transition-colors ${
                                 jawaban[current.id] === opt
                                   ? 'bg-green-500 text-white'
                                   : 'bg-gray-100 text-gray-600'
@@ -422,19 +639,37 @@ export default function siswaKerjakanKuis() {
                               <Label htmlFor={`${current.id}-${opt}`} className="flex-1 cursor-pointer text-gray-700 font-normal">
                                 {opsiVal}
                               </Label>
-                            </div>
+                              {jawaban[current.id] === opt && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="text-green-500"
+                                >
+                                  <CheckCircle2 className="h-5 w-5" />
+                                </motion.div>
+                              )}
+                            </motion.div>
                           )
                         })}
                       </div>
                     </RadioGroup>
                   ) : (
-                    <Textarea
-                      value={jawaban[current.id] || ''}
-                      onChange={(e) => setJawaban({ ...jawaban, [current.id]: e.target.value })}
-                      placeholder="Tulis jawaban Anda di sini..."
-                      rows={6}
-                      className="mt-2 resize-none"
-                    />
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <Textarea
+                        value={jawaban[current.id] || ''}
+                        onChange={(e) => setJawaban({ ...jawaban, [current.id]: e.target.value })}
+                        placeholder="Tulis jawaban Anda di sini..."
+                        rows={6}
+                        className="mt-2 resize-none"
+                      />
+                      {/* Word count indicator for essay */}
+                      <div className="mt-2 text-xs text-gray-400 text-right">
+                        {jawaban[current.id]?.length || 0} karakter
+                      </div>
+                    </motion.div>
                   )}
                 </CardContent>
               </Card>
@@ -475,9 +710,13 @@ export default function siswaKerjakanKuis() {
                 )}
               </div>
               {timeExpired && (
-                <p className="text-center text-sm text-red-600 mb-4 font-medium">
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center text-sm text-red-600 mb-4 font-medium"
+                >
                   Waktu habis! Jawaban akan dikirim otomatis...
-                </p>
+                </motion.p>
               )}
             </motion.div>
           </AnimatePresence>
@@ -502,27 +741,38 @@ export default function siswaKerjakanKuis() {
 
               <div className="grid grid-cols-5 gap-2">
                 {kuis.pertanyaan.map((p, i) => (
-                  <button
+                  <motion.button
                     key={p.id}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setCurrentIndex(i)}
                     className={`h-10 rounded-lg text-sm font-bold transition-all ${
                       i === currentIndex
-                        ? 'bg-green-500 text-white ring-2 ring-green-300 scale-110'
+                        ? 'bg-green-500 text-white ring-2 ring-green-300'
                         : isAnswered(p.id)
                           ? 'bg-green-100 text-green-700 hover:bg-green-200'
                           : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
                     }`}
                   >
                     {i + 1}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
 
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex justify-between text-sm mb-3">
                   <span className="text-gray-500">Terjawab</span>
-                  <span className="font-bold text-gray-900">{kuis.pertanyaan.filter(p => isAnswered(p.id)).length}/{total}</span>
+                  <span className="font-bold text-gray-900">{answeredCount}/{total}</span>
                 </div>
+
+                {/* Mini progress bar in sidebar */}
+                <div className="mb-4">
+                  <ProgressBar
+                    value={answeredCount}
+                    max={total}
+                    size="sm"
+                  />
+                </div>
+
                 <Button
                   onClick={requestSubmit}
                   disabled={submitting}
@@ -551,8 +801,9 @@ export default function siswaKerjakanKuis() {
 
           <div className="flex flex-wrap gap-2 justify-center my-3">
             {unansweredIndices.map(u => (
-              <button
+              <motion.button
                 key={u.num}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => {
                   setCurrentIndex(u.num - 1)
                   setShowConfirm(false)
@@ -560,7 +811,7 @@ export default function siswaKerjakanKuis() {
                 className="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 font-bold text-sm hover:bg-amber-200 transition-colors"
               >
                 {u.num}
-              </button>
+              </motion.button>
             ))}
           </div>
 

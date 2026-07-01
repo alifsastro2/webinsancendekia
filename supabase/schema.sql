@@ -71,6 +71,20 @@ CREATE TABLE IF NOT EXISTS materi_views (
 );
 
 -- ============================================
+-- TABLE: NOTIFICATIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT,
+  link TEXT,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
 -- TABLE: KUIS
 -- ============================================
 CREATE TABLE IF NOT EXISTS kuis (
@@ -81,7 +95,8 @@ CREATE TABLE IF NOT EXISTS kuis (
   waktu_menit INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   due_date TIMESTAMP WITH TIME ZONE,
-  published BOOLEAN DEFAULT FALSE
+  published BOOLEAN DEFAULT FALSE,
+  attempt_limits INTEGER DEFAULT NULL
 );
 
 -- ============================================
@@ -110,6 +125,7 @@ CREATE TABLE IF NOT EXISTS hasil_kuis (
   jawaban JSONB NOT NULL,
   skor INTEGER,
   submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  attempt_number INTEGER DEFAULT 1,
   UNIQUE(kuis_id, siswa_id)
 );
 

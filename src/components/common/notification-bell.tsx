@@ -17,7 +17,10 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [open, setOpen] = useState(false)
+  const [isBouncing, setIsBouncing] = useState(false)
+  const [newNotifIds, setNewNotifIds] = useState<Set<string>>(new Set())
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const prevCountRef = useRef(0)
 
   const fetchNotifications = async () => {
     try {
@@ -32,8 +35,30 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
         .limit(20)
 
       if (data) {
-        setNotifications(data as Notification[])
-        setUnreadCount((data as Notification[]).filter(n => !n.is_read).length)
+        const newNotifications = data as Notification[]
+        const newUnreadCount = newNotifications.filter(n => !n.is_read).length
+
+        // Check if count increased (new notification)
+        if (newUnreadCount > prevCountRef.current) {
+          setIsBouncing(true)
+          setTimeout(() => setIsBouncing(false), 300)
+
+          // Find which notifications are new (in the last 5 seconds)
+          const now = Date.now()
+          const newIds = new Set<string>()
+          newNotifications.forEach(n => {
+            const createdAt = new Date(n.created_at).getTime()
+            if (createdAt > now - 5000) {
+              newIds.add(n.id)
+            }
+          })
+          setNewNotifIds(newIds)
+          setTimeout(() => setNewNotifIds(new Set()), 3000)
+        }
+
+        prevCountRef.current = newUnreadCount
+        setNotifications(newNotifications)
+        setUnreadCount(newUnreadCount)
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
@@ -107,6 +132,10 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
     if (role === 'siswa') {
       checkDeadlines()
     }
+
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
   }, [role])
 
   useEffect(() => {
@@ -172,24 +201,65 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
         onClick={() => setOpen(!open)}
         className="relative p-2.5 rounded-xl hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
       >
-        <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
+        <motion.div
+          animate={isBouncing ? {
+            scale: [1, 1.2, 1],
+            rotate: [0, -10, 10, 0]
+          } : {}}
+          transition={{ duration: 0.3 }}
+        >
+          <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+        </motion.div>
+
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{
+                scale: isBouncing ? [1, 1.3, 1] : 1,
+              }}
+              exit={{ scale: 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+              className={`absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg ${
+                isBouncing ? 'ring-2 ring-red-300 ring-4' : ''
+              }`}
+            >
+              <motion.span
+                key={unreadCount}
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="relative"
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </motion.span>
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-80 bg-white rounded-xl shadow-xl border z-50 overflow-hidden"
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl border-t overflow-auto w-full max-w-sm mx-auto"
           >
             <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-              <h3 className="font-semibold text-gray-900">Notifikasi</h3>
+              <div className="flex items-center gap-2">
+                <motion.div
+                  animate={unreadCount > 0 ? {
+                    boxShadow: [
+                      '0 0 0 0 rgba(239, 68, 68, 0.4)',
+                      '0 0 0 8px rgba(239, 68, 68, 0)',
+                    ]
+                  } : {}}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-red-500"
+                />
+                <h3 className="font-semibold text-gray-900">Notifikasi</h3>
+              </div>
               {unreadCount > 0 && (
                 <button onClick={markAllRead} className="text-xs text-blue-600 hover:text-blue-700 font-medium">
                   Tandai semua dibaca
@@ -200,22 +270,39 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
             <div className="max-h-96 overflow-y-auto">
               {!notifications.length ? (
                 <div className="p-8 text-center text-gray-400">
-                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  </motion.div>
                   <p className="text-sm">Belum ada notifikasi</p>
                 </div>
               ) : (
-                notifications.map(notif => (
-                  <button
+                notifications.map((notif, index) => (
+                  <motion.button
                     key={notif.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
                     onClick={() => markAsRead(notif)}
                     className={`w-full p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 ${
-                      !notif.is_read ? 'bg-blue-50' : ''
-                    }`}
+                      !notif.is_read ? 'bg-blue-50/50' : ''
+                    } ${newNotifIds.has(notif.id) ? 'animate-pulse' : ''}`}
                   >
-                    <div className="flex gap-3">
-                      <div className="shrink-0 mt-0.5">
+                    <motion.div
+                      initial={newNotifIds.has(notif.id) ? { scale: [0.8, 1.05, 1] } : {}}
+                      className="flex gap-3"
+                    >
+                      <motion.div
+                        className="shrink-0 mt-0.5"
+                        animate={newNotifIds.has(notif.id) ? {
+                          rotate: [-5, 5, -5, 5, 0]
+                        } : {}}
+                        transition={{ duration: 0.5 }}
+                      >
                         {getIcon(notif.type)}
-                      </div>
+                      </motion.div>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm ${!notif.is_read ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
                           {notif.title}
@@ -225,10 +312,13 @@ export default function NotificationBell({ className = '', role = 'siswa' }: Not
                         </p>
                       </div>
                       {!notif.is_read && (
-                        <span className="shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2" />
+                        <motion.span
+                          layoutId="unread-dot"
+                          className="shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"
+                        />
                       )}
-                    </div>
-                  </button>
+                    </motion.div>
+                  </motion.button>
                 ))
               )}
             </div>

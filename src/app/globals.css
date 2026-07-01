@@ -177,6 +177,139 @@
   }
 }
 
+/* Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Badge Bounce Animation */
+@keyframes badge-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.animate-badge-bounce {
+  animation: badge-bounce 0.3s ease-in-out;
+}
+
+/* Timer Pulse Animation */
+@keyframes timer-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.animate-timer-pulse {
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+/* Timer Critical (last 1 minute) */
+@keyframes timer-critical {
+  0%, 100% {
+    transform: scale(1);
+    background-color: rgb(239 68 68 / 0.1);
+  }
+  50% {
+    transform: scale(1.1);
+    background-color: rgb(239 68 68 / 0.2);
+  }
+}
+
+.animate-timer-critical {
+  animation: timer-critical 0.5s ease-in-out infinite;
+}
+
+/* Sparkle Animation */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 1s ease-in-out forwards;
+}
+
+/* Success Checkmark Animation */
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-checkmark {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: checkmark 0.5s ease-out forwards;
+}
+
+/* Progress Bar Fill */
+@keyframes progress-fill {
+  0% { width: 0%; }
+}
+
+.animate-progress-fill {
+  animation: progress-fill 0.5s ease-out forwards;
+}
+
+/* Bounce In */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out forwards;
+}
+
+/* Pull to Refresh */
+@keyframes pull-arrow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(180deg); }
+}
+
+.animate-pull-arrow {
+  animation: pull-arrow 0.3s ease-out forwards;
+}
+
 /* Custom Animations */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
