@@ -152,8 +152,12 @@ export default function ReviewKuis() {
 
         {/* Questions */}
         {kuis.pertanyaan.map((q, i) => {
-          const jawabanSiswa = hasil.jawaban[q.id]
-          const benar = jawabanSiswa?.toUpperCase() === q.jawaban_benar
+          const rawJawaban = hasil.jawaban[q.id]
+          // Handle both old format (string) and new format (object)
+          const jawabanSiswa = typeof rawJawaban === 'object' && rawJawaban !== null
+            ? (rawJawaban as { jawaban: string; skor: number | null }).jawaban
+            : String(rawJawaban || '')
+          const benar = kuis.tipe === 'pilihan_ganda' && jawabanSiswa.toUpperCase() === q.jawaban_benar
 
           return (
             <motion.div

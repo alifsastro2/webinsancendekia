@@ -147,6 +147,8 @@ export default function MataPelajaranDetail() {
         return
       }
       setSelectedFile(file)
+      // Clear URL field when file is selected
+      setMateriForm(prev => ({ ...prev, file_url: '' }))
     }
   }
 
@@ -496,11 +498,20 @@ export default function MataPelajaranDetail() {
                       <Input
                         id="file_url"
                         value={materiForm.file_url}
-                        onChange={(e) => setMateriForm({ ...materiForm, file_url: e.target.value })}
+                        onChange={(e) => {
+                          setMateriForm({ ...materiForm, file_url: e.target.value })
+                          // Clear file selection when URL is typed
+                          if (e.target.value) {
+                            setSelectedFile(null)
+                          }
+                        }}
                         placeholder="https://drive.google.com/..."
                         disabled={!!selectedFile}
                         className="mt-1"
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Format: <code className="bg-gray-100 px-1 rounded">https://</code> wajib. Contoh: <code className="bg-gray-100 px-1 rounded">https://youtube.com/watch?v=xxx</code>
+                      </p>
                     </div>
 
                     <div>

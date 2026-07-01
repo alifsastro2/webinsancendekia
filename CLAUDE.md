@@ -34,6 +34,8 @@
 - [x] **Fitur Notifikasi (Bell icon + dropdown)**
 - [x] **Attempt Limits untuk Kuis**
 - [x] **Highest Score Logic untuk retry kuis**
+- [x] **Per-Question Essay Grading**
+- [x] **External URL support untuk materi**
 
 ---
 
@@ -85,13 +87,6 @@ Project menggunakan `middleware.ts` untuk security:
 - `src/components/common/notification-bell.tsx` - Bell icon + dropdown
 - Tabel `notifications` di database
 
-### Database Schema
-```sql
-notifications (
-  id, user_id, type, title, message, link, is_read, created_at
-)
-```
-
 ---
 
 ## 📝 Kuis Workflow
@@ -116,15 +111,6 @@ notifications (
 - Nilai yang direcord = **nilai tertinggi** dari semua percobaan
 - Siswa bisa lihat info "Percobaan ke-X (Tertinggi: Y)"
 
-### Database Columns
-```sql
--- Di tabel kuis
-attempt_limits INTEGER -- NULL = unlimited
-
--- Di tabel hasil_kuis
-attempt_number INTEGER -- urutan percobaan
-```
-
 ### Grading Essay (Per-Soal)
 
 **Konsep:**
@@ -147,6 +133,26 @@ attempt_number INTEGER -- urutan percobaan
 | Soal 2 | 90 |
 | Soal 3 | 70 |
 | **Rata-rata** | **80** |
+
+---
+
+## 📚 Materi
+
+### Upload Materi
+Guru bisa upload materi dengan dua cara:
+1. **Upload File** - Upload file langsung (PDF, Word, Excel, dll)
+2. **URL Link** - Masukkan link eksternal (YouTube, Google Drive, dll)
+
+### Form Behavior
+- URL dan File bersifat mutually exclusive
+- Jika upload file dipilih → URL field di-clear otomatis
+- Jika URL diketik → file selection di-clear otomatis
+- Hint format URL: `https://` wajib
+
+### External URL Support
+- YouTube, Google Drive, dan URL eksternal lainnya didukung
+- Link langsung terbuka di tab baru
+- Format wajib: `https://` di awal
 
 ---
 
@@ -177,7 +183,9 @@ src/
 │   │   │   ├── page.tsx            # Daftar mapel
 │   │   │   └── [mapelId]/
 │   │   │       ├── page.tsx        # Detail mapel + materi/kuis
-│   │   │       └── kuis/[kuisId]/page.tsx # Kerjakan kuis (satu-satu)
+│   │   │       └── kuis/[kuisId]/
+│   │   │           ├── page.tsx    # Kerjakan kuis (satu-satu)
+│   │   │           └── review/page.tsx # Review hasil kuis
 │   │   └── profil/page.tsx         # Profil siswa
 │   ├── layout.tsx                  # Root layout
 │   └── page.tsx                    # Home page (redirect)
@@ -199,6 +207,7 @@ src/
 │   ├── supabase/
 │   │   └── middleware.ts           # Supabase SSR helper untuk middleware
 │   ├── types.ts                    # TypeScript types
+│   ├── files.ts                    # File URL helpers (external URL support)
 │   └── utils.ts                    # Utility functions
 └── styles/
     └── globals.css                 # Global styles
@@ -247,9 +256,6 @@ Danger:      #ef4444 (Red 500)
 - `react-hook-form`, `@hookform/resolvers`, `zod` - Form handling
 - `clsx`, `tailwind-merge`, `class-variance-authority` - Utilities
 
-### State Management
-- `zustand` - State management (optional use)
-
 ---
 
 ## 🎯 Fitur yang Sudah Dibuat
@@ -272,7 +278,7 @@ Danger:      #ef4444 (Red 500)
 - ✅ Buat mata pelajaran baru
 - ✅ Pilih kelas untuk mata pelajaran
 - ✅ Edit & hapus mata pelajaran
-- ✅ Upload materi (link file)
+- ✅ Upload materi (file atau URL link)
 - ✅ Kelola materi
 
 ### Kuis (Guru)
@@ -309,6 +315,7 @@ Danger:      #ef4444 (Red 500)
 - ✅ Dropdown list notifikasi
 - ✅ Notifikasi saat guru publish kuis
 - ✅ Notifikasi saat guru upload materi
+- ✅ Notifikasi saat siswa submit essay
 - ✅ Notifikasi saat guru nilai essay
 - ✅ Notifikasi deadline < 24 jam (auto-check)
 - ✅ Mark as read on click
@@ -383,39 +390,6 @@ Open http://localhost:3000/login
 
 ---
 
-## 🎨 Design Updates (Latest)
-
-### Color Palette (okalpha.co inspired)
-```css
-Primary:     #ff1f25 (Red 500)
-Secondary:   #ff6b35 (Orange 500)
-Accent:      #f7c548 (Yellow 500)
-Tertiary:    #00d4ff (Cyan 500)
-Purple:      #8b5cf6 (Purple 500)
-```
-
-### Animations Added
-- ✅ Animated gradient backgrounds
-- ✅ Floating blobs with blur effect
-- ✅ Particle systems
-- ✅ Wave animations
-- ✅ Glassmorphism effects
-- ✅ Neon text & borders
-- ✅ Shimmer button effects
-- ✅ Wavy text animation
-- ✅ Ripple click effects
-- ✅ Gradient text
-- ✅ 3D card hover effects
-
-### Components
-- `AnimatedBackground` - Multi-variant animated background
-- `GradientText` - Gradient text animation
-- `GlassCard` - Glassmorphism card component
-- `ShimmerButton` - Button with shimmer effect
-- `NotificationBell` - Bell icon with notification dropdown
-
----
-
 ## 📁 Setup Files
 
 | File | Purpose |
@@ -441,9 +415,10 @@ Purple:      #8b5cf6 (Purple 500)
 - Saat ini reset password menggunakan Supabase Admin API
 - Pastikan menggunakan SERVICE_ROLE_KEY untuk produksi
 
-### File Upload
-- Saat ini menggunakan URL untuk materi (Google Drive, dll)
-- Untuk upload file sungguhan, setup Supabase Storage
+### File Upload & URL
+- Guru bisa upload file atau masukkan URL link
+- URL dan File mutually exclusive (salah satu saja)
+- External URL harus diawali dengan `https://`
 
 ### RLS Policies
 - Semua tabel sudah dilindungi dengan Row Level Security
@@ -451,15 +426,15 @@ Purple:      #8b5cf6 (Purple 500)
 - Guru hanya bisa edit mapel miliknya
 - Semua policies menggunakan role `siswa` (bukan `murid`)
 
-### Notifikasi
-- Tabel `notifications` perlu dibuat manual (lihat SQL di atas)
-- Policy INSERT menggunakan `WITH CHECK (true)` agar guru bisa insert untuk siswa
-- Deadline check auto-run saat siswa load halaman
-
 ### Kuis Attempt Limits
 - Kolom `attempt_limits` di tabel `kuis` perlu ditambahkan manual
 - Kolom `attempt_number` di tabel `hasil_kuis` perlu ditambahkan manual
 - Scoring menggunakan highest score logic
+
+### Essay Grading
+- Jawaban essay disimpan dalam format: `{ pertanyaanId: { jawaban: string, skor: number }`
+- Total score = rata-rata dari semua soal
+- Siswa bisa retry sesuai attempt_limits
 
 ---
 
@@ -485,7 +460,7 @@ Purple:      #8b5cf6 (Purple 500)
 
 - [ ] Halaman register (opsional, guru buat akun siswa)
 - [ ] Laporan statistik siswa (guru bisa lihat performa siswa)
-- [ ] File upload dengan Supabase Storage
+- [ ] File upload dengan Supabase Storage (saat ini pakai URL)
 - [ ] Email verification
 - [ ] Dark mode
 - [ ] Mobile responsive improvements
