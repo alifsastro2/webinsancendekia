@@ -154,6 +154,11 @@ Guru bisa upload materi dengan dua cara:
 - Link langsung terbuka di tab baru
 - Format wajib: `https://` di awal
 
+### Siapa yang Membuka (Tracking)
+- Guru bisa melihat siapa saja siswa yang sudah membuka materi
+- Track dilakukan saat siswa klik tombol "Lihat Materi"
+- Tabel `materi_views` menyimpan data viewer
+
 ---
 
 ## 📁 File Structure
@@ -280,6 +285,7 @@ Danger:      #ef4444 (Red 500)
 - ✅ Edit & hapus mata pelajaran
 - ✅ Upload materi (file atau URL link)
 - ✅ Kelola materi
+- ✅ Siapa yang Membuka (tracking viewer)
 
 ### Kuis (Guru)
 - ✅ Buat kuis pilihan ganda & essay
@@ -368,6 +374,17 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users_read_own_notifications" ON notifications FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "users_update_own_notifications" ON notifications FOR UPDATE USING (user_id = auth.uid());
 CREATE POLICY "users_insert_notifications" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
+
+-- Materi views tracking
+CREATE TABLE IF NOT EXISTS materi_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  materi_id UUID REFERENCES materi(id) ON DELETE CASCADE,
+  siswa_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  viewed_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(materi_id, siswa_id)
+);
+ALTER TABLE materi_views ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "materi_views_all" ON materi_views FOR ALL TO authenticated USING (true);
 ```
 
 ### 2. Buat Akun Guru Test

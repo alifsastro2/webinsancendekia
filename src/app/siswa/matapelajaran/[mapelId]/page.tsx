@@ -119,16 +119,23 @@ export default function siswaMapelDetail() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
-      // Insert or ignore if already exists
-      await supabase
+      // First try to insert, ignore if already exists
+      const { error } = await supabase
         .from('materi_views')
-        .upsert({
+        .insert({
           materi_id: materiId,
           siswa_id: session.user.id,
           viewed_at: new Date().toISOString()
-        }, {
-          onConflict: 'materi_id,siswa_id'
         })
+
+      // If error (duplicate), just update the viewed_at
+      if (error) {
+        await supabase
+          .from('materi_views')
+          .update({ viewed_at: new Date().toISOString() })
+          .eq('materi_id', materiId)
+          .eq('siswa_id', session.user.id)
+      }
     } catch (error) {
       console.error('Error tracking materi view:', error)
     } finally {
