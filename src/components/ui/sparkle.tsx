@@ -106,21 +106,25 @@ export function SparkleAnimation({
 }
 
 // Button with sparkle effect on click
-interface SparkleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface SparkleButtonProps {
+  children: React.ReactNode
   isLoading?: boolean
   showSparkle?: boolean
   sparkleColors?: string[]
+  className?: string
+  disabled?: boolean
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+  type?: 'button' | 'submit' | 'reset'
 }
 
 export function SparkleButton({
   children,
-  isLoading,
+  isLoading = false,
   showSparkle = true,
-  sparkleColors,
   className,
   disabled,
   onClick,
-  ...props
+  type = 'button'
 }: SparkleButtonProps) {
   const [isSparkling, setIsSparkling] = useState(false)
   const [position, setPosition] = useState({ x: 50, y: 50 })
@@ -140,6 +144,7 @@ export function SparkleButton({
   return (
     <div className="relative">
       <motion.button
+        type={type}
         whileTap={{ scale: disabled || isLoading ? 1 : 0.95 }}
         className={cn(
           'relative transition-all',
@@ -148,7 +153,6 @@ export function SparkleButton({
         )}
         onClick={handleClick}
         disabled={disabled || isLoading}
-        {...props}
       >
         {children}
       </motion.button>
@@ -180,7 +184,7 @@ export function SparkleButton({
                   width="8"
                   height="8"
                   viewBox="0 0 24 24"
-                  fill={(sparkleColors || COLORS)[i % (sparkleColors?.length || COLORS.length)]}
+                  fill={COLORS[i % COLORS.length]}
                 >
                   <path d="M12 0L14.59 8.41L24 11L17 18.59L18.59 24L12 20L5.41 24L7 18.59L0 11L9.41 8.41L12 0Z" />
                 </svg>
@@ -259,6 +263,7 @@ export function SuccessSparkle({ isActive, onComplete, icon }: SuccessSparklePro
             scale: [0, 1.5, 0],
             opacity: [1, 1, 0],
           }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="absolute"
         >

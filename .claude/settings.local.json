@@ -110,13 +110,19 @@
       "Bash(git commit -m 'fix: Syntax errors in notification-bell and add role prop *)",
       "Bash(git commit -m 'feat: Add notification for new materi *)",
       "Bash(git commit -m 'fix: Bug fixes for materi notification and pertanyaan kuis *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(grep -E \"^\\\\s{4,}[a-z_]+:\\\\s{$\" /home/alif/sekolah-online/src/lib/supabase.ts)",
+      "Bash(cp /home/alif/sekolah-online/src/app/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/page.tsx /home/alif/sekolah-online/src/app/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/page.tsx.bak)",
+      "Bash(cp /home/alif/sekolah-online/src/app/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/review/page.tsx /home/alif/sekolah-online/src/app/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/review/page.tsx.bak 2>/dev/null || echo \"Backup not needed\")",
+      "Bash(git restore *)"
     ],
     "additionalDirectories": [
       "/home/alif",
       "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]/kuis",
       "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]",
-      "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]/kuis/[kuisId]"
+      "/home/alif/sekolah-online/src/app/guru/matapelajaran/[id]/kuis/[kuisId]",
+      "/home/alif/sekolah-online/src/app/siswa/matapelajaran/[mapelId]/kuis/[kuisId]",
+      "/home/alif/sekolah-online/src/app/siswa/matapelajaran/[mapelId]/kuis/[kuisId]/review"
     ]
   },
   "enableAllProjectMcpServers": true,
