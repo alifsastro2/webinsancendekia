@@ -16,8 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Send,
-  Save,
-  RotateCcw
+  Save
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Kuis, PertanyaanKuis } from '@/lib/types'
@@ -60,13 +59,10 @@ export default function SiswaKerjakanKuis() {
   const [showConfirm, setShowConfirm] = useState(false)
 
   // Auto-save states
-  const [showRestoreModal, setShowRestoreModal] = useState(false)
-  const [savedDraft, setSavedDraft] = useState<Record<string, string> | null>(null)
-  const [draftTimestamp, setDraftTimestamp] = useState<Date | null>(null)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [showSparkle, setShowSparkle] = useState(false)
-  const [hasRestored, setHasRestored] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   const STORAGE_KEY = `quiz_draft_${kuisId}`
   const answersRef = useRef(jawaban)
@@ -95,30 +91,9 @@ export default function SiswaKerjakanKuis() {
     }
   }, [STORAGE_KEY, kuis?.waktu_menit])
 
-  // Check for existing draft on mount
-  useEffect(() => {
-    if (hasRestored) return
-
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        const parsed: QuizState = JSON.parse(saved)
-        if (parsed.answers && Object.keys(parsed.answers).length > 0) {
-          setSavedDraft(parsed.answers)
-          if (parsed.timestamp) {
-            setDraftTimestamp(new Date(parsed.timestamp))
-          }
-          setShowRestoreModal(true)
-        }
-      }
-    } catch {
-      // No draft or invalid data
-    }
-  }, [kuisId, STORAGE_KEY, hasRestored])
-
   // Auto-save every 5 seconds
   useEffect(() => {
-    if (!kuis || hasRestored === false) return
+    if (!kuis || !isReady) return
 
     const saveInterval = setInterval(() => {
       const currentAnswers = answersRef.current
@@ -128,7 +103,7 @@ export default function SiswaKerjakanKuis() {
     }, 5000)
 
     return () => clearInterval(saveInterval)
-  }, [kuis, STORAGE_KEY, saveToStorage, hasRestored])
+  }, [kuis, STORAGE_KEY, saveToStorage, isReady])
 
   // Save on page unload
   useEffect(() => {
@@ -159,9 +134,8 @@ export default function SiswaKerjakanKuis() {
 
   // Timer effect - runs in real-time, survives refresh
   useEffect(() => {
-    if (timeLeft === null || timeExpired) return
+    if (timeLeft === null || timeExpired || !isReady) return
 
-    // If time is up
     if (timeLeft <= 0) {
       setTimeExpired(true)
       handleSubmit(true)
@@ -179,7 +153,7 @@ export default function SiswaKerjakanKuis() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [timeLeft, timeExpired])
+  }, [timeLeft, timeExpired, isReady])
 
   const fetchKuis = async () => {
     try {
@@ -256,11 +230,14 @@ export default function SiswaKerjakanKuis() {
                 const remainingSeconds = parsed.totalTime - elapsedSeconds
 
                 if (remainingSeconds > 0) {
-                  // Timer can continue from where it left off
+                  // Continue from where it left off
                   startTimeRef.current = parsed.startTime
                   setTimeLeft(remainingSeconds)
+                  setJawaban(parsed.answers)
+                  answersRef.current = parsed.answers
+                  toast.success('Progress terakhir dipulihkan!')
                 } else {
-                  // Time already expired
+                  // Time already expired during previous session
                   setTimeExpired(true)
                   setTimeLeft(0)
                 }
@@ -278,7 +255,26 @@ export default function SiswaKerjakanKuis() {
             startTimeRef.current = Date.now()
             setTimeLeft(totalSeconds)
           }
+        } else {
+          // No time limit - just restore answers if any
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY)
+            if (saved) {
+              const parsed: QuizState = JSON.parse(saved)
+              if (parsed.answers && Object.keys(parsed.answers).length > 0) {
+                setJawaban(parsed.answers)
+                answersRef.current = parsed.answers
+                toast.success('Progress terakhir dipulihkan!')
+              }
+            }
+          } catch {
+            // Ignore
+          }
+          startTimeRef.current = Date.now()
         }
+
+        // Now ready to start
+        setIsReady(true)
       }
     } catch (error) {
       console.error('Error fetching kuis:', error)
@@ -303,14 +299,12 @@ export default function SiswaKerjakanKuis() {
 
       let skor: number | null = null
 
-      // Format jawaban for essay (needs skor field per question)
       const formattedJawaban: Record<string, any> = {}
       if (kuis?.tipe === 'pilihan_ganda') {
         Object.entries(jawaban).forEach(([id, ans]) => {
           formattedJawaban[id] = ans
         })
 
-        // Calculate PG score
         let correct = 0
         const total = kuis.pertanyaan.length
 
@@ -328,7 +322,6 @@ export default function SiswaKerjakanKuis() {
         skor = null
       }
 
-      // Calculate attempt number
       const attemptNumber = (kuis as any)?.attemptCount ? (kuis as any).attemptCount + 1 : 1
 
       const { error } = await supabase
@@ -350,7 +343,7 @@ export default function SiswaKerjakanKuis() {
         // Ignore
       }
 
-      // Notify guru if this is an essay kuis (needs grading)
+      // Notify guru if this is an essay kuis
       if (kuis?.tipe === 'essay') {
         const { data: kuisData } = await supabase
           .from('kuis')
@@ -376,7 +369,7 @@ export default function SiswaKerjakanKuis() {
         }
       }
 
-      // Get all attempts to find highest score
+      // Get highest score
       const { data: allAttempts } = await supabase
         .from('hasil_kuis')
         .select('skor')
@@ -387,7 +380,6 @@ export default function SiswaKerjakanKuis() {
         ? Math.max(...allAttempts.filter((a: { skor: number | null }) => a.skor !== null).map((a: { skor: number | null }) => a.skor || 0))
         : skor
 
-      // Trigger sparkle on submit
       setShowSparkle(true)
 
       if (expired) {
@@ -427,33 +419,6 @@ export default function SiswaKerjakanKuis() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const restoreDraft = () => {
-    if (savedDraft) {
-      setJawaban(savedDraft)
-      answersRef.current = savedDraft
-      setShowRestoreModal(false)
-      setHasRestored(true)
-      toast.success('Jawaban sebelumnya telah dipulihkan!')
-    }
-  }
-
-  const discardDraft = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY)
-    } catch {
-      // Ignore
-    }
-    setShowRestoreModal(false)
-    setSavedDraft(null)
-    setHasRestored(true)
-    // Start timer fresh
-    if (kuis?.waktu_menit) {
-      startTimeRef.current = Date.now()
-      setTimeLeft(kuis.waktu_menit * 60)
-    }
-  }
-
-  // Navigate to next question and save
   const goToNext = () => {
     saveToStorage()
     if (currentIndex < total - 1) {
@@ -461,7 +426,6 @@ export default function SiswaKerjakanKuis() {
     }
   }
 
-  // Navigate to previous question and save
   const goToPrev = () => {
     saveToStorage()
     if (currentIndex > 0) {
@@ -469,7 +433,6 @@ export default function SiswaKerjakanKuis() {
     }
   }
 
-  // Handle answer change and save
   const handleAnswerChange = (questionId: string, value: string) => {
     const newAnswers = { ...jawaban, [questionId]: value }
     setJawaban(newAnswers)
@@ -515,7 +478,6 @@ export default function SiswaKerjakanKuis() {
     .map((p, i) => ({ id: p.id, num: i + 1 }))
     .filter(p => !jawaban[p.id])
 
-  // Timer styling based on time left
   const isCritical = timeLeft !== null && timeLeft <= 10
   const isWarning = timeLeft !== null && timeLeft <= 60 && timeLeft > 10
 
@@ -523,51 +485,6 @@ export default function SiswaKerjakanKuis() {
     <div className="min-h-dvh bg-gray-50 flex flex-col relative">
       <Toaster />
       <SparkleAnimation isActive={showSparkle} onComplete={() => setShowSparkle(false)} />
-
-      {/* Restore Draft Modal */}
-      <Dialog open={showRestoreModal} onOpenChange={setShowRestoreModal}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <div className="mx-auto w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-3">
-              <RotateCcw className="h-7 w-7 text-blue-600" />
-            </div>
-            <DialogTitle className="text-center">Jawaban Tersimpan Ditemukan</DialogTitle>
-            <DialogDescription className="text-center">
-              Kami menemukan jawaban yang tersimpan dari sebelumnya.
-              {draftTimestamp && (
-                <span className="block mt-1 text-xs text-gray-400">
-                  Tersimpan pada: {draftTimestamp.toLocaleString('id-ID', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <div className="bg-blue-50 rounded-xl p-4 text-sm">
-              <p className="font-medium text-blue-800 mb-2">
-                {savedDraft ? Object.keys(savedDraft).length : 0} dari {total} soal telah dijawab
-              </p>
-              <p className="text-blue-600 text-xs">
-                Timer akan dilanjutkan dari sebelumnya
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={discardDraft} className="flex-1">
-              Mulai Baru
-            </Button>
-            <Button onClick={restoreDraft} className="flex-1 bg-blue-600 hover:bg-blue-700">
-              Lanjutkan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Header */}
       <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
@@ -599,11 +516,11 @@ export default function SiswaKerjakanKuis() {
             <Save className="h-3.5 w-3.5 text-gray-400" />
           </motion.div>
           <span className={isSaving ? 'text-green-600 font-medium' : 'text-gray-400'}>
-            {isSaving ? 'Menyimpan...' : lastSaved ? `Tersimpan` : 'Auto-save'}
+            {isSaving ? 'Menyimpan...' : lastSaved ? 'Tersimpan' : 'Auto-save'}
           </span>
         </div>
 
-        {/* Timer with enhanced styling */}
+        {/* Timer */}
         {timeLeft !== null && (
           <motion.div
             animate={
@@ -652,12 +569,7 @@ export default function SiswaKerjakanKuis() {
           <span className="text-xs text-gray-500">Progress Pengerjaan</span>
           <span className="text-xs font-medium text-gray-700">{answeredCount}/{total} soal</span>
         </div>
-        <ProgressBar
-          value={answeredCount}
-          max={total}
-          size="sm"
-          animated
-        />
+        <ProgressBar value={answeredCount} max={total} size="sm" animated />
       </div>
 
       {/* Progress Pills (mobile only) */}
@@ -745,11 +657,7 @@ export default function SiswaKerjakanKuis() {
                                 {opsiVal}
                               </Label>
                               {jawaban[current.id] === opt && (
-                                <motion.div
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  className="text-green-500"
-                                >
+                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-green-500">
                                   <CheckCircle2 className="h-5 w-5" />
                                 </motion.div>
                               )}
@@ -759,10 +667,7 @@ export default function SiswaKerjakanKuis() {
                       </div>
                     </RadioGroup>
                   ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                       <Textarea
                         value={jawaban[current.id] || ''}
                         onChange={(e) => handleAnswerChange(current.id, e.target.value)}
@@ -778,7 +683,7 @@ export default function SiswaKerjakanKuis() {
                 </CardContent>
               </Card>
 
-              {/* Navigation + Submit (inside scroll area) */}
+              {/* Navigation */}
               <div className="flex items-center gap-3 pb-4">
                 <Button
                   variant="outline"
@@ -795,10 +700,7 @@ export default function SiswaKerjakanKuis() {
                 </div>
 
                 {currentIndex < total - 1 ? (
-                  <Button
-                    onClick={goToNext}
-                    className="flex items-center gap-1"
-                  >
+                  <Button onClick={goToNext} className="flex items-center gap-1">
                     Simpan & Berikutnya
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -826,7 +728,7 @@ export default function SiswaKerjakanKuis() {
           </AnimatePresence>
         </div>
 
-        {/* Sidebar Map (desktop only) */}
+        {/* Sidebar (desktop only) */}
         <div className="hidden lg:block w-72 xl:w-80 border-l bg-white p-4 overflow-y-auto shrink-0">
           <Card className="border-0 shadow-sm bg-gray-50">
             <CardContent className="p-4">
@@ -872,11 +774,7 @@ export default function SiswaKerjakanKuis() {
                 </div>
 
                 <div className="mb-4">
-                  <ProgressBar
-                    value={answeredCount}
-                    max={total}
-                    size="sm"
-                  />
+                  <ProgressBar value={answeredCount} max={total} size="sm" />
                 </div>
 
                 <Button
