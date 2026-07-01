@@ -37,6 +37,13 @@ interface KuisWithPertanyaan extends Kuis {
   pertanyaan: PertanyaanKuis[]
 }
 
+interface QuizState {
+  answers: Record<string, string>
+  startTime: number
+  totalTime: number
+  timestamp: string
+}
+
 export default function SiswaKerjakanKuis() {
   const params = useParams()
   const router = useRouter()
@@ -63,6 +70,7 @@ export default function SiswaKerjakanKuis() {
 
   const STORAGE_KEY = `quiz_draft_${kuisId}`
   const answersRef = useRef(jawaban)
+  const startTimeRef = useRef<number | null>(null)
 
   // Keep ref updated
   useEffect(() => {
@@ -72,7 +80,12 @@ export default function SiswaKerjakanKuis() {
   // Save function
   const saveToStorage = useCallback(() => {
     try {
-      const toSave = { data: answersRef.current, timestamp: new Date().toISOString() }
+      const toSave: QuizState = {
+        answers: answersRef.current,
+        startTime: startTimeRef.current || Date.now(),
+        totalTime: kuis?.waktu_menit ? kuis.waktu_menit * 60 : 0,
+        timestamp: new Date().toISOString()
+      }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
       setLastSaved(new Date())
       setIsSaving(true)
@@ -80,19 +93,21 @@ export default function SiswaKerjakanKuis() {
     } catch (e) {
       console.error('Save failed:', e)
     }
-  }, [STORAGE_KEY])
+  }, [STORAGE_KEY, kuis?.waktu_menit])
 
   // Check for existing draft on mount
   useEffect(() => {
-    if (hasRestored) return // Only check once
+    if (hasRestored) return
 
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
-        const parsed = JSON.parse(saved)
-        if (parsed.data && Object.keys(parsed.data).length > 0) {
-          setSavedDraft(parsed.data)
-          setDraftTimestamp(new Date(parsed.timestamp))
+        const parsed: QuizState = JSON.parse(saved)
+        if (parsed.answers && Object.keys(parsed.answers).length > 0) {
+          setSavedDraft(parsed.answers)
+          if (parsed.timestamp) {
+            setDraftTimestamp(new Date(parsed.timestamp))
+          }
           setShowRestoreModal(true)
         }
       }
@@ -103,7 +118,7 @@ export default function SiswaKerjakanKuis() {
 
   // Auto-save every 5 seconds
   useEffect(() => {
-    if (!kuis || hasRestored === false) return // Wait until we've checked for draft
+    if (!kuis || hasRestored === false) return
 
     const saveInterval = setInterval(() => {
       const currentAnswers = answersRef.current
@@ -121,7 +136,12 @@ export default function SiswaKerjakanKuis() {
       const currentAnswers = answersRef.current
       if (Object.keys(currentAnswers).length > 0) {
         try {
-          const toSave = { data: currentAnswers, timestamp: new Date().toISOString() }
+          const toSave: QuizState = {
+            answers: currentAnswers,
+            startTime: startTimeRef.current || Date.now(),
+            totalTime: kuis?.waktu_menit ? kuis.waktu_menit * 60 : 0,
+            timestamp: new Date().toISOString()
+          }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
         } catch {
           // Ignore
@@ -131,34 +151,35 @@ export default function SiswaKerjakanKuis() {
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [STORAGE_KEY])
+  }, [STORAGE_KEY, kuis?.waktu_menit])
 
   useEffect(() => {
     fetchKuis()
   }, [])
 
-  // Timer effect
+  // Timer effect - runs in real-time, survives refresh
   useEffect(() => {
-    let timer: NodeJS.Timeout | null = null
+    if (timeLeft === null || timeExpired) return
 
-    if (timeLeft !== null && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev === null || prev <= 1) {
-            setTimeExpired(true)
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-    } else if (timeLeft === 0) {
+    // If time is up
+    if (timeLeft <= 0) {
+      setTimeExpired(true)
       handleSubmit(true)
+      return
     }
 
-    return () => {
-      if (timer) clearInterval(timer)
-    }
-  }, [timeLeft])
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev === null || prev <= 1) {
+          setTimeExpired(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [timeLeft, timeExpired])
 
   const fetchKuis = async () => {
     try {
@@ -219,8 +240,44 @@ export default function SiswaKerjakanKuis() {
           highestScore
         }
         setKuis(sorted as KuisWithPertanyaan & { attemptCount: number; highestScore: number | null })
+
+        // Setup timer - REAL TIME, survives refresh
         if (data.waktu_menit) {
-          setTimeLeft(data.waktu_menit * 60)
+          const totalSeconds = data.waktu_menit * 60
+
+          // Check if there's a saved timer state
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY)
+            if (saved) {
+              const parsed: QuizState = JSON.parse(saved)
+              if (parsed.startTime && parsed.totalTime) {
+                // Calculate remaining time based on elapsed time
+                const elapsedSeconds = Math.floor((Date.now() - parsed.startTime) / 1000)
+                const remainingSeconds = parsed.totalTime - elapsedSeconds
+
+                if (remainingSeconds > 0) {
+                  // Timer can continue from where it left off
+                  startTimeRef.current = parsed.startTime
+                  setTimeLeft(remainingSeconds)
+                } else {
+                  // Time already expired
+                  setTimeExpired(true)
+                  setTimeLeft(0)
+                }
+              } else {
+                // No saved start time, start fresh
+                startTimeRef.current = Date.now()
+                setTimeLeft(totalSeconds)
+              }
+            } else {
+              // No saved state, start fresh
+              startTimeRef.current = Date.now()
+              setTimeLeft(totalSeconds)
+            }
+          } catch {
+            startTimeRef.current = Date.now()
+            setTimeLeft(totalSeconds)
+          }
         }
       }
     } catch (error) {
@@ -373,6 +430,7 @@ export default function SiswaKerjakanKuis() {
   const restoreDraft = () => {
     if (savedDraft) {
       setJawaban(savedDraft)
+      answersRef.current = savedDraft
       setShowRestoreModal(false)
       setHasRestored(true)
       toast.success('Jawaban sebelumnya telah dipulihkan!')
@@ -388,11 +446,15 @@ export default function SiswaKerjakanKuis() {
     setShowRestoreModal(false)
     setSavedDraft(null)
     setHasRestored(true)
+    // Start timer fresh
+    if (kuis?.waktu_menit) {
+      startTimeRef.current = Date.now()
+      setTimeLeft(kuis.waktu_menit * 60)
+    }
   }
 
   // Navigate to next question and save
   const goToNext = () => {
-    // Save current answer before navigating
     saveToStorage()
     if (currentIndex < total - 1) {
       setCurrentIndex(prev => prev + 1)
@@ -401,7 +463,6 @@ export default function SiswaKerjakanKuis() {
 
   // Navigate to previous question and save
   const goToPrev = () => {
-    // Save current answer before navigating
     saveToStorage()
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1)
@@ -413,7 +474,6 @@ export default function SiswaKerjakanKuis() {
     const newAnswers = { ...jawaban, [questionId]: value }
     setJawaban(newAnswers)
     answersRef.current = newAnswers
-    // Immediately save to localStorage
     saveToStorage()
   }
 
@@ -493,7 +553,7 @@ export default function SiswaKerjakanKuis() {
                 {savedDraft ? Object.keys(savedDraft).length : 0} dari {total} soal telah dijawab
               </p>
               <p className="text-blue-600 text-xs">
-                Ingin melanjutkan pekerjaan sebelumnya?
+                Timer akan dilanjutkan dari sebelumnya
               </p>
             </div>
           </div>
@@ -539,7 +599,7 @@ export default function SiswaKerjakanKuis() {
             <Save className="h-3.5 w-3.5 text-gray-400" />
           </motion.div>
           <span className={isSaving ? 'text-green-600 font-medium' : 'text-gray-400'}>
-            {isSaving ? 'Menyimpan...' : lastSaved ? `Tersimpan ${lastSaved.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` : 'Auto-save'}
+            {isSaving ? 'Menyimpan...' : lastSaved ? `Tersimpan` : 'Auto-save'}
           </span>
         </div>
 
@@ -710,7 +770,6 @@ export default function SiswaKerjakanKuis() {
                         rows={6}
                         className="mt-2 resize-none"
                       />
-                      {/* Word count indicator for essay */}
                       <div className="mt-2 text-xs text-gray-400 text-right">
                         {jawaban[current.id]?.length || 0} karakter
                       </div>
@@ -812,7 +871,6 @@ export default function SiswaKerjakanKuis() {
                   <span className="font-bold text-gray-900">{answeredCount}/{total}</span>
                 </div>
 
-                {/* Mini progress bar in sidebar */}
                 <div className="mb-4">
                   <ProgressBar
                     value={answeredCount}
