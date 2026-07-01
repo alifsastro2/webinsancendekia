@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-import { Save, Settings as SettingsIcon, Layers, Users, Edit, Trash2, Plus, X, MoreVertical } from 'lucide-react'
+import { Save, Settings as SettingsIcon, Layers, Users, Edit, Trash2, Plus, X, MoreVertical, Key, Shield } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +22,7 @@ interface User {
   nama: string
   username: string
   is_active: boolean
+  created_at: string
 }
 
 interface Kelas {
@@ -39,6 +40,11 @@ export default function SettingsPage() {
   const [newKelas, setNewKelas] = useState('')
   const [editingKelas, setEditingKelas] = useState<string | null>(null)
   const [editKelasName, setEditKelasName] = useState('')
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
 
   useEffect(() => {
     fetchUser()
@@ -72,12 +78,64 @@ export default function SettingsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Sesi tidak valid')
+
+      // Cek apakah username sudah digunakan orang lain
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', formData.username)
+        .neq('id', session.user.id)
+        .maybeSingle()
+
+      if (existing) {
+        toast.error('Username sudah digunakan. Silakan pilih username lain.')
+        setSaving(false)
+        return
+      }
+
       const { error } = await supabase.from('users').update(formData).eq('id', session.user.id)
       if (error) throw error
       toast.success('Profil berhasil diupdate')
       fetchUser()
     } catch (e: any) { toast.error(e.message || 'Terjadi kesalahan') }
     finally { setSaving(false) }
+  }
+
+  const handleChangePassword = async () => {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error('Semua kolom password wajib diisi')
+      return
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('Password baru dan konfirmasi password tidak cocok')
+      return
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast.error('Password baru minimal 6 karakter')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword
+      })
+
+      if (error) throw error
+
+      toast.success('Password berhasil diubah!')
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal mengubah password. Silakan coba lagi.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleAddKelas = async () => {
@@ -195,6 +253,9 @@ export default function SettingsPage() {
           <TabsTrigger value="profil">
             <Users className="h-4 w-4 mr-2" /> Profil
           </TabsTrigger>
+          <TabsTrigger value="keamanan">
+            <Shield className="h-4 w-4 mr-2" /> Keamanan
+          </TabsTrigger>
           <TabsTrigger value="referensi">
             <Layers className="h-4 w-4 mr-2" /> Referensi
           </TabsTrigger>
@@ -239,6 +300,97 @@ export default function SettingsPage() {
                   <Save className="h-4 w-4" />
                   {saving ? 'Menyimpan...' : 'Simpan'}
                 </button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab Keamanan */}
+        <TabsContent value="keamanan" className="space-y-6">
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Key className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Ubah Password</CardTitle>
+                  <p className="text-sm text-gray-500">Ganti password akun Anda</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="currentPassword">Password Saat Ini</Label>
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  placeholder="Password saat ini"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="newPassword">Password Baru</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  placeholder="Password baru (minimal 6 karakter)"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Konfirmasi Password Baru</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  placeholder="Ulangi password baru"
+                  className="mt-2"
+                />
+              </div>
+
+              <button
+                onClick={handleChangePassword}
+                disabled={saving}
+                className="w-full h-11 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Key className="h-4 w-4" />
+                {saving ? 'Mengubah...' : 'Ubah Password'}
+              </button>
+            </CardContent>
+          </Card>
+
+          {/* Info Akun */}
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-l-4 border-gray-400">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <Shield className="h-5 w-5 text-gray-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900">Informasi Akun</CardTitle>
+                  <p className="text-sm text-gray-500">Detail dan status akun Anda</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3 text-sm">
+                <Users className="h-4 w-4 text-gray-500" />
+                <span className="text-gray-600">Bergabung sejak:</span>
+                <span className="text-gray-900">
+                  {user?.created_at ? new Date(user.created_at).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  }) : '-'}
+                </span>
               </div>
             </CardContent>
           </Card>
