@@ -119,11 +119,30 @@ export default function SettingsPage() {
 
     setSaving(true)
     try {
-      const { error } = await supabase.auth.updateUser({
+      // 1. Verifikasi password lama dengan sign in
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user.email) {
+        throw new Error('Email tidak ditemukan')
+      }
+
+      // Coba login dengan password lama
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: session.user.email,
+        password: passwordForm.currentPassword
+      })
+
+      if (signInError) {
+        toast.error('Password saat ini salah')
+        setSaving(false)
+        return
+      }
+
+      // 2. Password lama benar, update ke password baru
+      const { error: updateError } = await supabase.auth.updateUser({
         password: passwordForm.newPassword
       })
 
-      if (error) throw error
+      if (updateError) throw updateError
 
       toast.success('Password berhasil diubah!')
       setPasswordForm({

@@ -123,14 +123,30 @@ export default function siswaProfil() {
     setSaving(true)
 
     try {
+      // 1. Verifikasi password lama dengan sign in
       const { data: { session } } = await supabase.auth.getSession()
-      toast.error('Sesi login habis. Silakan login ulang.')
+      if (!session?.user.email) {
+        throw new Error('Email tidak ditemukan')
+      }
 
-      const { error } = await supabase.auth.updateUser({
+      // Coba login dengan password lama
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: session.user.email,
+        password: passwordForm.currentPassword
+      })
+
+      if (signInError) {
+        toast.error('Password saat ini salah')
+        setSaving(false)
+        return
+      }
+
+      // 2. Password lama benar, update ke password baru
+      const { error: updateError } = await supabase.auth.updateUser({
         password: passwordForm.newPassword
       })
 
-      if (error) throw error
+      if (updateError) throw updateError
 
       toast.success('Password berhasil diubah!')
       setPasswordForm({
@@ -139,7 +155,7 @@ export default function siswaProfil() {
         confirmPassword: ''
       })
     } catch (error: any) {
-      toast.error('Gagal mengubah password. Silakan coba lagi.')
+      toast.error(error.message || 'Gagal mengubah password. Silakan coba lagi.')
     } finally {
       setSaving(false)
     }
