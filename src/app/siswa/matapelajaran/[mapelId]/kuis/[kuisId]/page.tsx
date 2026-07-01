@@ -201,8 +201,9 @@ export default function SiswaKerjakanKuis() {
         }
 
         // Calculate highest score from previous attempts
-        const highestScore = allAttempts?.length
-          ? Math.max(...allAttempts.filter((a: { skor: number | null }) => a.skor !== null).map((a: { skor: number | null }) => a.skor || 0))
+        const scoredAttempts = (allAttempts || []).filter((a: { skor: number | null }) => a.skor !== null)
+        const highestScore = scoredAttempts.length > 0
+          ? Math.max(...scoredAttempts.map((a: { skor: number | null }) => a.skor || 0))
           : null
 
         const sorted = {
