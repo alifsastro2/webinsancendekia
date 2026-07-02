@@ -306,7 +306,9 @@ export default function GuruMataPelajaran() {
                 <Label htmlFor="kelas">Kelas</Label>
                 <Select value={formData.kelas_id} onValueChange={(v) => v && setFormData({ ...formData, kelas_id: v })}>
                   <SelectTrigger id="kelas" className="h-11 rounded-xl mt-2">
-                    <SelectValue placeholder="Pilih kelas" />
+                    <SelectValue placeholder="Pilih kelas">
+                      {formData.kelas_id ? kelas.find(k => k.id === formData.kelas_id)?.nama : undefined}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {kelas.map((k) => (
@@ -446,7 +448,9 @@ export default function GuruMataPelajaran() {
               <Label htmlFor="edit-kelas">Kelas</Label>
               <Select value={formData.kelas_id} onValueChange={(v) => v && setFormData({ ...formData, kelas_id: v })}>
                 <SelectTrigger id="edit-kelas" className="h-11 rounded-xl mt-2">
-                  <SelectValue placeholder="Pilih kelas" />
+                  <SelectValue placeholder="Pilih kelas">
+                    {formData.kelas_id ? kelas.find(k => k.id === formData.kelas_id)?.nama : undefined}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {kelas.map((k) => (
